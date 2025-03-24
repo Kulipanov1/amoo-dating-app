@@ -2,6 +2,7 @@
   "name": "amoo-dating-app",
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
+  "homepage": "https://alekivatu.github.io/amoo-dating-app",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
