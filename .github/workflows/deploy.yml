@@ -23,10 +23,14 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm install
+          npm install -g expo-cli
+          npm install --save-dev @react-native-community/eslint-config @typescript-eslint/eslint-plugin @typescript-eslint/parser
 
       - name: Build web
-        run: npm run web:build
+        run: |
+          npx expo export:web
         env:
           CI: false
 
