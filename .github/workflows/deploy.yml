@@ -28,17 +28,18 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-          npm install -g expo-cli@latest
+          npx expo install --fix
+          npm install -g expo-cli@6.3.10
 
       - name: Build website
         run: |
-          npm run web:build
+          npx expo export --platform web
         env:
           CI: false
 
       - name: Deploy to GitHub Pages 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: web-build
+          folder: dist
           branch: gh-pages
           clean: true 
