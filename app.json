@@ -25,8 +25,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "webpack",
-      "output": "static"
+      "bundler": "webpack"
     }
   }
 } 

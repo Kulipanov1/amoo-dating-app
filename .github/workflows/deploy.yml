@@ -6,20 +6,19 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency: ci-${{ github.ref }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
@@ -29,29 +28,15 @@ jobs:
         run: |
           npm install
           npm install -g expo-cli
-          npm install --save-dev @react-native-community/eslint-config @typescript-eslint/eslint-plugin @typescript-eslint/parser
 
-      - name: Update Expo config
+      - name: Build website
         run: |
-          npx expo customize webpack.config.js
-
-      - name: Build web
-        run: |
-          export NODE_OPTIONS=--max_old_space_size=4096
-          npx expo export:web
+          npm run web:build
         env:
           CI: false
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+      - name: Deploy to GitHub Pages 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          path: 'dist'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }} 
+          folder: web-build
+          branch: gh-pages 
