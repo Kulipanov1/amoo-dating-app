@@ -24,9 +24,7 @@ module.exports = {
   },
   web: {
     favicon: "./assets/favicon.png",
-    bundler: "webpack",
-    output: "static",
-    publicPath: "/amoo-dating-app/"
+    bundler: "webpack"
   },
   extra: {
     eas: {
