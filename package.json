@@ -2,15 +2,15 @@
   "name": "amoo-dating-app",
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
-  "homepage": "https://alekivatu.github.io/amoo-dating-app/",
+  "homepage": "https://alekivatu.github.io/amoo-dating-app",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "web:build": "expo export --platform web",
+    "web:build": "expo build:web",
     "predeploy": "npm run web:build",
-    "deploy": "gh-pages -d dist",
+    "deploy": "gh-pages -d web-build",
     "test": "jest",
     "lint": "eslint ."
   },
