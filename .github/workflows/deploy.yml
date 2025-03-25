@@ -32,13 +32,13 @@ jobs:
 
       - name: Build website
         run: |
-          expo export -p web
+          npm run web:build
         env:
           CI: false
 
       - name: Deploy to GitHub Pages 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist
+          folder: web-build
           branch: gh-pages
           clean: true 

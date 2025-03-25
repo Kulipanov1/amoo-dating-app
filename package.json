@@ -8,9 +8,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "web:build": "expo export -p web",
+    "web:build": "expo export:web",
     "predeploy": "npm run web:build",
-    "deploy": "gh-pages -d dist",
+    "deploy": "gh-pages -d web-build",
     "test": "jest",
     "lint": "eslint ."
   },
