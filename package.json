@@ -10,7 +10,7 @@
     "web": "expo start --web",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "build": "CI=false expo export -p web",
+    "build": "expo export --platform web",
     "test": "jest",
     "lint": "eslint ."
   },

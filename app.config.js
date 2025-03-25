@@ -13,18 +13,27 @@ module.exports = {
   assetBundlePatterns: [
     "**/*"
   ],
+  platforms: ["ios", "android", "web"],
   ios: {
-    supportsTablet: true
+    supportsTablet: true,
+    bundleIdentifier: "com.alekivatu.amoodatingapp"
   },
   android: {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#ffffff"
-    }
+    },
+    package: "com.alekivatu.amoodatingapp"
   },
   web: {
     favicon: "./assets/favicon.png",
-    bundler: "webpack"
+    bundler: "webpack",
+    output: "single",
+    build: {
+      babel: {
+        include: ["@ui-kitten/components"]
+      }
+    }
   },
   extra: {
     eas: {
