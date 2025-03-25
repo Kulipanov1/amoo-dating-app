@@ -26,7 +26,7 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "webpack",
-      "publicPath": "/amoo-dating-app/"
+      "output": "static"
     }
   }
 } 

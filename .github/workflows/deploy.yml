@@ -31,8 +31,13 @@ jobs:
           npm install -g expo-cli
           npm install --save-dev @react-native-community/eslint-config @typescript-eslint/eslint-plugin @typescript-eslint/parser
 
+      - name: Update Expo config
+        run: |
+          npx expo customize webpack.config.js
+
       - name: Build web
         run: |
+          export NODE_OPTIONS=--max_old_space_size=4096
           npx expo export:web
         env:
           CI: false
@@ -43,7 +48,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          path: './web-build'
+          path: 'dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
