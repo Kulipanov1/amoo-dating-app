@@ -1,18 +1,19 @@
 const createExpoWebpackConfigAsync = require('@expo/webpack-config');
 
 module.exports = async function (env, argv) {
-  const config = await createExpoWebpackConfigAsync({
-    ...env,
-    babel: {
-      dangerouslyAddModulePathsToTranspile: ['@ui-kitten/components']
-    }
-  }, argv);
+  const config = await createExpoWebpackConfigAsync(
+    {
+      ...env,
+      babel: {
+        dangerouslyAddModulePathsToTranspile: ['@ui-kitten/components']
+      }
+    },
+    argv
+  );
 
-  return {
-    ...config,
-    output: {
-      ...config.output,
-      publicPath: '/amoo-dating-app/'
-    }
-  };
+  if (env.mode === 'production') {
+    config.output.publicPath = '/amoo-dating-app/';
+  }
+
+  return config;
 }; 
