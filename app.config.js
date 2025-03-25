@@ -25,10 +25,12 @@ module.exports = {
   web: {
     favicon: "./assets/favicon.png",
     bundler: "webpack",
-    build: {
-      babel: {
-        include: ["@ui-kitten/components"]
-      }
+    output: "static",
+    publicPath: "/amoo-dating-app/"
+  },
+  extra: {
+    eas: {
+      projectId: "your-project-id"
     }
   }
 }; 
