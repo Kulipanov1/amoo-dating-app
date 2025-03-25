@@ -10,7 +10,7 @@
     "web": "expo start --web",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "build": "expo export --platform web",
+    "build": "npx expo export:web",
     "test": "jest",
     "lint": "eslint ."
   },
@@ -27,6 +27,7 @@
     "@react-navigation/stack": "^6.3.20",
     "@types/leaflet": "^1.9.17",
     "expo": "~50.0.6",
+    "expo-cli": "^6.3.10",
     "expo-location": "~16.5.5",
     "expo-status-bar": "~1.11.1",
     "react": "18.2.0",

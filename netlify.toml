@@ -1,5 +1,5 @@
 [build]
-  command = "expo export --platform web"
+  command = "npm install -g expo-cli && npm run build"
   publish = "web-build"
 
 [[redirects]]
@@ -10,5 +10,4 @@
 [build.environment]
   NODE_VERSION = "18"
   NPM_FLAGS = "--legacy-peer-deps --force"
-  CI = "false"
-  EXPO_USE_METRO_BUNDLER = "true" 
+  CI = "false" 
