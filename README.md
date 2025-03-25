@@ -61,6 +61,9 @@ amoo-dating-app/
 - Используйте `npm run ios` для запуска на iOS
 - Используйте `npm run web` для запуска веб-версии
 
+## Development Branch
+This branch is used for testing new features and improvements.
+
 ## Contributing
 
 1. Форкните репозиторий
