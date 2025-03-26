@@ -2,6 +2,15 @@
   command = "npm install -g expo-cli && npm run build"
   publish = "web-build"
 
+[context.production]
+  command = "npm install -g expo-cli && npm run build"
+
+[context.develop]
+  command = "npm install -g expo-cli && npm run build"
+
+[context.branch-deploy]
+  command = "npm install -g expo-cli && npm run build"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
