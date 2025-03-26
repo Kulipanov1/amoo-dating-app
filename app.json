@@ -2,8 +2,8 @@
   "expo": {
     "name": "Amoo Dating App",
     "slug": "amoo-dating-app",
-    "description": "A modern dating app for meaningful connections - Development Version",
-    "version": "1.0.0",
+    "description": "A modern dating app for meaningful connections - Development Branch",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
