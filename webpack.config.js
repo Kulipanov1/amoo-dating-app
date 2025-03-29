@@ -1,4 +1,5 @@
 const createExpoWebpackConfigAsync = require('@expo/webpack-config');
+const path = require('path');
 
 module.exports = async function (env, argv) {
   const config = await createExpoWebpackConfigAsync({
@@ -12,21 +13,21 @@ module.exports = async function (env, argv) {
     },
   }, argv);
 
-  // Customize the config before returning it.
-  config.resolve = {
-    ...config.resolve,
-    alias: {
-      ...config.resolve.alias,
-      'react-native': 'react-native-web',
-      'react-native-gesture-handler': 'react-native-web',
-    },
-    fallback: {
-      ...config.resolve.fallback,
-      "crypto": require.resolve("crypto-browserify"),
-      "stream": require.resolve("stream-browserify"),
-      "path": require.resolve("path-browserify"),
-      "fs": false
-    }
+  // Add aliases for native modules
+  config.resolve.alias = {
+    ...config.resolve.alias,
+    'react-native$': 'react-native-web',
+    'react-native-reanimated': 'react-native-web',
+    'react-native-gesture-handler': 'react-native-web/dist/modules/GestureHandler',
+    '@react-native': 'react-native-web',
+  };
+
+  // Ensure proper fallbacks
+  config.resolve.fallback = {
+    ...config.resolve.fallback,
+    'react-native/Libraries/Utilities/codegenNativeCommands': false,
+    'react-native/Libraries/Components/View/ViewNativeComponent': false,
+    'react-native/Libraries/Image/AssetRegistry': false,
   };
 
   return config;
