@@ -4,8 +4,12 @@ module.exports = async function (env, argv) {
   const config = await createExpoWebpackConfigAsync({
     ...env,
     babel: {
-      dangerouslyAddModulePathsToTranspile: ['@react-native']
-    }
+      dangerouslyAddModulePathsToTranspile: [
+        '@react-native',
+        'react-native-reanimated',
+        'react-native-gesture-handler',
+      ],
+    },
   }, argv);
 
   // Customize the config before returning it.
