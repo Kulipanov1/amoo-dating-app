@@ -35,6 +35,7 @@ module.exports = {
       }
     }
   },
+  plugins: [],
   extra: {
     eas: {
       projectId: "your-project-id"
