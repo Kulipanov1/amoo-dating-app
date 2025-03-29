@@ -1,5 +1,4 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,21 +16,68 @@ export default function App() {
           tabBarIcon: ({ focused, color, size }) => {
             let iconName: keyof typeof Ionicons.glyphMap = 'help-outline';
 
-            if (route.name === 'Home') {
-              iconName = focused ? 'home' : 'home-outline';
-            } else if (route.name === 'Profile') {
+            if (route.name === 'Знакомства') {
+              iconName = focused ? 'heart' : 'heart-outline';
+            } else if (route.name === 'Профиль') {
               iconName = focused ? 'person' : 'person-outline';
-            } else if (route.name === 'Map') {
+            } else if (route.name === 'Карта') {
               iconName = focused ? 'map' : 'map-outline';
             }
 
             return <Ionicons name={iconName} size={size} color={color} />;
           },
+          tabBarActiveTintColor: '#8A2BE2',
+          tabBarInactiveTintColor: '#666',
+          tabBarStyle: {
+            backgroundColor: '#fff',
+            borderTopWidth: 0,
+            elevation: 10,
+            shadowColor: '#000',
+            shadowOffset: {
+              width: 0,
+              height: -2,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 3,
+          },
+          headerStyle: {
+            backgroundColor: '#fff',
+            elevation: 5,
+            shadowColor: '#000',
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 3,
+          },
+          headerTitleStyle: {
+            color: '#8A2BE2',
+            fontWeight: 'bold',
+          },
         })}
       >
-        <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Profile" component={ProfileScreen} />
-        <Tab.Screen name="Map" component={MapScreen} />
+        <Tab.Screen 
+          name="Знакомства" 
+          component={HomeScreen}
+          options={{
+            title: 'Знакомства'
+          }}
+        />
+        <Tab.Screen 
+          name="Карта" 
+          component={MapScreen}
+          options={{
+            title: 'Люди рядом'
+          }}
+        />
+        <Tab.Screen 
+          name="Профиль" 
+          component={ProfileScreen}
+          options={{
+            title: 'Мой профиль'
+          }}
+        />
       </Tab.Navigator>
     </NavigationContainer>
   );
