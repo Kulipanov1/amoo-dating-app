@@ -1,5 +1,5 @@
 [build]
-  command = "npm ci && npm run build"
+  command = "npm install -g expo-cli && npm ci && npx expo export --platform web"
   publish = "web-build"
 
 [context.production]
