@@ -58,6 +58,8 @@ export default function HomeScreen() {
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const [lastSwipe, setLastSwipe] = useState({ x: 0, y: 0 });
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [borderColor, setBorderColor] = useState('#E8E8E8');
+  const [borderWidth, setBorderWidth] = useState(2);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -90,6 +92,10 @@ export default function HomeScreen() {
 
   const handleSwiping = useCallback((x: number, y: number) => {
     setLastSwipe({ x, y });
+    if (Math.abs(x) > Math.abs(y)) {
+      setBorderColor(x > 0 ? '#8A2BE2' : x < 0 ? '#FF4B4B' : '#E8E8E8');
+      setBorderWidth(Math.abs(x) > 50 ? 4 : 2);
+    }
   }, []);
 
   const handleSwiped = useCallback((cardIndex: number) => {
@@ -98,6 +104,8 @@ export default function HomeScreen() {
     const direction = Math.abs(y) > Math.abs(x) ? 'up' : x > 0 ? 'right' : 'left';
     handleSwipe(direction, cardIndex);
     setCurrentIndex(cardIndex + 1);
+    setBorderColor('#E8E8E8');
+    setBorderWidth(2);
   }, [lastSwipe, handleSwipe]);
 
   const renderCard = useCallback((user: User, cardIndex: number) => {
@@ -113,7 +121,9 @@ export default function HomeScreen() {
           height: cardHeight,
           transform: [
             { translateY: isExpanded ? -20 : 0 }
-          ]
+          ],
+          borderColor: borderColor,
+          borderWidth: borderWidth,
         }
       ]}>
         <Image
@@ -140,7 +150,7 @@ export default function HomeScreen() {
         </View>
       </View>
     );
-  }, [expandedCard]);
+  }, [expandedCard, borderColor, borderWidth]);
 
   const renderSkeleton = useCallback(() => (
     <View style={styles.cardContainer}>
@@ -172,17 +182,26 @@ export default function HomeScreen() {
         renderCard={(card) => renderCard(card, users.indexOf(card))}
         onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
         onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
-        onSwiped={handleSwiped}
+        onSwiped={(cardIndex: number) => {
+          handleSwiped(cardIndex);
+          setBorderColor('#E8E8E8');
+          setBorderWidth(2);
+        }}
         cardIndex={currentIndex}
         backgroundColor={'#F5F5F5'}
         stackSize={3}
         cardStyle={styles.cardContainer}
         animateCardOpacity
         swipeBackCard
-        verticalSwipe={true}
+        verticalSwipe={false}
         horizontalSwipe={true}
         cardVerticalMargin={0}
         cardHorizontalMargin={0}
+        disableBottomSwipe={true}
+        disableTopSwipe={true}
+        swipeAnimationDuration={350}
+        horizontalThreshold={80}
+        outputRotationRange={['0deg', '0deg', '0deg']}
         overlayLabels={{
           left: {
             title: '',
@@ -225,7 +244,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: '#E8E8E8',
     backgroundColor: 'white',
     overflow: 'hidden'
   },
