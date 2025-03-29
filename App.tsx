@@ -3,8 +3,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from './screens/HomeScreen';
-import ProfileScreen from './screens/ProfileScreen';
 import MapScreen from './screens/MapScreen';
+import LiveScreen from './screens/LiveScreen';
+import ProfileScreen from './screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -42,6 +43,25 @@ export default function App() {
           options={{
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="heart-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Карта"
+          component={MapScreen}
+          options={{
+            title: 'Люди рядом',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="map-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Эфиры"
+          component={LiveScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="videocam-outline" size={size} color={color} />
             ),
           }}
         />
