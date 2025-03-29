@@ -1,5 +1,5 @@
 [build]
-  command = "npm install && NODE_OPTIONS=--max_old_space_size=4096 expo export:web"
+  command = "npm install --legacy-peer-deps && NODE_OPTIONS=--max_old_space_size=4096 expo export:web"
   publish = "web-build"
 
 [[redirects]]
@@ -9,6 +9,7 @@
 
 [build.environment]
   NODE_VERSION = "18"
-  NPM_FLAGS = "--legacy-peer-deps"
+  NPM_FLAGS = "--legacy-peer-deps --force"
   CI = "false"
-  NETLIFY_USE_YARN = "false" 
+  NETLIFY_USE_YARN = "false"
+  EXPO_NO_DOTENV = "1" 
