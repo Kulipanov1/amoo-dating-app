@@ -1,15 +1,15 @@
 [build]
-  command = "npm install && npm run build"
+  command = "npm install && npx expo export --platform web"
   publish = "web-build"
 
 [context.production]
-  command = "npm install -g expo-cli && npm ci && npx expo export --platform web"
+  command = "npm install && npx expo export --platform web"
 
 [context.develop]
-  command = "npm install -g expo-cli && npm ci && npx expo export --platform web"
+  command = "npm install && npx expo export --platform web"
 
 [context.branch-deploy]
-  command = "npm install -g expo-cli && npm ci && npx expo export --platform web"
+  command = "npm install && npx expo export --platform web"
 
 [[redirects]]
   from = "/*"
