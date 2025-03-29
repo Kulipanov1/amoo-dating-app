@@ -26,9 +26,13 @@ module.exports = async function (env, argv) {
       '../Utilities/Platform': path.resolve(__dirname, './node_modules/react-native-web/dist/exports/Platform'),
       './Platform': path.resolve(__dirname, './node_modules/react-native-web/dist/exports/Platform'),
       // Add aliases for animated components
-      'react-native-reanimated': 'react-native-reanimated/lib/reanimated2/core',
-      'react-native-gesture-handler': 'react-native-web/dist/modules/GestureHandler'
+      'react-native-reanimated': path.resolve(__dirname, './node_modules/react-native-reanimated/lib/module/index.web.js'),
+      'react-native-gesture-handler': path.resolve(__dirname, './node_modules/react-native-gesture-handler/lib/module/index.js'),
+      // Add additional aliases for gesture handler
+      'react-native-gesture-handler/DrawerLayout': path.resolve(__dirname, './node_modules/react-native-gesture-handler/DrawerLayout'),
+      'react-native-gesture-handler/Swipeable': path.resolve(__dirname, './node_modules/react-native-gesture-handler/Swipeable')
     },
+    extensions: ['.web.js', '.js', '.jsx', '.json', '.tsx', '.ts'],
     fallback: {
       ...config.resolve.fallback,
       "crypto": require.resolve("crypto-browserify"),
