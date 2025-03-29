@@ -1,5 +1,5 @@
 [build]
-  command = "npm install && npm install -g expo-cli && expo build:web"
+  command = "npm install && npx expo export:web"
   publish = "web-build"
 
 [[redirects]]
