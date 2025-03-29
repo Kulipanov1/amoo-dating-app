@@ -3,8 +3,7 @@ module.exports = function(api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
-      'babel-plugin-react-native-web',
-      ['react-native-web', { commonjs: true }]
+      'babel-plugin-react-native-web'
     ]
   };
 }; 
