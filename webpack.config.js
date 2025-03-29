@@ -17,9 +17,8 @@ module.exports = async function (env, argv) {
   config.resolve.alias = {
     ...config.resolve.alias,
     'react-native$': 'react-native-web',
-    'react-native-reanimated': 'react-native-web',
-    'react-native-gesture-handler': 'react-native-web/dist/modules/GestureHandler',
-    '@react-native': 'react-native-web',
+    'react-native-reanimated': 'react-native-web/dist/vendor/reanimated',
+    'react-native-gesture-handler': 'react-native-web/dist/vendor/react-native-gesture-handler',
   };
 
   // Ensure proper fallbacks
@@ -28,6 +27,9 @@ module.exports = async function (env, argv) {
     'react-native/Libraries/Utilities/codegenNativeCommands': false,
     'react-native/Libraries/Components/View/ViewNativeComponent': false,
     'react-native/Libraries/Image/AssetRegistry': false,
+    crypto: require.resolve('crypto-browserify'),
+    stream: require.resolve('stream-browserify'),
+    path: require.resolve('path-browserify'),
   };
 
   return config;
