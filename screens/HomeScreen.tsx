@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Text, View, Dimensions, Image, RefreshControl, ScrollView } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { hapticFeedback } from '../utils/haptics';
 import Skeleton from '../components/Skeleton';
-import Animated, { FadeIn, FadeOut, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Animated, { 
+  FadeIn, 
+  FadeOut, 
+  useAnimatedStyle, 
+  withSpring,
+  runOnJS
+} from 'react-native-reanimated';
 
 interface User {
   id: number;
@@ -58,68 +64,74 @@ export default function HomeScreen() {
   const [users, setUsers] = useState<User[]>([]);
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const [lastSwipe, setLastSwipe] = useState({ x: 0, y: 0 });
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setIsLoading(false);
       setUsers(dummyUsers);
     }, 2000);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  const onRefresh = React.useCallback(() => {
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setUsers(dummyUsers);
       setRefreshing(false);
+      setCurrentIndex(0);
     }, 2000);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  const handleSwipe = (direction: 'left' | 'right' | 'up', cardIndex: number) => {
+  const handleSwipe = useCallback((direction: 'left' | 'right' | 'up', cardIndex: number) => {
     hapticFeedback.medium();
     if (direction === 'up') {
-      setExpandedCard(expandedCard === cardIndex ? null : cardIndex);
+      setExpandedCard(prev => prev === cardIndex ? null : cardIndex);
     } else {
       console.log(direction === 'right' ? 'Нравится' : 'Не нравится', cardIndex);
     }
-  };
+  }, []);
 
-  const handleSwiping = (x: number, y: number) => {
+  const handleSwiping = useCallback((x: number, y: number) => {
     setLastSwipe({ x, y });
-    const cardStyle = {
-      borderColor: x > 0 ? '#8A2BE2' : x < 0 ? '#FF4B4B' : '#E8E8E8',
-      borderWidth: Math.abs(x) > 50 ? 3 : 2,
-    };
-    // Здесь можно добавить анимацию границы карточки
-  };
+  }, []);
 
-  const handleSwiped = (cardIndex: number) => {
+  const handleSwiped = useCallback((cardIndex: number) => {
     const { x, y } = lastSwipe;
+    if (Math.abs(x) < 5 && Math.abs(y) < 5) return; // Игнорируем слишком маленькие свайпы
     const direction = Math.abs(y) > Math.abs(x) ? 'up' : x > 0 ? 'right' : 'left';
     handleSwipe(direction, cardIndex);
-  };
+    setCurrentIndex(cardIndex + 1);
+  }, [lastSwipe, handleSwipe]);
 
-  const renderCard = (user: User, cardIndex: number) => {
+  const renderCard = useCallback((user: User, cardIndex: number) => {
+    if (!user) return null;
+    
     const isExpanded = expandedCard === cardIndex;
     
     const animatedStyle = useAnimatedStyle(() => {
       return {
         transform: [
-          { scale: withSpring(isExpanded ? 1.05 : 1) },
-          { translateY: withSpring(isExpanded ? -20 : 0) }
+          { scale: withSpring(isExpanded ? 1.05 : 1, { damping: 20 }) },
+          { translateY: withSpring(isExpanded ? -20 : 0, { damping: 20 }) }
         ],
-        height: withSpring(isExpanded ? SCREEN_HEIGHT * 0.8 : SCREEN_HEIGHT * 0.7),
+        height: withSpring(isExpanded ? SCREEN_HEIGHT * 0.8 : SCREEN_HEIGHT * 0.7, { damping: 20 }),
       };
-    });
+    }, [isExpanded]);
 
     return (
       <Animated.View 
-        entering={FadeIn}
-        exiting={FadeOut}
+        entering={FadeIn.duration(300)}
+        exiting={FadeOut.duration(300)}
         style={[styles.card, animatedStyle]}
       >
         <Image
           source={{ uri: user.image }}
           style={styles.cardImage}
+          defaultSource={require('../assets/placeholder.png')}
         />
         <View style={styles.cardText}>
           <Text style={styles.cardTitle}>{user.name}, {user.age}</Text>
@@ -141,9 +153,9 @@ export default function HomeScreen() {
         </View>
       </Animated.View>
     );
-  };
+  }, [expandedCard]);
 
-  const renderSkeleton = () => (
+  const renderSkeleton = useCallback(() => (
     <View style={styles.cardContainer}>
       <Skeleton width={SCREEN_WIDTH * 0.9} height={SCREEN_HEIGHT * 0.7} borderRadius={20} />
       <View style={styles.skeletonTextContainer}>
@@ -151,60 +163,60 @@ export default function HomeScreen() {
         <Skeleton width={150} height={16} style={styles.skeletonDescription} />
       </View>
     </View>
-  );
+  ), []);
+
+  if (isLoading) {
+    return (
+      <ScrollView 
+        style={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {renderSkeleton()}
+      </ScrollView>
+    );
+  }
 
   return (
-    <ScrollView 
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      {isLoading ? (
-        renderSkeleton()
-      ) : (
-        <View style={styles.swiperContainer}>
-          <Swiper
-            cards={users}
-            renderCard={(card) => renderCard(card, users.indexOf(card))}
-            onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
-            onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
-            onSwiped={handleSwiped}
-            cardIndex={0}
-            backgroundColor={'#F5F5F5'}
-            stackSize={3}
-            cardStyle={styles.cardContainer}
-            animateCardOpacity
-            swipeBackCard
-            disableTopSwipe={false}
-            disableBottomSwipe={false}
-            disableLeftSwipe={false}
-            disableRightSwipe={false}
-            cardVerticalMargin={0}
-            cardHorizontalMargin={0}
-            overlayLabels={{
-              left: {
-                title: '',
-                style: {
-                  container: {
-                    backgroundColor: 'transparent',
-                  }
-                }
-              },
-              right: {
-                title: '',
-                style: {
-                  container: {
-                    backgroundColor: 'transparent',
-                  }
-                }
+    <View style={styles.container}>
+      <Swiper
+        cards={users}
+        renderCard={(card) => renderCard(card, users.indexOf(card))}
+        onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
+        onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
+        onSwiped={handleSwiped}
+        cardIndex={currentIndex}
+        backgroundColor={'#F5F5F5'}
+        stackSize={3}
+        cardStyle={styles.cardContainer}
+        animateCardOpacity
+        swipeBackCard
+        verticalSwipe={true}
+        horizontalSwipe={true}
+        cardVerticalMargin={0}
+        cardHorizontalMargin={0}
+        overlayLabels={{
+          left: {
+            title: '',
+            style: {
+              container: {
+                backgroundColor: 'transparent',
               }
-            }}
-            onSwiping={handleSwiping}
-          />
-        </View>
-      )}
-    </ScrollView>
+            }
+          },
+          right: {
+            title: '',
+            style: {
+              container: {
+                backgroundColor: 'transparent',
+              }
+            }
+          }
+        }}
+        onSwiping={handleSwiping}
+      />
+    </View>
   );
 }
 
