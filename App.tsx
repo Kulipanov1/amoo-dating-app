@@ -6,6 +6,7 @@ import HomeScreen from './screens/HomeScreen';
 import MapScreen from './screens/MapScreen';
 import LiveScreen from './screens/LiveScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import Header from './components/Header';
 
 const Tab = createBottomTabNavigator();
 
@@ -15,7 +16,7 @@ export default function App() {
       <Tab.Navigator
         screenOptions={{
           tabBarActiveTintColor: '#8A2BE2',
-          tabBarInactiveTintColor: 'gray',
+          tabBarInactiveTintColor: '#B19CD9',
           tabBarStyle: {
             backgroundColor: 'white',
             borderTopWidth: 1,
@@ -23,7 +24,10 @@ export default function App() {
             paddingBottom: 5,
             paddingTop: 5,
             height: 60,
+            elevation: 0,
+            shadowOpacity: 0,
           },
+          header: () => <Header />,
           headerStyle: {
             backgroundColor: 'white',
             elevation: 0,
@@ -42,7 +46,7 @@ export default function App() {
           component={HomeScreen}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="heart-outline" size={size} color={color} />
+              <Ionicons name="heart" size={size} color={color} />
             ),
           }}
         />
@@ -52,7 +56,7 @@ export default function App() {
           options={{
             title: 'Люди рядом',
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="map-outline" size={size} color={color} />
+              <Ionicons name="map" size={size} color={color} />
             ),
           }}
         />
@@ -61,7 +65,7 @@ export default function App() {
           component={LiveScreen}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="videocam-outline" size={size} color={color} />
+              <Ionicons name="videocam" size={size} color={color} />
             ),
           }}
         />
@@ -70,7 +74,7 @@ export default function App() {
           component={ProfileScreen}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="person-outline" size={size} color={color} />
+              <Ionicons name="person" size={size} color={color} />
             ),
           }}
         />
