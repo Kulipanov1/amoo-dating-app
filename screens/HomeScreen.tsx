@@ -1,15 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, Text, View, Dimensions, Image, RefreshControl, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, Image, RefreshControl, ScrollView, Animated as RNAnimated } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { hapticFeedback } from '../utils/haptics';
 import Skeleton from '../components/Skeleton';
-import Animated, { 
-  FadeIn, 
-  FadeOut, 
-  useAnimatedStyle, 
-  withSpring,
-  runOnJS
-} from 'react-native-reanimated';
 
 interface User {
   id: number;
@@ -101,7 +94,7 @@ export default function HomeScreen() {
 
   const handleSwiped = useCallback((cardIndex: number) => {
     const { x, y } = lastSwipe;
-    if (Math.abs(x) < 5 && Math.abs(y) < 5) return; // Игнорируем слишком маленькие свайпы
+    if (Math.abs(x) < 5 && Math.abs(y) < 5) return;
     const direction = Math.abs(y) > Math.abs(x) ? 'up' : x > 0 ? 'right' : 'left';
     handleSwipe(direction, cardIndex);
     setCurrentIndex(cardIndex + 1);
@@ -111,27 +104,21 @@ export default function HomeScreen() {
     if (!user) return null;
     
     const isExpanded = expandedCard === cardIndex;
+    const cardHeight = isExpanded ? SCREEN_HEIGHT * 0.8 : SCREEN_HEIGHT * 0.7;
     
-    const animatedStyle = useAnimatedStyle(() => {
-      return {
-        transform: [
-          { scale: withSpring(isExpanded ? 1.05 : 1, { damping: 20 }) },
-          { translateY: withSpring(isExpanded ? -20 : 0, { damping: 20 }) }
-        ],
-        height: withSpring(isExpanded ? SCREEN_HEIGHT * 0.8 : SCREEN_HEIGHT * 0.7, { damping: 20 }),
-      };
-    }, [isExpanded]);
-
     return (
-      <Animated.View 
-        entering={FadeIn.duration(300)}
-        exiting={FadeOut.duration(300)}
-        style={[styles.card, animatedStyle]}
-      >
+      <View style={[
+        styles.card,
+        {
+          height: cardHeight,
+          transform: [
+            { translateY: isExpanded ? -20 : 0 }
+          ]
+        }
+      ]}>
         <Image
           source={{ uri: user.image }}
           style={styles.cardImage}
-          defaultSource={require('../assets/placeholder.png')}
         />
         <View style={styles.cardText}>
           <Text style={styles.cardTitle}>{user.name}, {user.age}</Text>
@@ -151,7 +138,7 @@ export default function HomeScreen() {
             </View>
           )}
         </View>
-      </Animated.View>
+      </View>
     );
   }, [expandedCard]);
 
