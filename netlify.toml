@@ -1,5 +1,5 @@
 [build]
-  command = "npm install && npx expo export:web"
+  command = "npm install && NODE_OPTIONS=--max_old_space_size=4096 npx expo export:web"
   publish = "web-build"
 
 [[redirects]]
@@ -10,4 +10,5 @@
 [build.environment]
   NODE_VERSION = "18"
   NPM_FLAGS = "--legacy-peer-deps"
-  CI = "false" 
+  CI = "false"
+  NETLIFY_USE_YARN = "false" 
