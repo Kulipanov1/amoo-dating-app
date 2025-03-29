@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Dimensions, Image, RefreshControl, ScrollView }
 import Swiper from 'react-native-deck-swiper';
 import { hapticFeedback } from '../utils/haptics';
 import Skeleton from '../components/Skeleton';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 
 interface User {
   id: number;
@@ -11,6 +11,9 @@ interface User {
   age: number;
   image: string;
   bio: string;
+  interests: string[];
+  location: string;
+  occupation: string;
 }
 
 const dummyUsers: User[] = [
@@ -19,21 +22,30 @@ const dummyUsers: User[] = [
     name: 'Анна',
     age: 25,
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-    bio: 'Люблю путешествия и фотографию'
+    bio: 'Люблю путешествия и фотографию',
+    interests: ['Путешествия', 'Фотография', 'Искусство', 'Музыка'],
+    location: 'Москва',
+    occupation: 'Фотограф'
   },
   {
     id: 2,
     name: 'Михаил',
     age: 28,
     image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e',
-    bio: 'Занимаюсь спортом, ищу активную девушку'
+    bio: 'Занимаюсь спортом, ищу активную девушку',
+    interests: ['Спорт', 'Путешествия', 'Кулинария', 'Кино'],
+    location: 'Санкт-Петербург',
+    occupation: 'Тренер'
   },
   {
     id: 3,
     name: 'Елена',
     age: 24,
     image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
-    bio: 'Обожаю музыку и искусство'
+    bio: 'Обожаю музыку и искусство',
+    interests: ['Музыка', 'Искусство', 'Театр', 'Литература'],
+    location: 'Москва',
+    occupation: 'Дизайнер'
   }
 ];
 
@@ -44,9 +56,10 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
+  const [expandedCard, setExpandedCard] = useState<number | null>(null);
+  const [lastSwipe, setLastSwipe] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    // Имитация загрузки данных
     setTimeout(() => {
       setIsLoading(false);
       setUsers(dummyUsers);
@@ -55,28 +68,54 @@ export default function HomeScreen() {
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    // Имитация обновления данных
     setTimeout(() => {
       setUsers(dummyUsers);
       setRefreshing(false);
     }, 2000);
   }, []);
 
-  const handleSwipe = (direction: 'left' | 'right', cardIndex: number) => {
+  const handleSwipe = (direction: 'left' | 'right' | 'up', cardIndex: number) => {
     hapticFeedback.medium();
-    if (direction === 'right') {
-      console.log('Нравится', cardIndex);
+    if (direction === 'up') {
+      setExpandedCard(expandedCard === cardIndex ? null : cardIndex);
     } else {
-      console.log('Не нравится', cardIndex);
+      console.log(direction === 'right' ? 'Нравится' : 'Не нравится', cardIndex);
     }
   };
 
-  const renderCard = (user: User) => {
+  const handleSwiping = (x: number, y: number) => {
+    setLastSwipe({ x, y });
+    const cardStyle = {
+      borderColor: x > 0 ? '#8A2BE2' : x < 0 ? '#FF4B4B' : '#E8E8E8',
+      borderWidth: Math.abs(x) > 50 ? 3 : 2,
+    };
+    // Здесь можно добавить анимацию границы карточки
+  };
+
+  const handleSwiped = (cardIndex: number) => {
+    const { x, y } = lastSwipe;
+    const direction = Math.abs(y) > Math.abs(x) ? 'up' : x > 0 ? 'right' : 'left';
+    handleSwipe(direction, cardIndex);
+  };
+
+  const renderCard = (user: User, cardIndex: number) => {
+    const isExpanded = expandedCard === cardIndex;
+    
+    const animatedStyle = useAnimatedStyle(() => {
+      return {
+        transform: [
+          { scale: withSpring(isExpanded ? 1.05 : 1) },
+          { translateY: withSpring(isExpanded ? -20 : 0) }
+        ],
+        height: withSpring(isExpanded ? SCREEN_HEIGHT * 0.8 : SCREEN_HEIGHT * 0.7),
+      };
+    });
+
     return (
       <Animated.View 
         entering={FadeIn}
         exiting={FadeOut}
-        style={styles.card}
+        style={[styles.card, animatedStyle]}
       >
         <Image
           source={{ uri: user.image }}
@@ -85,6 +124,20 @@ export default function HomeScreen() {
         <View style={styles.cardText}>
           <Text style={styles.cardTitle}>{user.name}, {user.age}</Text>
           <Text style={styles.cardDescription}>{user.bio}</Text>
+          {isExpanded && (
+            <View style={styles.expandedContent}>
+              <Text style={styles.expandedText}>📍 {user.location}</Text>
+              <Text style={styles.expandedText}>💼 {user.occupation}</Text>
+              <Text style={styles.interestsTitle}>Интересы:</Text>
+              <View style={styles.interestsContainer}>
+                {user.interests.map((interest, index) => (
+                  <View key={index} style={styles.interestTag}>
+                    <Text style={styles.interestText}>{interest}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
         </View>
       </Animated.View>
     );
@@ -113,42 +166,41 @@ export default function HomeScreen() {
         <View style={styles.swiperContainer}>
           <Swiper
             cards={users}
-            renderCard={renderCard}
-            onSwipedLeft={(cardIndex) => handleSwipe('left', cardIndex)}
-            onSwipedRight={(cardIndex) => handleSwipe('right', cardIndex)}
+            renderCard={(card) => renderCard(card, users.indexOf(card))}
+            onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
+            onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
+            onSwiped={handleSwiped}
             cardIndex={0}
             backgroundColor={'#F5F5F5'}
             stackSize={3}
             cardStyle={styles.cardContainer}
-            animateOverlayLabelsOpacity
             animateCardOpacity
             swipeBackCard
+            disableTopSwipe={false}
+            disableBottomSwipe={false}
+            disableLeftSwipe={false}
+            disableRightSwipe={false}
+            cardVerticalMargin={0}
+            cardHorizontalMargin={0}
             overlayLabels={{
               left: {
-                title: 'НЕТ',
+                title: '',
                 style: {
-                  label: {
-                    backgroundColor: '#FF4B4B',
-                    color: '#fff',
-                    fontSize: 24,
-                    borderRadius: 10,
-                    overflow: 'hidden',
+                  container: {
+                    backgroundColor: 'transparent',
                   }
                 }
               },
               right: {
-                title: 'ДА',
+                title: '',
                 style: {
-                  label: {
-                    backgroundColor: '#8A2BE2',
-                    color: '#fff',
-                    fontSize: 24,
-                    borderRadius: 10,
-                    overflow: 'hidden',
+                  container: {
+                    backgroundColor: 'transparent',
                   }
                 }
               }
             }}
+            onSwiping={handleSwiping}
           />
         </View>
       )}
@@ -184,7 +236,8 @@ const styles = StyleSheet.create({
     resizeMode: 'cover'
   },
   cardText: {
-    padding: 15
+    padding: 15,
+    flex: 1
   },
   cardTitle: {
     fontSize: 24,
@@ -193,7 +246,41 @@ const styles = StyleSheet.create({
   },
   cardDescription: {
     fontSize: 16,
-    color: '#666'
+    color: '#666',
+    marginBottom: 10
+  },
+  expandedContent: {
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    paddingTop: 10
+  },
+  expandedText: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 5
+  },
+  interestsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 10,
+    marginBottom: 5
+  },
+  interestsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 5
+  },
+  interestTag: {
+    backgroundColor: '#8A2BE2',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    margin: 4
+  },
+  interestText: {
+    color: 'white',
+    fontSize: 14
   },
   skeletonTextContainer: {
     padding: 15,
