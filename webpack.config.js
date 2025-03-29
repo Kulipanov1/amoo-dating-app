@@ -4,8 +4,8 @@ module.exports = async function (env, argv) {
   const config = await createExpoWebpackConfigAsync(env, argv);
 
   // Customize the config before returning it.
-  if (env.mode === 'production') {
-    config.output.publicPath = '/amoo-dating-app/';
+  if (config.mode === 'production') {
+    config.output.publicPath = '/';
   }
 
   return config;

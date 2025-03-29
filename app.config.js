@@ -28,7 +28,7 @@ module.exports = {
   web: {
     favicon: "./assets/favicon.png",
     bundler: "webpack",
-    output: "single",
+    output: "static",
     build: {
       babel: {
         include: ["@ui-kitten/components"]
