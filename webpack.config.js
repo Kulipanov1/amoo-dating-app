@@ -1,16 +1,10 @@
 const createExpoWebpackConfigAsync = require('@expo/webpack-config');
-const path = require('path');
 
 module.exports = async function (env, argv) {
   const config = await createExpoWebpackConfigAsync({
     ...env,
     babel: {
-      dangerouslyAddModulePathsToTranspile: [
-        '@react-native',
-        'react-native-web',
-        'react-native-reanimated',
-        'react-native-gesture-handler'
-      ]
+      dangerouslyAddModulePathsToTranspile: ['@react-native']
     }
   }, argv);
 
@@ -20,19 +14,8 @@ module.exports = async function (env, argv) {
     alias: {
       ...config.resolve.alias,
       'react-native': 'react-native-web',
-      'react-native-web': path.resolve(__dirname, './node_modules/react-native-web'),
-      '@react-native': path.resolve(__dirname, './node_modules/react-native'),
-      // Explicitly alias Platform utility
-      '../Utilities/Platform': path.resolve(__dirname, './node_modules/react-native-web/dist/exports/Platform'),
-      './Platform': path.resolve(__dirname, './node_modules/react-native-web/dist/exports/Platform'),
-      // Add aliases for animated components
-      'react-native-reanimated': path.resolve(__dirname, './node_modules/react-native-reanimated/lib/module/index.web.js'),
-      'react-native-gesture-handler': path.resolve(__dirname, './node_modules/react-native-gesture-handler/lib/module/index.js'),
-      // Add additional aliases for gesture handler
-      'react-native-gesture-handler/DrawerLayout': path.resolve(__dirname, './node_modules/react-native-gesture-handler/DrawerLayout'),
-      'react-native-gesture-handler/Swipeable': path.resolve(__dirname, './node_modules/react-native-gesture-handler/Swipeable')
+      'react-native-gesture-handler': 'react-native-web',
     },
-    extensions: ['.web.js', '.js', '.jsx', '.json', '.tsx', '.ts'],
     fallback: {
       ...config.resolve.fallback,
       "crypto": require.resolve("crypto-browserify"),
