@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 interface UserProfile {
   name: string;
-  age: string;
+  age: number;
   bio: string;
   interests: string[];
   image: string;
@@ -14,10 +14,10 @@ export default function ProfileScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<UserProfile>({
     name: 'Александр',
-    age: '27',
-    bio: 'Разработчик, люблю путешествовать и пробовать новое 🌍',
+    age: 27,
+    bio: 'Привет! Я разработчик и люблю путешествовать.',
     interests: ['Программирование', 'Путешествия', 'Фотография', 'Спорт'],
-    image: 'https://randomuser.me/api/portraits/men/32.jpg'
+    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e'
   });
 
   const [editableProfile, setEditableProfile] = useState(profile);
@@ -25,6 +25,8 @@ export default function ProfileScreen() {
   const handleEdit = () => {
     if (isEditing) {
       setProfile(editableProfile);
+    } else {
+      setEditableProfile(profile);
     }
     setIsEditing(!isEditing);
   };
@@ -34,11 +36,7 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <Image source={{ uri: profile.image }} style={styles.profileImage} />
         <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
-          <Ionicons 
-            name={isEditing ? "checkmark-outline" : "pencil-outline"} 
-            size={24} 
-            color="#fff" 
-          />
+          <Ionicons name={isEditing ? "checkmark-outline" : "pencil-outline"} size={24} color="#8A2BE2" />
         </TouchableOpacity>
       </View>
 
@@ -53,34 +51,34 @@ export default function ProfileScreen() {
             />
             <TextInput
               style={styles.input}
-              value={editableProfile.age}
-              onChangeText={(text) => setEditableProfile({...editableProfile, age: text})}
-              placeholder="Возраст"
+              value={String(editableProfile.age)}
+              onChangeText={(text) => setEditableProfile({...editableProfile, age: parseInt(text) || 0})}
               keyboardType="numeric"
+              placeholder="Возраст"
             />
             <TextInput
               style={[styles.input, styles.bioInput]}
               value={editableProfile.bio}
               onChangeText={(text) => setEditableProfile({...editableProfile, bio: text})}
-              placeholder="О себе"
               multiline
+              placeholder="О себе"
             />
           </>
         ) : (
           <>
             <Text style={styles.name}>{profile.name}, {profile.age}</Text>
             <Text style={styles.bio}>{profile.bio}</Text>
-            
-            <Text style={styles.sectionTitle}>Интересы</Text>
-            <View style={styles.interestsContainer}>
-              {profile.interests.map((interest, index) => (
-                <View key={index} style={styles.interestTag}>
-                  <Text style={styles.interestText}>{interest}</Text>
-                </View>
-              ))}
-            </View>
           </>
         )}
+
+        <Text style={styles.sectionTitle}>Интересы</Text>
+        <View style={styles.interestsContainer}>
+          {profile.interests.map((interest, index) => (
+            <View key={index} style={styles.interestTag}>
+              <Text style={styles.interestText}>{interest}</Text>
+            </View>
+          ))}
+        </View>
       </View>
     </ScrollView>
   );
@@ -89,7 +87,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F5F5F5',
   },
   header: {
     alignItems: 'center',
@@ -104,61 +102,54 @@ const styles = StyleSheet.create({
   },
   editButton: {
     position: 'absolute',
-    right: 20,
     top: 20,
-    backgroundColor: '#8A2BE2',
+    right: 20,
     padding: 10,
-    borderRadius: 20,
   },
   infoContainer: {
     padding: 20,
   },
   name: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#363636',
-    textAlign: 'center',
+    marginBottom: 10,
   },
   bio: {
     fontSize: 16,
-    color: '#757575',
-    marginTop: 10,
-    textAlign: 'center',
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#363636',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  interestsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginTop: 10,
-  },
-  interestTag: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    margin: 5,
-  },
-  interestText: {
     color: '#666',
-    fontSize: 14,
+    marginBottom: 20,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
+    backgroundColor: 'white',
+    padding: 15,
     borderRadius: 10,
-    padding: 10,
     marginBottom: 15,
     fontSize: 16,
   },
   bioInput: {
     height: 100,
     textAlignVertical: 'top',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    marginTop: 10,
+  },
+  interestsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 20,
+  },
+  interestTag: {
+    backgroundColor: '#8A2BE2',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    margin: 5,
+  },
+  interestText: {
+    color: 'white',
+    fontSize: 14,
   },
 }); 
