@@ -60,6 +60,8 @@ export default function HomeScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [borderColor, setBorderColor] = useState('#E8E8E8');
   const [borderWidth, setBorderWidth] = useState(2);
+  const [glowColor, setGlowColor] = useState('transparent');
+  const [glowIntensity, setGlowIntensity] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -93,8 +95,12 @@ export default function HomeScreen() {
   const handleSwiping = useCallback((x: number, y: number) => {
     setLastSwipe({ x, y });
     if (Math.abs(x) > Math.abs(y)) {
-      setBorderColor(x > 0 ? '#8A2BE2' : x < 0 ? '#FF4B4B' : '#E8E8E8');
-      setBorderWidth(Math.abs(x) > 50 ? 4 : 2);
+      const color = x > 0 ? '#8A2BE2' : x < 0 ? '#FF4B4B' : 'transparent';
+      const intensity = Math.min(Math.abs(x) / 100, 1);
+      setGlowColor(color);
+      setGlowIntensity(intensity);
+      setBorderColor(color);
+      setBorderWidth(Math.abs(x) > 50 ? 3 : 2);
     }
   }, []);
 
@@ -104,6 +110,8 @@ export default function HomeScreen() {
     const direction = Math.abs(y) > Math.abs(x) ? 'up' : x > 0 ? 'right' : 'left';
     handleSwipe(direction, cardIndex);
     setCurrentIndex(cardIndex + 1);
+    setGlowColor('transparent');
+    setGlowIntensity(0);
     setBorderColor('#E8E8E8');
     setBorderWidth(2);
   }, [lastSwipe, handleSwipe]);
@@ -124,12 +132,34 @@ export default function HomeScreen() {
           ],
           borderColor: borderColor,
           borderWidth: borderWidth,
+          shadowColor: glowColor,
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: glowIntensity * 0.8,
+          shadowRadius: 20,
+          elevation: glowIntensity * 15,
         }
       ]}>
-        <Image
-          source={{ uri: user.image }}
-          style={styles.cardImage}
-        />
+        <View style={[
+          styles.imageContainer,
+          {
+            shadowColor: glowColor,
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: glowIntensity * 0.5,
+            shadowRadius: 10,
+          }
+        ]}>
+          <Image
+            source={{ uri: user.image }}
+            style={styles.cardImage}
+          />
+          <View style={[
+            styles.imageTint,
+            {
+              backgroundColor: glowColor,
+              opacity: glowIntensity * 0.2,
+            }
+          ]} />
+        </View>
         <View style={styles.cardText}>
           <Text style={styles.cardTitle}>{user.name}, {user.age}</Text>
           <Text style={styles.cardDescription}>{user.bio}</Text>
@@ -150,7 +180,7 @@ export default function HomeScreen() {
         </View>
       </View>
     );
-  }, [expandedCard, borderColor, borderWidth]);
+  }, [expandedCard, borderColor, borderWidth, glowColor, glowIntensity]);
 
   const renderSkeleton = useCallback(() => (
     <View style={styles.cardContainer}>
@@ -245,12 +275,26 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
     backgroundColor: 'white',
-    overflow: 'hidden'
+    overflow: 'visible',
+  },
+  imageContainer: {
+    width: '100%',
+    height: '70%',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: 'hidden',
   },
   cardImage: {
     width: '100%',
-    height: '70%',
-    resizeMode: 'cover'
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  imageTint: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   cardText: {
     padding: 15,
