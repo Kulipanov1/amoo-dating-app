@@ -1,5 +1,5 @@
 [build]
-  command = "npm install && NODE_OPTIONS=--max_old_space_size=4096 npx expo export -p web"
+  command = "npm install && npm install -g expo-cli && expo build:web"
   publish = "web-build"
 
 [[redirects]]
