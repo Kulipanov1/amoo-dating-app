@@ -1,419 +1,298 @@
-import React, { useState } from 'react';
-import { useSwipeable } from 'react-swipeable';
-import './WebApp.css';
+import React from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 
-const WebApp = () => {
-  const [activeTab, setActiveTab] = useState('Знакомства');
-  const [mapView, setMapView] = useState('list');
-  const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
-  const [matches, setMatches] = useState([
-    {
-      id: 1,
-      name: 'Katie',
-      age: 25,
-      distance: '2 км',
-      photo: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e',
-      online: true,
-      job: 'Designer at Abercrombie',
-      education: 'Stanford University'
-    },
-    {
-      id: 2,
-      name: 'Sarah',
-      age: 26,
-      distance: '1 км',
-      photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
-      online: true,
-      job: 'Marketing Manager',
-      education: 'NYU'
-    },
-    {
-      id: 3,
-      name: 'Claire',
-      age: 24,
-      distance: '3 км',
-      photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1',
-      online: true,
-      job: 'Photographer',
-      education: 'Art Institute'
-    },
-    {
-      id: 4,
-      name: 'Lilly',
-      age: 23,
-      distance: '2 км',
-      photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-      online: true
-    },
-    {
-      id: 5,
-      name: 'Bonnie',
-      age: 25,
-      distance: '5 км',
-      photo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9',
-      online: true
-    },
-    {
-      id: 6,
-      name: 'Jane',
-      age: 22,
-      distance: '4 км',
-      photo: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04',
-      online: true
-    },
-    {
-      id: 7,
-      name: 'Lisa',
-      age: 27,
-      distance: '6 км',
-      photo: 'https://images.unsplash.com/photo-1526510747491-58f928ec870f',
-      online: true
-    },
-    {
-      id: 8,
-      name: 'Laura',
-      age: 24,
-      distance: '2 км',
-      photo: 'https://images.unsplash.com/photo-1504703395950-b89145a5425b',
-      online: true
-    },
-    {
-      id: 9,
-      name: 'Eva',
-      age: 23,
-      distance: '5 км',
-      photo: 'https://images.unsplash.com/photo-1514315384763-ba401779410f',
-      online: true
-    },
-    {
-      id: 10,
-      name: 'Anna',
-      age: 26,
-      distance: '4 км',
-      photo: 'https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43',
-      online: true
-    }
-  ]);
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
-  const [chats] = useState([
-    {
-      id: 1,
-      name: 'Мария',
-      lastMessage: 'Привет! Как дела?',
-      time: '12:30',
-      unread: 2,
-      photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330'
-    },
-    {
-      id: 2,
-      name: 'Елена',
-      lastMessage: 'Давай встретимся завтра',
-      time: '10:15',
-      unread: 0,
-      photo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9'
-    }
-  ]);
+interface Profile {
+  id: string;
+  name: string;
+  age: number;
+  bio: string;
+  distance: string;
+  photos: string[];
+  interests: string[];
+}
 
-  const userProfile = {
+const DUMMY_PROFILES: Profile[] = [
+  {
+    id: '1',
     name: 'Анна',
     age: 25,
-    location: 'Москва',
-    bio: 'Люблю путешествия, фотографию и хорошую музыку. В поисках интересных знакомств и новых впечатлений.',
+    bio: 'Люблю путешествия и фотографию 📸✈️',
+    distance: '2 км',
     photos: [
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9',
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1'
+      'https://picsum.photos/400/600',
+      'https://picsum.photos/400/601',
     ],
-    interests: ['Путешествия', 'Фотография', 'Музыка', 'Спорт', 'Искусство']
-  };
+    interests: ['Путешествия', 'Фотография', 'Йога'],
+  },
+  {
+    id: '2',
+    name: 'Мария',
+    age: 23,
+    bio: 'Обожаю музыку и искусство 🎨🎵',
+    distance: '3 км',
+    photos: [
+      'https://picsum.photos/400/602',
+      'https://picsum.photos/400/603',
+    ],
+    interests: ['Музыка', 'Искусство', 'Танцы'],
+  },
+];
 
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  const [swipePosition, setSwipePosition] = useState({ x: 0, y: 0 });
-
-  const handlePrevProfile = () => {
-    if (currentProfileIndex > 0) {
-      setCurrentProfileIndex(currentProfileIndex - 1);
-    }
-  };
-
-  const handleNextProfile = () => {
-    if (currentProfileIndex < matches.length - 1) {
-      setCurrentProfileIndex(currentProfileIndex + 1);
-    }
-  };
-
-  const handleLike = () => {
-    console.log('Liked profile:', matches[currentProfileIndex].name);
-    handleNextProfile();
-  };
-
-  const handleDislike = () => {
-    console.log('Disliked profile:', matches[currentProfileIndex].name);
-    handleNextProfile();
-  };
-
-  const handleSuperLike = () => {
-    console.log('Super liked profile:', matches[currentProfileIndex].name);
-    handleNextProfile();
-  };
-
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: handleDislike,
-    onSwipedRight: handleLike,
-    onSwiping: (eventData) => {
-      if (eventData.dir === 'Left') {
-        setSwipeDirection('left');
-        setSwipePosition({ x: eventData.deltaX, y: 0 });
-      } else if (eventData.dir === 'Right') {
-        setSwipeDirection('right');
-        setSwipePosition({ x: eventData.deltaX, y: 0 });
-      }
-    },
-    onSwiped: () => {
-      setSwipeDirection(null);
-      setSwipePosition({ x: 0, y: 0 });
-    },
-    trackMouse: true
-  });
-
-  const renderMatches = () => {
-    const currentProfile = matches[currentProfileIndex];
-    const cardStyle = {
-      transform: `translate(${swipePosition.x}px, ${swipePosition.y}px) rotate(${swipePosition.x * 0.1}deg)`,
-      transition: swipePosition.x === 0 ? 'transform 0.3s ease' : 'none'
-    };
-
-    return (
-      <div className="swipe-screen">
-        <div className="app-header">
-          <h1 className="app-title">amoo</h1>
-        </div>
-        
-        <div {...swipeHandlers} className="profile-card" data-swiping={swipeDirection} style={cardStyle}>
-          <div className="profile-photo-container">
-            <img src={currentProfile.photo} alt={currentProfile.name} className="profile-photo" />
-            <div className="profile-info">
-              <div className="profile-name-verified">
-                <h2>{currentProfile.name}, {currentProfile.age}</h2>
-                <span className="verified-badge">✓</span>
-              </div>
-              <p className="profile-job">{currentProfile.job}</p>
-              <p className="profile-education">{currentProfile.education}</p>
-            </div>
-          </div>
-
-          <div className="action-buttons">
-            <button className="action-btn undo" onClick={handlePrevProfile}>
-              ↩️
-            </button>
-            <button className="action-btn superlike" onClick={handleSuperLike}>
-              ⭐
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderMap = () => (
-    <div className="map-screen">
-      <div className="app-header">
-        <h1 className="app-title">amoo</h1>
-      </div>
-      <div className="map-header">
-        <button 
-          className={`view-toggle-btn ${mapView === 'map' ? 'active' : ''}`}
-          onClick={() => setMapView('map')}
-        >
-          <span className="view-toggle-icon">🗺️</span>
-          Карта
-        </button>
-        <button 
-          className={`view-toggle-btn ${mapView === 'list' ? 'active' : ''}`}
-          onClick={() => setMapView('list')}
-        >
-          <span className="view-toggle-icon">👥</span>
-          Список
-        </button>
-      </div>
-
-      {mapView === 'map' ? (
-        <div className="map-container">
-          <iframe
-            src="https://www.openstreetmap.org/export/embed.html?bbox=37.5,55.7,37.7,55.8&layer=mapnik"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            title="Map"
-          />
-          <div className="nearby-users">
-            {matches.slice(0, 3).map(user => (
-              <div key={user.id} className="nearby-user-card">
-                <img src={user.photo} alt={user.name} />
-                <div className="nearby-user-info">
-                  <h4>{user.name}, {user.age}</h4>
-                  <p>{user.distance}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="users-grid">
-          {matches.map(user => (
-            <div key={user.id} className="user-circle">
-              <div className="user-photo-container">
-                <img src={user.photo} alt={user.name} className="user-photo" />
-                <div className="online-indicator"></div>
-              </div>
-              <p className="user-name">{user.name}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
-  const renderLive = () => (
-    <div className="live-container">
-      <div className="app-header">
-        <h1 className="app-title">amoo</h1>
-      </div>
-      <div className="live-grid">
-        {matches.map(user => (
-          <div key={user.id} className="live-card">
-            <div className="live-stream-placeholder">
-              <img src={user.photo} alt={user.name} />
-              <div className="live-badge">LIVE</div>
-            </div>
-            <div className="live-info">
-              <h4>{user.name}, {user.age}</h4>
-              <p>{user.distance}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderChats = () => (
-    <div className="chats-container">
-      <div className="app-header">
-        <h1 className="app-title">amoo</h1>
-      </div>
-      {chats.map(chat => (
-        <div key={chat.id} className="chat-item">
-          <img src={chat.photo} alt={chat.name} className="chat-photo" />
-          <div className="chat-content">
-            <div className="chat-header">
-              <h4>{chat.name}</h4>
-              <span className="chat-time">{chat.time}</span>
-            </div>
-            <p className="chat-message">{chat.lastMessage}</p>
-          </div>
-          {chat.unread > 0 && (
-            <div className="unread-badge">{chat.unread}</div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-
-  const renderProfile = () => (
-    <div className="profile">
-      <div className="app-header">
-        <h1 className="app-title">amoo</h1>
-      </div>
-      <div className="profile-header">
-        <img src={userProfile.photos[0]} alt={userProfile.name} className="profile-photo" />
-        <h2>{userProfile.name}, {userProfile.age}</h2>
-        <p>{userProfile.location}</p>
-      </div>
-
-      <div className="profile-section">
-        <h3>О себе</h3>
-        <p>{userProfile.bio}</p>
-      </div>
-
-      <div className="profile-section">
-        <h3>Фотографии</h3>
-        <div className="photos-grid">
-          {userProfile.photos.map((photo, index) => (
-            <img key={index} src={photo} alt={`Фото ${index + 1}`} className="photo" />
-          ))}
-          <button className="add-photo-btn">+</button>
-        </div>
-      </div>
-
-      <div className="profile-section">
-        <h3>Интересы</h3>
-        <div className="interests-container">
-          {userProfile.interests.map((interest, index) => (
-            <span key={index} className="interest-tag">{interest}</span>
-          ))}
-          <button className="add-interest-btn">+</button>
-        </div>
-      </div>
-
-      <div className="profile-section">
-        <h3>Настройки</h3>
-        <div className="settings-list">
-          {[
-            'Редактировать профиль',
-            'Уведомления',
-            'Конфиденциальность',
-            'Помощь',
-            'Выйти'
-          ].map((item, index) => (
-            <button key={index} className="settings-item">{item}</button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'Знакомства':
-        return renderMatches();
-      case 'Карта':
-        return renderMap();
-      case 'Эфир':
-        return renderLive();
-      case 'Чаты':
-        return renderChats();
-      case 'Профиль':
-        return renderProfile();
-      default:
-        return renderProfile();
-    }
-  };
-
+const WebApp = () => {
   return (
-    <div className="app">
-      <main className="main">
-        {renderContent()}
-      </main>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.logo}>Amoo</Text>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity style={styles.headerButton}>
+            <Text style={styles.headerButtonText}>Войти</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.headerButton, styles.primaryButton]}>
+            <Text style={styles.primaryButtonText}>Регистрация</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
 
-      <nav className="nav">
-        {[
-          { name: 'Знакомства', icon: '❤️' },
-          { name: 'Карта', icon: '🗺️' },
-          { name: 'Эфир', icon: '📻' },
-          { name: 'Чаты', icon: '💬' },
-          { name: 'Профиль', icon: '👤' }
-        ].map(tab => (
-          <button
-            key={tab.name}
-            onClick={() => setActiveTab(tab.name)}
-            className={`nav-button ${activeTab === tab.name ? 'active' : ''}`}
-          >
-            <span className="nav-icon">{tab.icon}</span>
-          </button>
-        ))}
-      </nav>
-    </div>
+      <ScrollView style={styles.content}>
+        <View style={styles.hero}>
+          <Text style={styles.heroTitle}>Найдите свою любовь</Text>
+          <Text style={styles.heroSubtitle}>
+            Присоединяйтесь к миллионам пользователей и начните свою историю любви сегодня
+          </Text>
+          <TouchableOpacity style={styles.startButton}>
+            <Text style={styles.startButtonText}>Начать знакомства</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.featuredProfiles}>
+          <Text style={styles.sectionTitle}>Популярные анкеты</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {DUMMY_PROFILES.map((profile) => (
+              <View key={profile.id} style={styles.profileCard}>
+                <Image source={{ uri: profile.photos[0] }} style={styles.profileImage} />
+                <View style={styles.profileInfo}>
+                  <Text style={styles.profileName}>{profile.name}, {profile.age}</Text>
+                  <Text style={styles.profileDistance}>{profile.distance}</Text>
+                  <Text style={styles.profileBio} numberOfLines={2}>{profile.bio}</Text>
+                  <View style={styles.interests}>
+                    {profile.interests.map((interest, index) => (
+                      <View key={index} style={styles.interestTag}>
+                        <Text style={styles.interestText}>{interest}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+
+        <View style={styles.features}>
+          <Text style={styles.sectionTitle}>Почему Amoo?</Text>
+          <View style={styles.featureGrid}>
+            {[
+              { title: 'Умный подбор', description: 'Находите людей со схожими интересами' },
+              { title: 'Безопасность', description: 'Ваши данные под надежной защитой' },
+              { title: 'Удобство', description: 'Простой и понятный интерфейс' },
+              { title: 'Поддержка', description: '24/7 служба поддержки' },
+            ].map((feature, index) => (
+              <View key={index} style={styles.featureCard}>
+                <Text style={styles.featureTitle}>{feature.title}</Text>
+                <Text style={styles.featureDescription}>{feature.description}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      </ScrollView>
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>© 2024 Amoo. Все права защищены.</Text>
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  logo: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#8A2BE2',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+  },
+  headerButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginLeft: 10,
+  },
+  headerButtonText: {
+    color: '#666',
+    fontSize: 16,
+  },
+  primaryButton: {
+    backgroundColor: '#8A2BE2',
+  },
+  primaryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  content: {
+    flex: 1,
+  },
+  hero: {
+    padding: 40,
+    alignItems: 'center',
+    backgroundColor: '#F8F9FA',
+  },
+  heroTitle: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  heroSubtitle: {
+    fontSize: 18,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 30,
+    maxWidth: 600,
+  },
+  startButton: {
+    backgroundColor: '#8A2BE2',
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 25,
+  },
+  startButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  featuredProfiles: {
+    padding: 20,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+  },
+  profileCard: {
+    width: 300,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    marginRight: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  profileImage: {
+    width: '100%',
+    height: 400,
+  },
+  profileInfo: {
+    padding: 15,
+  },
+  profileName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  profileDistance: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 5,
+  },
+  profileBio: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 10,
+  },
+  interests: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 10,
+  },
+  interestTag: {
+    backgroundColor: '#F0E6FF',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  interestText: {
+    color: '#8A2BE2',
+    fontSize: 12,
+  },
+  features: {
+    padding: 20,
+    backgroundColor: '#F8F9FA',
+  },
+  featureGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -10,
+  },
+  featureCard: {
+    width: (SCREEN_WIDTH - 60) / 2,
+    backgroundColor: '#fff',
+    padding: 20,
+    margin: 10,
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  featureTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  featureDescription: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+  },
+  footer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    alignItems: 'center',
+  },
+  footerText: {
+    color: '#666',
+    fontSize: 14,
+  },
+});
 
 export default WebApp; 

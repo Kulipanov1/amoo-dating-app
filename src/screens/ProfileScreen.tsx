@@ -8,7 +8,47 @@ import {
   TouchableOpacity,
   Platform
 } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
+
+interface ProfileSection {
+  id: string;
+  title: string;
+  icon: string;
+  action: () => void;
+}
+
+const PROFILE_SECTIONS: ProfileSection[] = [
+  {
+    id: '1',
+    title: 'Редактировать профиль',
+    icon: 'person-outline',
+    action: () => console.log('Edit profile'),
+  },
+  {
+    id: '2',
+    title: 'Настройки приватности',
+    icon: 'lock-closed-outline',
+    action: () => console.log('Privacy settings'),
+  },
+  {
+    id: '3',
+    title: 'Уведомления',
+    icon: 'notifications-outline',
+    action: () => console.log('Notifications'),
+  },
+  {
+    id: '4',
+    title: 'Помощь и поддержка',
+    icon: 'help-circle-outline',
+    action: () => console.log('Help'),
+  },
+  {
+    id: '5',
+    title: 'О приложении',
+    icon: 'information-circle-outline',
+    action: () => console.log('About'),
+  },
+];
 
 const ProfileScreen = () => {
   const userProfile = {
@@ -26,87 +66,60 @@ const ProfileScreen = () => {
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <Image
-        source={{ uri: userProfile.photos[0] }}
-        style={styles.mainPhoto}
-      />
-      <View style={styles.headerInfo}>
-        <Text style={styles.name}>{userProfile.name}, {userProfile.age}</Text>
-        <View style={styles.locationContainer}>
-          <Ionicons name="location-outline" size={16} color="#666" />
-          <Text style={styles.location}>{userProfile.location}</Text>
+      <View style={styles.profileImageContainer}>
+        <Image
+          source={{ uri: userProfile.photos[0] }}
+          style={styles.profileImage}
+        />
+        <TouchableOpacity style={styles.editImageButton}>
+          <Ionicons name="camera-outline" size={20} color="#fff" />
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.name}>{userProfile.name}, {userProfile.age}</Text>
+      <Text style={styles.bio}>{userProfile.bio}</Text>
+      <View style={styles.statsContainer}>
+        <View style={styles.statItem}>
+          <Text style={styles.statNumber}>248</Text>
+          <Text style={styles.statLabel}>Подписчики</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
+          <Text style={styles.statNumber}>186</Text>
+          <Text style={styles.statLabel}>Подписки</Text>
         </View>
       </View>
     </View>
   );
 
-  const renderBio = () => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>О себе</Text>
-      <Text style={styles.bio}>{userProfile.bio}</Text>
-    </View>
-  );
-
-  const renderPhotos = () => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Фотографии</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photosContainer}>
-        {userProfile.photos.map((photo, index) => (
-          <Image
-            key={index}
-            source={{ uri: photo }}
-            style={styles.photo}
-          />
-        ))}
-        <TouchableOpacity style={styles.addPhotoButton}>
-          <Ionicons name="add" size={32} color="#8A2BE2" />
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
-  );
-
-  const renderInterests = () => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Интересы</Text>
-      <View style={styles.interestsContainer}>
-        {userProfile.interests.map((interest, index) => (
-          <View key={index} style={styles.interestTag}>
-            <Text style={styles.interestText}>{interest}</Text>
+  const renderSections = () => (
+    <View style={styles.sections}>
+      {PROFILE_SECTIONS.map((section) => (
+        <TouchableOpacity
+          key={section.id}
+          style={styles.sectionItem}
+          onPress={section.action}
+        >
+          <View style={styles.sectionIcon}>
+            <Ionicons name={section.icon} size={24} color="#8A2BE2" />
           </View>
-        ))}
-        <TouchableOpacity style={styles.addInterestButton}>
-          <Ionicons name="add" size={20} color="#8A2BE2" />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
-  const renderSettings = () => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Настройки</Text>
-      {[
-        { icon: 'person-outline', title: 'Редактировать профиль' },
-        { icon: 'notifications-outline', title: 'Уведомления' },
-        { icon: 'shield-outline', title: 'Конфиденциальность' },
-        { icon: 'help-circle-outline', title: 'Помощь' },
-        { icon: 'log-out-outline', title: 'Выйти' }
-      ].map((item, index) => (
-        <TouchableOpacity key={index} style={styles.settingItem}>
-          <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={24} color="#666" />
-          <Text style={styles.settingText}>{item.title}</Text>
+          <Text style={styles.sectionTitle}>{section.title}</Text>
           <Ionicons name="chevron-forward" size={24} color="#666" />
         </TouchableOpacity>
       ))}
     </View>
   );
 
+  const renderLogoutButton = () => (
+    <TouchableOpacity style={styles.logoutButton}>
+      <Text style={styles.logoutText}>Выйти</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <ScrollView style={styles.container}>
       {renderHeader()}
-      {renderBio()}
-      {renderPhotos()}
-      {renderInterests()}
-      {renderSettings()}
+      {renderSections()}
+      {renderLogoutButton()}
     </ScrollView>
   );
 };
@@ -114,23 +127,44 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F5F5F5',
   },
   header: {
-    backgroundColor: '#fff',
-    padding: 20,
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    padding: 20,
+    backgroundColor: '#fff',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
-  mainPhoto: {
+  profileImageContainer: {
+    position: 'relative',
+    marginBottom: 15,
+  },
+  profileImage: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    marginBottom: 15,
   },
-  headerInfo: {
+  editImageButton: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#8A2BE2',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#fff',
   },
   name: {
     fontSize: 24,
@@ -138,88 +172,84 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 5,
   },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  location: {
-    fontSize: 16,
-    color: '#666',
-    marginLeft: 5,
-  },
-  section: {
-    backgroundColor: '#fff',
-    padding: 20,
-    marginTop: 10,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
-  },
   bio: {
     fontSize: 16,
     color: '#666',
-    lineHeight: 24,
+    marginBottom: 15,
   },
-  photosContainer: {
+  statsContainer: {
     flexDirection: 'row',
-  },
-  photo: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-    marginRight: 10,
-  },
-  addPhotoButton: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#8A2BE2',
-    borderStyle: 'dashed',
+    justifyContent: 'center',
+    width: '100%',
+    paddingHorizontal: 30,
   },
-  interestsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginHorizontal: -5,
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
   },
-  interestTag: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    margin: 5,
+  statDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: '#ddd',
+    marginHorizontal: 20,
   },
-  interestText: {
+  statNumber: {
+    fontSize: 20,
+    fontWeight: 'bold',
     color: '#333',
+  },
+  statLabel: {
     fontSize: 14,
+    color: '#666',
+    marginTop: 5,
   },
-  addInterestButton: {
-    backgroundColor: '#f0f0f0',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 5,
+  sections: {
+    backgroundColor: '#fff',
+    marginTop: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
-  settingItem: {
+  sectionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 15,
+    padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#f0f0f0',
   },
-  settingText: {
+  sectionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F0E6FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  sectionTitle: {
     flex: 1,
     fontSize: 16,
     color: '#333',
-    marginLeft: 15,
+  },
+  logoutButton: {
+    margin: 20,
+    padding: 15,
+    backgroundColor: '#FF4B4B',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  logoutText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
