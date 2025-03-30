@@ -47,4 +47,3 @@ const styles = StyleSheet.create({
     maxWidth: 480,
   },
 }); 
-}); 
