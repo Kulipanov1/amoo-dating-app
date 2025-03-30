@@ -57,9 +57,9 @@ const isWeb = Platform.OS === 'web';
 const isMobile = SCREEN_WIDTH < 768;
 
 const CARD_DIMENSIONS = {
-  width: isMobile ? SCREEN_WIDTH : Math.min(SCREEN_WIDTH * 0.7, 600),
-  height: isMobile ? SCREEN_HEIGHT * 0.8 : Math.min(SCREEN_HEIGHT * 0.8, 800),
-  expandedHeight: isMobile ? SCREEN_HEIGHT * 0.9 : Math.min(SCREEN_HEIGHT * 0.9, 900)
+  width: isMobile ? SCREEN_WIDTH - 32 : Math.min(SCREEN_WIDTH * 0.7, 400),
+  height: isMobile ? SCREEN_HEIGHT * 0.6 : Math.min(SCREEN_HEIGHT * 0.7, 600),
+  expandedHeight: isMobile ? SCREEN_HEIGHT * 0.8 : Math.min(SCREEN_HEIGHT * 0.8, 700)
 };
 
 export default function HomeScreen() {
@@ -325,24 +325,20 @@ const styles = StyleSheet.create({
   swiperWrapper: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
+    justifyContent: 'flex-start',
+    paddingTop: 20,
     width: '100%',
-    maxWidth: 1200,
-    alignSelf: 'center',
   },
   cardContainer: {
     width: CARD_DIMENSIONS.width,
-    alignSelf: 'center',
-    marginLeft: 'auto',
-    marginRight: 'auto',
+    height: CARD_DIMENSIONS.height,
   },
   card: {
+    width: CARD_DIMENSIONS.width,
+    height: CARD_DIMENSIONS.height,
     borderRadius: 20,
     backgroundColor: 'white',
     overflow: 'hidden',
-    alignSelf: 'center',
-    position: 'relative',
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: {
@@ -354,10 +350,8 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: '80%',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    overflow: 'hidden',
+    height: '100%',
+    position: 'relative',
   },
   cardImage: {
     width: '100%',
@@ -547,12 +541,12 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   cardContent: {
-    padding: 15,
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'white',
+    padding: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
