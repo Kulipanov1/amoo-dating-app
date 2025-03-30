@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, Text, View, Dimensions, Image, RefreshControl, ScrollView, Platform } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, Image, RefreshControl, ScrollView, Platform, TouchableOpacity } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { hapticFeedback } from '../utils/haptics';
 import Skeleton from '../components/Skeleton';
+import { Ionicons } from '@expo/vector-icons';
 
 interface User {
   id: number;
@@ -106,11 +107,11 @@ export default function HomeScreen() {
     setLastSwipe({ x, y });
     if (Math.abs(x) > Math.abs(y)) {
       const color = x > 0 ? '#8A2BE2' : x < 0 ? '#FF4B4B' : 'transparent';
-      const intensity = Math.min(Math.abs(x) / 100, 1);
       setGlowColor(color);
-      setGlowIntensity(intensity);
-      setBorderColor(color);
-      setBorderWidth(Math.abs(x) > 50 ? 3 : 2);
+      setGlowIntensity(0.3);
+    } else if (y < 0) { // Свайп вверх
+      setGlowColor('#4CAF50');
+      setGlowIntensity(0.3);
     }
   }, []);
 
@@ -125,6 +126,46 @@ export default function HomeScreen() {
     setBorderColor('#E8E8E8');
     setBorderWidth(2);
   }, [lastSwipe, handleSwipe]);
+
+  const handleLike = useCallback(() => {
+    if (currentIndex < users.length) {
+      hapticFeedback.medium();
+      setGlowColor('#8A2BE2');
+      setGlowIntensity(0.3);
+      setTimeout(() => {
+        handleSwipe('right', currentIndex);
+      }, 200);
+    }
+  }, [currentIndex, users.length, handleSwipe]);
+
+  const handleDislike = useCallback(() => {
+    if (currentIndex < users.length) {
+      hapticFeedback.medium();
+      setGlowColor('#FF4B4B');
+      setGlowIntensity(0.3);
+      setTimeout(() => {
+        handleSwipe('left', currentIndex);
+      }, 200);
+    }
+  }, [currentIndex, users.length, handleSwipe]);
+
+  const handleSuperLike = useCallback(() => {
+    if (currentIndex < users.length) {
+      hapticFeedback.medium();
+      setGlowColor('#4CAF50');
+      setGlowIntensity(0.3);
+      setTimeout(() => {
+        handleSwipe('up', currentIndex);
+      }, 200);
+    }
+  }, [currentIndex, users.length, handleSwipe]);
+
+  const handleRewind = useCallback(() => {
+    if (currentIndex > 0) {
+      hapticFeedback.medium();
+      setCurrentIndex(currentIndex - 1);
+    }
+  }, [currentIndex]);
 
   const renderCard = useCallback((user: User, cardIndex: number) => {
     if (!user) return null;
@@ -141,7 +182,6 @@ export default function HomeScreen() {
           transform: [
             { translateY: isExpanded ? -20 : 0 }
           ],
-          backgroundColor: 'white',
         }
       ]}>
         <View style={[styles.imageContainer, { height: cardHeight * 0.7 }]}>
@@ -153,7 +193,7 @@ export default function HomeScreen() {
             styles.imageTint,
             {
               backgroundColor: glowColor,
-              opacity: glowIntensity * 0.3,
+              opacity: glowIntensity,
             }
           ]} />
         </View>
@@ -211,6 +251,7 @@ export default function HomeScreen() {
           renderCard={(card) => renderCard(card, users.indexOf(card))}
           onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
           onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
+          onSwipedTop={(cardIndex: number) => handleSwipe('up', cardIndex)}
           onSwiped={handleSwiped}
           cardIndex={currentIndex}
           backgroundColor={'#F5F5F5'}
@@ -218,35 +259,44 @@ export default function HomeScreen() {
           cardStyle={[styles.cardContainer, { width: CARD_DIMENSIONS.width }]}
           animateCardOpacity
           swipeBackCard
-          verticalSwipe={false}
+          verticalSwipe={true}
           horizontalSwipe={true}
           cardVerticalMargin={10}
           cardHorizontalMargin={0}
           disableBottomSwipe={true}
-          disableTopSwipe={true}
           swipeAnimationDuration={350}
           horizontalThreshold={80}
+          verticalThreshold={80}
           outputRotationRange={['0deg', '0deg', '0deg']}
-          overlayLabels={{
-            left: {
-              title: '',
-              style: {
-                container: {
-                  backgroundColor: 'transparent',
-                }
-              }
-            },
-            right: {
-              title: '',
-              style: {
-                container: {
-                  backgroundColor: 'transparent',
-                }
-              }
-            }
-          }}
+          overlayLabels={{}}
           onSwiping={handleSwiping}
         />
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity 
+            style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
+            onPress={handleRewind}
+          >
+            <Ionicons name="arrow-undo" size={24} color="#8A2BE2" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
+            onPress={handleDislike}
+          >
+            <Ionicons name="close" size={28} color="#FF4B4B" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
+            onPress={handleLike}
+          >
+            <Ionicons name="heart" size={24} color="#8A2BE2" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
+            onPress={handleSuperLike}
+          >
+            <Ionicons name="flame" size={24} color="#4CAF50" />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -267,6 +317,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingBottom: 80, // Место для кнопок
   },
   cardContainer: {
     alignSelf: 'center',
@@ -361,5 +412,31 @@ const styles = StyleSheet.create({
   },
   skeletonDescription: {
     opacity: 0.7,
+  },
+  buttonsContainer: {
+    position: 'absolute',
+    bottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    gap: 15,
+  },
+  actionButton: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#8A2BE2',
+    elevation: 5,
+    shadowColor: '#8A2BE2',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   }
 }); 
