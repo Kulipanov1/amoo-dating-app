@@ -96,7 +96,7 @@ export default function HomeScreen() {
   const handleSwipe = useCallback((direction: 'left' | 'right' | 'up', cardIndex: number) => {
     hapticFeedback.medium();
     if (direction === 'up') {
-      setExpandedCard(prev => prev === cardIndex ? null : cardIndex);
+      setExpandedCard(cardIndex);
     } else {
       console.log(direction === 'right' ? 'Нравится' : 'Не нравится', cardIndex);
       setCurrentIndex(cardIndex + 1);
@@ -114,8 +114,11 @@ export default function HomeScreen() {
     } else if (y < 0) {
       setGlowColor('#4CAF50');
       setGlowIntensity(0.3);
+      if (Math.abs(y) > 80) {
+        setExpandedCard(currentIndex);
+      }
     }
-  }, []);
+  }, [currentIndex]);
 
   const handleLike = useCallback(() => {
     if (swiper.current && currentIndex < users.length) {
@@ -169,12 +172,13 @@ export default function HomeScreen() {
             height: cardHeight,
             width: CARD_DIMENSIONS.width,
             transform: [
-              { translateY: isExpanded ? -20 : 0 }
+              { translateY: isExpanded ? -50 : 0 },
+              { scale: isExpanded ? 1.05 : 1 }
             ],
           }
         ]}
       >
-        <View style={[styles.imageContainer, { height: cardHeight * 0.7 }]}>
+        <View style={[styles.imageContainer, { height: isExpanded ? cardHeight * 0.5 : cardHeight * 0.7 }]}>
           <Image
             source={{ uri: user.image }}
             style={styles.cardImage}
@@ -187,7 +191,7 @@ export default function HomeScreen() {
             }
           ]} />
         </View>
-        <View style={styles.cardText}>
+        <View style={[styles.cardText, isExpanded && styles.expandedCardText]}>
           <Text style={styles.cardTitle}>{user.name}, {user.age}</Text>
           <Text style={styles.cardDescription}>{user.bio}</Text>
           {isExpanded && (
@@ -257,7 +261,10 @@ export default function HomeScreen() {
           swipeAnimationDuration={350}
           horizontalThreshold={80}
           verticalThreshold={80}
-          outputRotationRange={['0deg', '0deg', '0deg']}
+          outputRotationRange={['-0deg', '0deg', '0deg']}
+          stackSeparation={0}
+          stackScale={0}
+          inputRotationRange={[-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2]}
           overlayLabels={{}}
           onSwiping={handleSwiping}
         />
@@ -325,6 +332,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+    transition: 'all 0.3s ease',
   },
   imageContainer: {
     width: '100%',
@@ -346,7 +354,13 @@ const styles = StyleSheet.create({
   },
   cardText: {
     padding: isMobile ? 15 : 20,
-    flex: 1
+    flex: 1,
+  },
+  expandedCardText: {
+    backgroundColor: 'white',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    paddingTop: 20,
   },
   cardTitle: {
     fontSize: isMobile ? 24 : 28,
