@@ -7,7 +7,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build:web": "SET NODE_OPTIONS=--openssl-legacy-provider && expo export:web"
+    "build:web": "expo export:web"
   },
   "keywords": [],
   "author": "",
@@ -15,7 +15,7 @@
   "description": "",
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
-    "@expo/webpack-config": "^0.17.2",
+    "@expo/webpack-config": "^19.0.0",
     "@react-navigation/bottom-tabs": "^6.5.11",
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/native-stack": "^6.9.17",
