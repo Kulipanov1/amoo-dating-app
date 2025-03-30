@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { StyleSheet, Text, View, Dimensions, Image, RefreshControl, ScrollView, Platform, TouchableOpacity, Modal } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, Image, RefreshControl, ScrollView, Platform, TouchableOpacity, Modal, SafeAreaView } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { hapticFeedback } from '../utils/haptics';
 import Skeleton from '../components/Skeleton';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 interface User {
   id: string;
@@ -57,6 +58,7 @@ const CARD_DIMENSIONS = {
 };
 
 export default function HomeScreen() {
+  const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
@@ -68,6 +70,8 @@ export default function HomeScreen() {
   const swiper = useRef<any>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [currentProfile, setCurrentProfile] = useState<User | null>(null);
+  const [windowWidth, setWindowWidth] = useState(Dimensions.get('window').width);
+  const [windowHeight, setWindowHeight] = useState(Dimensions.get('window').height);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -76,6 +80,15 @@ export default function HomeScreen() {
     }, 2000);
 
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setWindowWidth(window.width);
+      setWindowHeight(window.height);
+    });
+
+    return () => subscription?.remove();
   }, []);
 
   const onRefresh = useCallback(() => {
@@ -222,165 +235,224 @@ export default function HomeScreen() {
     </View>
   ), []);
 
+  const isDesktop = windowWidth > 768;
+  const contentWidth = isDesktop ? 480 : windowWidth;
+  const contentHeight = isDesktop ? Math.min(700, windowHeight - 40) : windowHeight;
+
   if (isLoading) {
     return (
-      <ScrollView 
-        style={styles.container}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        {renderSkeleton()}
-      </ScrollView>
+      <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
+        <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
+          <View style={[
+            styles.mainContent,
+            isDesktop && {
+              width: contentWidth,
+              height: contentHeight,
+            }
+          ]}>
+            <View style={styles.header}>
+              <Text style={styles.logoText}>Amoo</Text>
+            </View>
+
+            <View style={styles.cardContainer}>
+              {renderSkeleton()}
+            </View>
+
+            <View style={styles.actionButtons}>
+              <TouchableOpacity style={[styles.actionButton, styles.rewindButton]}>
+                <Ionicons name="arrow-undo" size={24} color="#8A2BE2" />
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, styles.dislikeButton]}>
+                <Ionicons name="close" size={32} color="#FF4B4B" />
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, styles.likeButton]}>
+                <Ionicons name="heart" size={32} color="#8A2BE2" />
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, styles.boostButton]}>
+                <Ionicons name="flash" size={24} color="#8A2BE2" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.logoText}>Amoo</Text>
-      </View>
+    <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
+      <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
+        <View style={[
+          styles.mainContent,
+          isDesktop && {
+            width: contentWidth,
+            height: contentHeight,
+          }
+        ]}>
+          <View style={styles.header}>
+            <Text style={styles.logoText}>Amoo</Text>
+          </View>
 
-      <View style={styles.swiperWrapper}>
-        <Swiper
-          ref={swiper}
-          cards={users}
-          renderCard={(card) => renderCard(card, users.indexOf(card))}
-          onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
-          onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
-          onSwipedTop={handleSwipedUp}
-          cardIndex={currentIndex}
-          backgroundColor={'transparent'}
-          stackSize={2}
-          cardStyle={styles.cardContainer}
-          animateCardOpacity
-          swipeBackCard
-          verticalSwipe={true}
-          horizontalSwipe={true}
-          cardVerticalMargin={0}
-          cardHorizontalMargin={0}
-          disableBottomSwipe={true}
-          swipeAnimationDuration={150}
-          horizontalThreshold={50}
-          verticalThreshold={30}
-          outputRotationRange={['-0deg', '0deg', '0deg']}
-          stackSeparation={-30}
-          animateOverlayLabelsOpacity
-          overlayLabels={{
-            left: {
-              title: 'NOPE',
-              style: {
-                label: {
-                  backgroundColor: '#FF0000',
-                  color: '#fff',
-                  fontSize: 24
+          <View style={styles.swiperWrapper}>
+            <Swiper
+              ref={swiper}
+              cards={users}
+              renderCard={(card) => renderCard(card, users.indexOf(card))}
+              onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
+              onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
+              onSwipedTop={handleSwipedUp}
+              cardIndex={currentIndex}
+              backgroundColor={'transparent'}
+              stackSize={2}
+              cardStyle={styles.cardContainer}
+              animateCardOpacity
+              swipeBackCard
+              verticalSwipe={true}
+              horizontalSwipe={true}
+              cardVerticalMargin={0}
+              cardHorizontalMargin={0}
+              disableBottomSwipe={true}
+              swipeAnimationDuration={150}
+              horizontalThreshold={50}
+              verticalThreshold={30}
+              outputRotationRange={['-0deg', '0deg', '0deg']}
+              stackSeparation={-30}
+              animateOverlayLabelsOpacity
+              overlayLabels={{
+                left: {
+                  title: 'NOPE',
+                  style: {
+                    label: {
+                      backgroundColor: '#FF0000',
+                      color: '#fff',
+                      fontSize: 24
+                    },
+                    wrapper: {
+                      flexDirection: 'column',
+                      alignItems: 'flex-end',
+                      justifyContent: 'flex-start',
+                      marginTop: 20,
+                      marginLeft: -20
+                    }
+                  }
                 },
-                wrapper: {
-                  flexDirection: 'column',
-                  alignItems: 'flex-end',
-                  justifyContent: 'flex-start',
-                  marginTop: 20,
-                  marginLeft: -20
-                }
-              }
-            },
-            right: {
-              title: 'LIKE',
-              style: {
-                label: {
-                  backgroundColor: '#4CCC93',
-                  color: '#fff',
-                  fontSize: 24
+                right: {
+                  title: 'LIKE',
+                  style: {
+                    label: {
+                      backgroundColor: '#4CCC93',
+                      color: '#fff',
+                      fontSize: 24
+                    },
+                    wrapper: {
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      justifyContent: 'flex-start',
+                      marginTop: 20,
+                      marginLeft: 20
+                    }
+                  }
                 },
-                wrapper: {
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  justifyContent: 'flex-start',
-                  marginTop: 20,
-                  marginLeft: 20
+                top: {
+                  title: 'SUPER LIKE',
+                  style: {
+                    label: {
+                      backgroundColor: '#8A2BE2',
+                      color: '#fff',
+                      fontSize: 24
+                    },
+                    wrapper: {
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }
+                  }
                 }
-              }
-            },
-            top: {
-              title: 'SUPER LIKE',
-              style: {
-                label: {
-                  backgroundColor: '#8A2BE2',
-                  color: '#fff',
-                  fontSize: 24
-                },
-                wrapper: {
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }
-              }
-            }
-          }}
-          onSwiping={handleSwiping}
-          containerStyle={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        />
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity 
-            style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
-            onPress={handleRewind}
+              }}
+              onSwiping={handleSwiping}
+              containerStyle={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            />
+            <View style={styles.buttonsContainer}>
+              <TouchableOpacity 
+                style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
+                onPress={handleRewind}
+              >
+                <Ionicons name="arrow-undo" size={24} color="#8A2BE2" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.actionButton, { backgroundColor: 'rgba(255, 75, 75, 0.1)' }]} 
+                onPress={handleDislike}
+              >
+                <Ionicons name="close" size={28} color="#FF4B4B" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
+                onPress={handleLike}
+              >
+                <Ionicons name="heart" size={24} color="#8A2BE2" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.actionButton, { backgroundColor: 'rgba(76, 175, 80, 0.1)' }]} 
+                onPress={handleSuperLike}
+              >
+                <Ionicons name="flame" size={24} color="#4CAF50" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <Modal
+            visible={showProfile}
+            animationType="slide"
+            onRequestClose={() => setShowProfile(false)}
           >
-            <Ionicons name="arrow-undo" size={24} color="#8A2BE2" />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.actionButton, { backgroundColor: 'rgba(255, 75, 75, 0.1)' }]} 
-            onPress={handleDislike}
-          >
-            <Ionicons name="close" size={28} color="#FF4B4B" />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
-            onPress={handleLike}
-          >
-            <Ionicons name="heart" size={24} color="#8A2BE2" />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.actionButton, { backgroundColor: 'rgba(76, 175, 80, 0.1)' }]} 
-            onPress={handleSuperLike}
-          >
-            <Ionicons name="flame" size={24} color="#4CAF50" />
-          </TouchableOpacity>
+            {currentProfile && (
+              <View style={styles.modalContainer}>
+                {renderDetailedInfo(currentProfile)}
+                <TouchableOpacity 
+                  style={styles.closeButton}
+                  onPress={() => setShowProfile(false)}
+                >
+                  <Ionicons name="close" size={30} color="#8A2BE2" />
+                </TouchableOpacity>
+              </View>
+            )}
+          </Modal>
         </View>
       </View>
-
-      <Modal
-        visible={showProfile}
-        animationType="slide"
-        onRequestClose={() => setShowProfile(false)}
-      >
-        {currentProfile && (
-          <View style={styles.modalContainer}>
-            {renderDetailedInfo(currentProfile)}
-            <TouchableOpacity 
-              style={styles.closeButton}
-              onPress={() => setShowProfile(false)}
-            >
-              <Ionicons name="close" size={30} color="#8A2BE2" />
-            </TouchableOpacity>
-          </View>
-        )}
-      </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: '#F8F4FF',
   },
+  desktopSafeArea: {
+    backgroundColor: '#8A2BE2',
+  },
+  wrapper: {
+    flex: 1,
+  },
+  desktopWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  mainContent: {
+    flex: 1,
+    backgroundColor: '#F8F4FF',
+    ...(Platform.OS === 'web' ? {
+      borderRadius: 20,
+      overflow: 'hidden',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    } : {}),
+  },
   header: {
-    height: 50,
+    height: 56,
     backgroundColor: '#8A2BE2',
     alignItems: 'center',
     justifyContent: 'center',
@@ -403,19 +475,24 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   cardContainer: {
-    width: CARD_DIMENSIONS.width,
-    height: CARD_DIMENSIONS.height,
+    flex: 1,
+    padding: 16,
   },
   card: {
-    width: CARD_DIMENSIONS.width,
-    height: CARD_DIMENSIONS.height,
+    flex: 1,
     backgroundColor: 'white',
+    borderRadius: 20,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   imageContainer: {
     width: '100%',
     height: '100%',
-    position: 'relative',
+    position: 'absolute',
   },
   cardImage: {
     width: '100%',
@@ -586,5 +663,30 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: 'white',
+    borderTopWidth: 1,
+    borderTopColor: '#E3D3FF',
+  },
+  rewindButton: {
+    borderWidth: 2,
+    borderColor: '#8A2BE2',
+  },
+  dislikeButton: {
+    borderWidth: 2,
+    borderColor: '#FF4B4B',
+  },
+  likeButton: {
+    borderWidth: 2,
+    borderColor: '#8A2BE2',
+  },
+  boostButton: {
+    borderWidth: 2,
+    borderColor: '#8A2BE2',
   },
 }); 
