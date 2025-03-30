@@ -114,7 +114,7 @@ export default function HomeScreen() {
     } else if (y < 0) {
       setGlowColor('#4CAF50');
       setGlowIntensity(0.3);
-      if (Math.abs(y) > 80) {
+      if (Math.abs(y) > 30) {
         setExpandedCard(currentIndex);
       }
     }
@@ -258,9 +258,9 @@ export default function HomeScreen() {
           cardVerticalMargin={10}
           cardHorizontalMargin={0}
           disableBottomSwipe={true}
-          swipeAnimationDuration={350}
+          swipeAnimationDuration={250}
           horizontalThreshold={80}
-          verticalThreshold={80}
+          verticalThreshold={40}
           outputRotationRange={['-0deg', '0deg', '0deg']}
           stackSeparation={0}
           stackScale={0}
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    transition: 'all 0.3s ease',
+    transition: 'all 0.2s ease',
   },
   imageContainer: {
     width: '100%',
