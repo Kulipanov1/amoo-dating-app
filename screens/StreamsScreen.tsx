@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { hapticFeedback } from '../utils/haptics';
+import AnimatedBackground from '../components/AnimatedBackground';
 
 interface Stream {
   id: string;
@@ -137,32 +138,41 @@ export default function StreamsScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
-      <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
-        <View style={[styles.mainContent, isDesktop && { width: contentWidth }]}>
-          <View style={styles.header}>
-            <Text style={styles.logoText}>Amoo</Text>
+    <View style={styles.container}>
+      <AnimatedBackground />
+      <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
+        <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
+          <View style={[styles.mainContent, isDesktop && { width: contentWidth }]}>
+            <View style={styles.header}>
+              <Text style={styles.logoText}>Amoo</Text>
+            </View>
+
+            <FlatList
+              data={streams}
+              renderItem={renderStreamItem}
+              keyExtractor={item => item.id}
+              contentContainerStyle={styles.streamsList}
+              showsVerticalScrollIndicator={false}
+            />
+
+            <TouchableOpacity style={styles.startStreamButton}>
+              <Ionicons name="videocam" size={24} color="white" />
+              <Text style={styles.startStreamText}>Начать стрим</Text>
+            </TouchableOpacity>
           </View>
-
-          <FlatList
-            data={streams}
-            renderItem={renderStreamItem}
-            keyExtractor={item => item.id}
-            contentContainerStyle={styles.streamsList}
-            showsVerticalScrollIndicator={false}
-          />
-
-          <TouchableOpacity style={styles.startStreamButton}>
-            <Ionicons name="videocam" size={24} color="white" />
-            <Text style={styles.startStreamText}>Начать стрим</Text>
-          </TouchableOpacity>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   safeArea: {
     flex: 1,
     backgroundColor: '#F8F4FF',

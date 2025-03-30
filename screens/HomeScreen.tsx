@@ -5,6 +5,7 @@ import { hapticFeedback } from '../utils/haptics';
 import Skeleton from '../components/Skeleton';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import AnimatedBackground from '../components/AnimatedBackground';
 
 interface User {
   id: string;
@@ -279,154 +280,161 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
-      <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
-        <View style={[
-          styles.mainContent,
-          isDesktop && {
-            width: contentWidth,
-            height: contentHeight,
-          }
-        ]}>
-          <View style={styles.header}>
-            <Text style={styles.logoText}>Amoo</Text>
-          </View>
-
-          <View style={styles.swiperWrapper}>
-            <Swiper
-              ref={swiper}
-              cards={users}
-              renderCard={(card) => renderCard(card, users.indexOf(card))}
-              onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
-              onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
-              onSwipedTop={handleSwipedUp}
-              cardIndex={currentIndex}
-              backgroundColor={'transparent'}
-              stackSize={2}
-              cardStyle={styles.cardContainer}
-              animateCardOpacity
-              swipeBackCard
-              verticalSwipe={true}
-              horizontalSwipe={true}
-              cardVerticalMargin={0}
-              cardHorizontalMargin={0}
-              disableBottomSwipe={true}
-              swipeAnimationDuration={150}
-              horizontalThreshold={50}
-              verticalThreshold={30}
-              outputRotationRange={['-0deg', '0deg', '0deg']}
-              stackSeparation={-30}
-              animateOverlayLabelsOpacity
-              overlayLabels={{
-                left: {
-                  title: 'NOPE',
-                  style: {
-                    label: {
-                      backgroundColor: '#FF0000',
-                      color: '#fff',
-                      fontSize: 24
-                    },
-                    wrapper: {
-                      flexDirection: 'column',
-                      alignItems: 'flex-end',
-                      justifyContent: 'flex-start',
-                      marginTop: 20,
-                      marginLeft: -20
-                    }
-                  }
-                },
-                right: {
-                  title: 'LIKE',
-                  style: {
-                    label: {
-                      backgroundColor: '#4CCC93',
-                      color: '#fff',
-                      fontSize: 24
-                    },
-                    wrapper: {
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      justifyContent: 'flex-start',
-                      marginTop: 20,
-                      marginLeft: 20
-                    }
-                  }
-                },
-                top: {
-                  title: 'SUPER LIKE',
-                  style: {
-                    label: {
-                      backgroundColor: '#8A2BE2',
-                      color: '#fff',
-                      fontSize: 24
-                    },
-                    wrapper: {
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }
-                  }
-                }
-              }}
-              onSwiping={handleSwiping}
-              containerStyle={{
-                flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            />
-            <View style={styles.buttonsContainer}>
-              <TouchableOpacity 
-                style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
-                onPress={handleRewind}
-              >
-                <Ionicons name="arrow-undo" size={24} color="#8A2BE2" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.actionButton, { backgroundColor: 'rgba(255, 75, 75, 0.1)' }]} 
-                onPress={handleDislike}
-              >
-                <Ionicons name="close" size={28} color="#FF4B4B" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
-                onPress={handleLike}
-              >
-                <Ionicons name="heart" size={24} color="#8A2BE2" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.actionButton, { backgroundColor: 'rgba(76, 175, 80, 0.1)' }]} 
-                onPress={handleSuperLike}
-              >
-                <Ionicons name="flame" size={24} color="#4CAF50" />
-              </TouchableOpacity>
+    <View style={styles.container}>
+      <AnimatedBackground />
+      <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
+        <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
+          <View style={[
+            styles.mainContent,
+            isDesktop && {
+              width: contentWidth,
+              height: contentHeight,
+            }
+          ]}>
+            <View style={styles.header}>
+              <Text style={styles.logoText}>Amoo</Text>
             </View>
-          </View>
 
-          <Modal
-            visible={showProfile}
-            animationType="slide"
-            onRequestClose={() => setShowProfile(false)}
-          >
-            {currentProfile && (
-              <View style={styles.modalContainer}>
-                {renderDetailedInfo(currentProfile)}
+            <View style={styles.swiperWrapper}>
+              <Swiper
+                ref={swiper}
+                cards={users}
+                renderCard={(card) => renderCard(card, users.indexOf(card))}
+                onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
+                onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
+                onSwipedTop={handleSwipedUp}
+                cardIndex={currentIndex}
+                backgroundColor={'transparent'}
+                stackSize={2}
+                cardStyle={styles.cardContainer}
+                animateCardOpacity
+                swipeBackCard
+                verticalSwipe={true}
+                horizontalSwipe={true}
+                cardVerticalMargin={0}
+                cardHorizontalMargin={0}
+                disableBottomSwipe={true}
+                swipeAnimationDuration={150}
+                horizontalThreshold={50}
+                verticalThreshold={30}
+                outputRotationRange={['-0deg', '0deg', '0deg']}
+                stackSeparation={-30}
+                animateOverlayLabelsOpacity
+                overlayLabels={{
+                  left: {
+                    title: 'NOPE',
+                    style: {
+                      label: {
+                        backgroundColor: '#FF0000',
+                        color: '#fff',
+                        fontSize: 24
+                      },
+                      wrapper: {
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        justifyContent: 'flex-start',
+                        marginTop: 20,
+                        marginLeft: -20
+                      }
+                    }
+                  },
+                  right: {
+                    title: 'LIKE',
+                    style: {
+                      label: {
+                        backgroundColor: '#4CCC93',
+                        color: '#fff',
+                        fontSize: 24
+                      },
+                      wrapper: {
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        justifyContent: 'flex-start',
+                        marginTop: 20,
+                        marginLeft: 20
+                      }
+                    }
+                  },
+                  top: {
+                    title: 'SUPER LIKE',
+                    style: {
+                      label: {
+                        backgroundColor: '#8A2BE2',
+                        color: '#fff',
+                        fontSize: 24
+                      },
+                      wrapper: {
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }
+                    }
+                  }
+                }}
+                onSwiping={handleSwiping}
+                containerStyle={{
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              />
+              <View style={styles.buttonsContainer}>
                 <TouchableOpacity 
-                  style={styles.closeButton}
-                  onPress={() => setShowProfile(false)}
+                  style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
+                  onPress={handleRewind}
                 >
-                  <Ionicons name="close" size={30} color="#8A2BE2" />
+                  <Ionicons name="arrow-undo" size={24} color="#8A2BE2" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.actionButton, { backgroundColor: 'rgba(255, 75, 75, 0.1)' }]} 
+                  onPress={handleDislike}
+                >
+                  <Ionicons name="close" size={28} color="#FF4B4B" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
+                  onPress={handleLike}
+                >
+                  <Ionicons name="heart" size={24} color="#8A2BE2" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.actionButton, { backgroundColor: 'rgba(76, 175, 80, 0.1)' }]} 
+                  onPress={handleSuperLike}
+                >
+                  <Ionicons name="flame" size={24} color="#4CAF50" />
                 </TouchableOpacity>
               </View>
-            )}
-          </Modal>
+            </View>
+
+            <Modal
+              visible={showProfile}
+              animationType="slide"
+              onRequestClose={() => setShowProfile(false)}
+            >
+              {currentProfile && (
+                <View style={styles.modalContainer}>
+                  {renderDetailedInfo(currentProfile)}
+                  <TouchableOpacity 
+                    style={styles.closeButton}
+                    onPress={() => setShowProfile(false)}
+                  >
+                    <Ionicons name="close" size={30} color="#8A2BE2" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </Modal>
+          </View>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
   safeArea: {
     flex: 1,
     backgroundColor: '#F8F4FF',

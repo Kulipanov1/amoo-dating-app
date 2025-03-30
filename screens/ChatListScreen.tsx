@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 import ScreenWrapper from '../components/ScreenWrapper';
+import AnimatedBackground from '../components/AnimatedBackground';
 
 type RootStackParamList = {
   ChatList: undefined;
@@ -155,31 +156,36 @@ export default function ChatListScreen({ navigation }: Props) {
   );
 
   return (
-    <ScreenWrapper isDesktop={isDesktop} contentWidth={contentWidth}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Чаты</Text>
-          <TouchableOpacity style={styles.newChatButton}>
-            <Ionicons name="create-outline" size={24} color="#8A2BE2" />
-          </TouchableOpacity>
-        </View>
+    <View style={styles.container}>
+      <AnimatedBackground />
+      <ScreenWrapper isDesktop={isDesktop} contentWidth={contentWidth}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Чаты</Text>
+            <TouchableOpacity style={styles.newChatButton}>
+              <Ionicons name="create-outline" size={24} color="#8A2BE2" />
+            </TouchableOpacity>
+          </View>
 
-        <FlatList
-          data={dummyChats}
-          renderItem={renderChatItem}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.chatList}
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
-    </ScreenWrapper>
+          <FlatList
+            data={dummyChats}
+            renderItem={renderChatItem}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.chatList}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
+      </ScreenWrapper>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   header: {
     height: 56,

@@ -51,6 +51,7 @@
     "@types/react-native-maps": "^0.24.2",
     "babel-plugin-react-native-web": "^0.19.6",
     "babel-preset-expo": "^9.5.0",
+    "file-loader": "^6.2.0",
     "react-native-svg-transformer": "^1.1.0",
     "react-native-web-maps": "^0.3.0",
     "typescript": "^5.1.3"

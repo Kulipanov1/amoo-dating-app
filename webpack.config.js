@@ -21,21 +21,18 @@ module.exports = async function (env, argv) {
     '@react-native/assets/registry': 'react-native-web/dist/modules/AssetRegistry',
     '../Utilities/Platform': 'react-native-web/dist/exports/Platform',
     './Platform': 'react-native-web/dist/exports/Platform',
-    'react-native/Libraries/Utilities/Platform': 'react-native-web/dist/exports/Platform',
-    'react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo': 'react-native-web/dist/exports/AccessibilityInfo',
-    'react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo.ios': 'react-native-web/dist/exports/AccessibilityInfo',
-    'react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo.android': 'react-native-web/dist/exports/AccessibilityInfo',
-    'react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo.win32': 'react-native-web/dist/exports/AccessibilityInfo',
-    'react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo.macos': 'react-native-web/dist/exports/AccessibilityInfo',
-    'react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo.web': 'react-native-web/dist/exports/AccessibilityInfo',
-    'react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo.native': 'react-native-web/dist/exports/AccessibilityInfo',
-    'react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo.ios.js': 'react-native-web/dist/exports/AccessibilityInfo',
-    'react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo.android.js': 'react-native-web/dist/exports/AccessibilityInfo',
-    'react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo.win32.js': 'react-native-web/dist/exports/AccessibilityInfo',
-    'react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo.macos.js': 'react-native-web/dist/exports/AccessibilityInfo',
-    'react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo.web.js': 'react-native-web/dist/exports/AccessibilityInfo',
-    'react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo.native.js': 'react-native-web/dist/exports/AccessibilityInfo'
+    'react-native/Libraries/Utilities/Platform': 'react-native-web/dist/exports/Platform'
   };
+
+  // Add support for Expo vector icons
+  config.module.rules.push({
+    test: /\.(woff|woff2|eot|ttf|otf)$/,
+    loader: 'file-loader',
+    options: {
+      name: '[name].[ext]',
+      outputPath: 'fonts/'
+    }
+  });
 
   config.module = {
     ...config.module,

@@ -129,6 +129,7 @@ const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
     overflow: 'hidden',
+    zIndex: -1,
   },
   desktopContainer: {
     borderRadius: 20,
