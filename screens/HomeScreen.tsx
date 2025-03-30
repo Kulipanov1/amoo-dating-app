@@ -149,37 +149,58 @@ export default function HomeScreen() {
   }, [currentIndex, users.length]);
 
   const handleRewind = useCallback(() => {
-    if (currentIndex > 0) {
+    if (currentIndex > 0 && swiper.current) {
       hapticFeedback.medium();
+      swiper.current.goBackFromLeft();
       setCurrentIndex(currentIndex - 1);
       setGlowColor('transparent');
       setGlowIntensity(0);
     }
   }, [currentIndex]);
 
+  const renderDetailedInfo = (user: User) => (
+    <View style={styles.detailedInfo}>
+      <View style={styles.detailedHeader}>
+        <View style={styles.verifiedBadge}>
+          <Ionicons name="checkmark-circle" size={16} color="#8A2BE2" />
+          <Text style={styles.verifiedText}>Проверенный профиль</Text>
+        </View>
+      </View>
+      <View style={styles.userMainInfo}>
+        <Text style={styles.userName}>{user.name}, {user.age}</Text>
+        <View style={styles.locationRow}>
+          <Ionicons name="location-outline" size={18} color="#666" />
+          <Text style={styles.locationText}>{user.location}</Text>
+        </View>
+      </View>
+      <View style={styles.divider} />
+      <View style={styles.occupationRow}>
+        <Ionicons name="briefcase-outline" size={18} color="#666" />
+        <Text style={styles.occupationText}>{user.occupation}</Text>
+      </View>
+      <View style={styles.divider} />
+      <Text style={styles.bioTitle}>О себе</Text>
+      <Text style={styles.bioText}>{user.bio}</Text>
+      <View style={styles.divider} />
+      <Text style={styles.interestsTitle}>Интересы</Text>
+      <View style={styles.interestsContainer}>
+        {user.interests.map((interest, index) => (
+          <View key={index} style={styles.interestTag}>
+            <Text style={styles.interestText}>{interest}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+
   const renderCard = useCallback((user: User, cardIndex: number) => {
     if (!user) return null;
     
     const isExpanded = expandedCard === cardIndex;
-    const cardHeight = isExpanded ? CARD_DIMENSIONS.expandedHeight : CARD_DIMENSIONS.height;
     
     return (
-      <TouchableOpacity 
-        activeOpacity={0.9}
-        onPress={() => setExpandedCard(prev => prev === cardIndex ? null : cardIndex)}
-        style={[
-          styles.card,
-          {
-            height: cardHeight,
-            width: CARD_DIMENSIONS.width,
-            transform: [
-              { translateY: isExpanded ? -50 : 0 },
-              { scale: isExpanded ? 1.05 : 1 }
-            ],
-          }
-        ]}
-      >
-        <View style={[styles.imageContainer, { height: isExpanded ? cardHeight * 0.4 : cardHeight * 0.7 }]}>
+      <View style={[styles.card, { height: CARD_DIMENSIONS.height }]}>
+        <View style={styles.imageContainer}>
           <Image
             source={{ uri: user.image }}
             style={styles.cardImage}
@@ -192,32 +213,12 @@ export default function HomeScreen() {
             }
           ]} />
         </View>
-        <View style={[styles.cardText, isExpanded && styles.expandedCardText]}>
+        <View style={styles.cardContent}>
           <Text style={styles.cardTitle}>{user.name}, {user.age}</Text>
           <Text style={styles.cardDescription}>{user.bio}</Text>
-          {isExpanded && (
-            <View style={styles.expandedContent}>
-              <View style={styles.infoRow}>
-                <Ionicons name="location" size={20} color="#8A2BE2" />
-                <Text style={styles.expandedText}>{user.location}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Ionicons name="briefcase" size={20} color="#8A2BE2" />
-                <Text style={styles.expandedText}>{user.occupation}</Text>
-              </View>
-              <View style={styles.divider} />
-              <Text style={styles.interestsTitle}>Интересы и увлечения:</Text>
-              <View style={styles.interestsContainer}>
-                {user.interests.map((interest, index) => (
-                  <View key={index} style={styles.interestTag}>
-                    <Text style={styles.interestText}>{interest}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
         </View>
-      </TouchableOpacity>
+        {isExpanded && renderDetailedInfo(user)}
+      </View>
     );
   }, [expandedCard, glowColor, glowIntensity]);
 
@@ -476,5 +477,78 @@ const styles = StyleSheet.create({
     fontSize: isMobile ? 16 : 18,
     color: '#666',
     flex: 1,
+  },
+  detailedInfo: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
+    zIndex: 1000,
+  },
+  detailedHeader: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 10,
+  },
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(138, 43, 226, 0.1)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+    gap: 5,
+  },
+  verifiedText: {
+    color: '#8A2BE2',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  userMainInfo: {
+    marginBottom: 15,
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  locationText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  occupationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginVertical: 10,
+  },
+  occupationText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  bioTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  bioText: {
+    fontSize: 16,
+    color: '#666',
+    lineHeight: 22,
+    marginBottom: 15,
+  },
+  cardContent: {
+    padding: 15,
   },
 }); 
