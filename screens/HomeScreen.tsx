@@ -130,24 +130,10 @@ export default function HomeScreen() {
           transform: [
             { translateY: isExpanded ? -20 : 0 }
           ],
-          borderColor: borderColor,
-          borderWidth: borderWidth,
-          shadowColor: glowColor,
-          shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: glowIntensity * 0.8,
-          shadowRadius: 20,
-          elevation: glowIntensity * 15,
+          backgroundColor: 'white',
         }
       ]}>
-        <View style={[
-          styles.imageContainer,
-          {
-            shadowColor: glowColor,
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: glowIntensity * 0.5,
-            shadowRadius: 10,
-          }
-        ]}>
+        <View style={styles.imageContainer}>
           <Image
             source={{ uri: user.image }}
             style={styles.cardImage}
@@ -156,7 +142,7 @@ export default function HomeScreen() {
             styles.imageTint,
             {
               backgroundColor: glowColor,
-              opacity: glowIntensity * 0.2,
+              opacity: glowIntensity * 0.3,
             }
           ]} />
         </View>
@@ -180,7 +166,7 @@ export default function HomeScreen() {
         </View>
       </View>
     );
-  }, [expandedCard, borderColor, borderWidth, glowColor, glowIntensity]);
+  }, [expandedCard, glowColor, glowIntensity]);
 
   const renderSkeleton = useCallback(() => (
     <View style={styles.cardContainer}>
@@ -212,11 +198,7 @@ export default function HomeScreen() {
         renderCard={(card) => renderCard(card, users.indexOf(card))}
         onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
         onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
-        onSwiped={(cardIndex: number) => {
-          handleSwiped(cardIndex);
-          setBorderColor('#E8E8E8');
-          setBorderWidth(2);
-        }}
+        onSwiped={handleSwiped}
         cardIndex={currentIndex}
         backgroundColor={'#F5F5F5'}
         stackSize={3}
@@ -225,7 +207,7 @@ export default function HomeScreen() {
         swipeBackCard
         verticalSwipe={false}
         horizontalSwipe={true}
-        cardVerticalMargin={0}
+        cardVerticalMargin={20}
         cardHorizontalMargin={0}
         disableBottomSwipe={true}
         disableTopSwipe={true}
@@ -259,7 +241,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5'
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
   },
   swiperContainer: {
     flex: 1,
@@ -268,14 +251,12 @@ const styles = StyleSheet.create({
   cardContainer: {
     width: SCREEN_WIDTH * 0.9,
     height: SCREEN_HEIGHT * 0.7,
-    marginTop: 20,
   },
   card: {
     flex: 1,
     borderRadius: 20,
-    borderWidth: 2,
     backgroundColor: 'white',
-    overflow: 'visible',
+    overflow: 'hidden',
   },
   imageContainer: {
     width: '100%',
