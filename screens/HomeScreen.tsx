@@ -214,18 +214,9 @@ export default function HomeScreen() {
                   </View>
                 ))}
               </View>
-              <View style={styles.divider} />
-              <Text style={styles.aboutTitle}>О себе:</Text>
-              <Text style={styles.aboutText}>{user.bio}</Text>
             </View>
           )}
         </View>
-        {!isExpanded && (
-          <View style={styles.swipeHint}>
-            <Ionicons name="chevron-up" size={24} color="#8A2BE2" />
-            <Text style={styles.swipeHintText}>Свайп вверх для подробностей</Text>
-          </View>
-        )}
       </TouchableOpacity>
     );
   }, [expandedCard, glowColor, glowIntensity]);
@@ -267,7 +258,7 @@ export default function HomeScreen() {
           cardIndex={currentIndex}
           backgroundColor={'transparent'}
           stackSize={3}
-          cardStyle={[styles.cardContainer, { width: CARD_DIMENSIONS.width }]}
+          cardStyle={styles.cardContainer}
           animateCardOpacity
           swipeBackCard
           verticalSwipe={true}
@@ -275,20 +266,20 @@ export default function HomeScreen() {
           cardVerticalMargin={0}
           cardHorizontalMargin={0}
           disableBottomSwipe={true}
-          swipeAnimationDuration={250}
-          horizontalThreshold={80}
-          verticalThreshold={40}
-          outputRotationRange={['-0deg', '0deg', '0deg']}
+          swipeAnimationDuration={200}
+          horizontalThreshold={60}
+          verticalThreshold={30}
+          outputRotationRange={['0deg', '0deg', '0deg']}
           stackSeparation={0}
           stackScale={0}
-          inputRotationRange={[-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2]}
+          inputRotationRange={[-1, 0, 1]}
           overlayLabels={{}}
           onSwiping={handleSwiping}
           containerStyle={{
             flex: 1,
             alignItems: 'center',
             justifyContent: 'center',
-            width: '100%',
+            paddingBottom: 100,
           }}
         />
         <View style={styles.buttonsContainer}>
@@ -299,7 +290,7 @@ export default function HomeScreen() {
             <Ionicons name="arrow-undo" size={24} color="#8A2BE2" />
           </TouchableOpacity>
           <TouchableOpacity 
-            style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
+            style={[styles.actionButton, { backgroundColor: 'rgba(255, 75, 75, 0.1)' }]} 
             onPress={handleDislike}
           >
             <Ionicons name="close" size={28} color="#FF4B4B" />
@@ -311,7 +302,7 @@ export default function HomeScreen() {
             <Ionicons name="heart" size={24} color="#8A2BE2" />
           </TouchableOpacity>
           <TouchableOpacity 
-            style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
+            style={[styles.actionButton, { backgroundColor: 'rgba(76, 175, 80, 0.1)' }]} 
             onPress={handleSuperLike}
           >
             <Ionicons name="flame" size={24} color="#4CAF50" />
@@ -337,15 +328,16 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingBottom: 80,
     position: 'relative',
     width: '100%',
+    maxWidth: 1200,
+    alignSelf: 'center',
   },
   cardContainer: {
+    width: CARD_DIMENSIONS.width,
     alignSelf: 'center',
-    position: 'relative',
-    left: '50%',
-    transform: [{ translateX: -CARD_DIMENSIONS.width / 2 }],
+    marginLeft: 'auto',
+    marginRight: 'auto',
   },
   card: {
     borderRadius: 20,
@@ -361,7 +353,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    transition: 'all 0.2s ease',
   },
   imageContainer: {
     width: '100%',
@@ -416,37 +407,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     marginVertical: 15,
   },
-  aboutTitle: {
-    fontSize: isMobile ? 18 : 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
-  },
-  aboutText: {
-    fontSize: isMobile ? 16 : 18,
-    color: '#666',
-    lineHeight: 24,
-  },
-  swipeHint: {
-    position: 'absolute',
-    bottom: 20,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'column',
-  },
-  swipeHintText: {
-    color: '#8A2BE2',
-    fontSize: 14,
-    marginTop: 5,
-    opacity: 0.8,
-  },
-  expandedText: {
-    fontSize: isMobile ? 16 : 18,
-    color: '#666',
-    flex: 1,
-  },
   interestsTitle: {
     fontSize: isMobile ? 18 : 20,
     fontWeight: 'bold',
@@ -491,6 +451,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     gap: 15,
+    maxWidth: CARD_DIMENSIONS.width,
+    alignSelf: 'center',
+    backgroundColor: 'transparent',
   },
   actionButton: {
     width: 54,
@@ -508,5 +471,10 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-  }
+  },
+  expandedText: {
+    fontSize: isMobile ? 16 : 18,
+    color: '#666',
+    flex: 1,
+  },
 }); 
