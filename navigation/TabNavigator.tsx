@@ -1,22 +1,12 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
-import ProfileScreen from '../screens/ProfileScreen';
 import ChatListScreen from '../screens/ChatListScreen';
-import ChatScreen from '../screens/ChatScreen';
 import StreamsScreen from '../screens/StreamsScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
-
-const ChatStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="ChatList" component={ChatListScreen} />
-    <Stack.Screen name="Chat" component={ChatScreen} />
-  </Stack.Navigator>
-);
 
 export default function TabNavigator() {
   return (
@@ -25,7 +15,7 @@ export default function TabNavigator() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: 'white',
-          borderTopColor: '#E3D3FF',
+          borderTopColor: '#E5E5E5',
           height: 60,
           paddingBottom: 8,
           paddingTop: 8,
@@ -45,16 +35,6 @@ export default function TabNavigator() {
         }}
       />
       <Tab.Screen
-        name="People"
-        component={HomeScreen}
-        options={{
-          tabBarLabel: 'Люди рядом',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
         name="Streams"
         component={StreamsScreen}
         options={{
@@ -65,8 +45,8 @@ export default function TabNavigator() {
         }}
       />
       <Tab.Screen
-        name="Chats"
-        component={ChatStack}
+        name="ChatList"
+        component={ChatListScreen}
         options={{
           tabBarLabel: 'Чаты',
           tabBarIcon: ({ color, size }) => (
