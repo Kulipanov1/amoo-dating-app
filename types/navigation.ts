@@ -1,3 +1,10 @@
+export type TabParamList = {
+  HomeTab: undefined;
+  StreamsTab: undefined;
+  ChatTab: undefined;
+  ProfileTab: undefined;
+};
+
 export type ChatStackParamList = {
   ChatList: undefined;
   Chat: {
@@ -22,21 +29,21 @@ export type ChatStackParamList = {
 export type ProfileStackParamList = {
   Profile: undefined;
   Settings: undefined;
+  EditProfile: undefined;
 };
 
 export type HomeStackParamList = {
   Home: undefined;
   Map: undefined;
+  UserProfile: {
+    userId: string;
+  };
 };
 
 export type StreamsStackParamList = {
   Streams: undefined;
-  Live: undefined;
-};
-
-export type TabParamList = {
-  HomeTab: undefined;
-  StreamsTab: undefined;
-  ProfileTab: undefined;
-  ChatTab: undefined;
+  Live: {
+    streamId: string;
+    userName: string;
+  };
 }; 

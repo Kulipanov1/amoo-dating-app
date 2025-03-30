@@ -16,19 +16,12 @@ import { Audio } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import { StackScreenProps } from '@react-navigation/stack';
 import ScreenWrapper from '../components/ScreenWrapper';
+import { SendIcon, CameraIcon, MicrophoneIcon } from '../components/Icons';
+import Message from '../components/Message';
+import AnimatedBackground from '../components/AnimatedBackground';
+import { ChatStackParamList } from '../types/navigation';
 
-type RootStackParamList = {
-  ChatList: undefined;
-  Chat: {
-    userId: string;
-    userName: string;
-  };
-  Profile: {
-    userId: string;
-  };
-};
-
-type Props = StackScreenProps<RootStackParamList, 'Chat'>;
+type Props = StackScreenProps<ChatStackParamList, 'Chat'>;
 
 interface Message {
   id: string;
@@ -88,7 +81,7 @@ const dummyMessages: Message[] = [
   },
 ];
 
-export default function ChatScreen({ route, navigation }: Props) {
+const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
   const [messages, setMessages] = useState<Message[]>(dummyMessages);
   const [inputText, setInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -307,62 +300,52 @@ export default function ChatScreen({ route, navigation }: Props) {
 
   return (
     <ScreenWrapper isDesktop={isDesktop} contentWidth={contentWidth}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
-      >
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          renderItem={renderMessage}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.messageList}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
-          showsVerticalScrollIndicator={false}
-        />
-        
-        <View style={styles.inputContainer}>
-          <TouchableOpacity
-            style={styles.attachButton}
-            onPress={handleImagePick}
-          >
-            <Ionicons name="image" size={24} color="#8A2BE2" />
-          </TouchableOpacity>
-          
-          <TextInput
-            style={styles.input}
-            value={inputText}
-            onChangeText={setInputText}
-            placeholder="Сообщение..."
-            multiline
+      <View style={styles.container}>
+        <AnimatedBackground />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardAvoidingView}
+        >
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            renderItem={renderMessage}
+            keyExtractor={item => item.id}
+            style={styles.messageList}
+            onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+            showsVerticalScrollIndicator={false}
           />
-          
-          {inputText.trim() ? (
-            <TouchableOpacity
-              style={styles.sendButton}
-              onPress={handleSend}
-            >
-              <Ionicons name="send" size={24} color="#8A2BE2" />
+          <View style={styles.inputContainer}>
+            <TouchableOpacity style={styles.button} onPress={handleImagePick}>
+              <CameraIcon size={24} color="#666" />
             </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={styles.micButton}
-              onPressIn={startRecording}
-              onPressOut={stopRecording}
-            >
-              <Ionicons
-                name={isRecording ? "radio-button-on" : "mic"}
-                size={24}
-                color={isRecording ? "#f44336" : "#8A2BE2"}
-              />
-            </TouchableOpacity>
-          )}
-        </View>
-      </KeyboardAvoidingView>
+            <TextInput
+              style={styles.input}
+              value={inputText}
+              onChangeText={setInputText}
+              placeholder="Введите сообщение..."
+              placeholderTextColor="#999"
+              multiline
+            />
+            {inputText.trim() ? (
+              <TouchableOpacity style={styles.button} onPress={handleSend}>
+                <SendIcon size={24} color="#FF4B6E" />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.button}
+                onPressIn={startRecording}
+                onPressOut={stopRecording}
+              >
+                <MicrophoneIcon size={24} color={isRecording ? "#f44336" : "#666"} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </KeyboardAvoidingView>
+      </View>
     </ScreenWrapper>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -378,8 +361,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   messageList: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    flex: 1,
+    padding: 10,
   },
   messageContainer: {
     flexDirection: 'row',
@@ -459,27 +442,26 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 8,
+    padding: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderTopWidth: 1,
     borderTopColor: '#E3D3FF',
   },
-  attachButton: {
-    padding: 8,
-  },
   input: {
     flex: 1,
-    backgroundColor: '#F0E6FF',
+    marginHorizontal: 10,
+    padding: 10,
+    backgroundColor: '#F0F0F0',
     borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginHorizontal: 8,
-    fontSize: 16,
     maxHeight: 100,
+    color: '#333',
   },
-  sendButton: {
-    padding: 8,
+  button: {
+    padding: 10,
   },
-  micButton: {
-    padding: 8,
+  keyboardAvoidingView: {
+    flex: 1,
   },
-}); 
+});
+
+export default ChatScreen; 
