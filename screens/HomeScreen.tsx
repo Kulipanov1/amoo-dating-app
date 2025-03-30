@@ -380,10 +380,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F4FF',
   },
   header: {
-    padding: 16,
+    height: 50,
     backgroundColor: '#8A2BE2',
     alignItems: 'center',
-    marginBottom: 10,
+    justifyContent: 'center',
   },
   logoText: {
     fontSize: 24,

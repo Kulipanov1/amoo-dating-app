@@ -25,15 +25,7 @@ export default function TabNavigator() {
         },
         tabBarActiveTintColor: '#8A2BE2',
         tabBarInactiveTintColor: '#666',
-        headerStyle: {
-          backgroundColor: '#8A2BE2',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-          color: '#333',
-          fontSize: 18,
-          fontWeight: 'bold',
-        },
+        headerShown: false,
       }}
     >
       <Tab.Screen

@@ -44,6 +44,63 @@ interface UserProfile {
   isPremium: boolean;
 }
 
+interface StatModalProps {
+  visible: boolean;
+  onClose: () => void;
+  title: string;
+  data: any[];
+  type: 'followers' | 'following' | 'likes' | 'matches';
+}
+
+const StatModal = ({ visible, onClose, title, data, type }: StatModalProps) => {
+  const renderItem = ({ item }: { item: any }) => (
+    <TouchableOpacity style={styles.userListItem}>
+      <Image source={{ uri: item.avatar }} style={styles.userListAvatar} />
+      <View style={styles.userListInfo}>
+        <Text style={styles.userListName}>{item.name}</Text>
+        <Text style={styles.userListStatus}>{item.status}</Text>
+      </View>
+      {type === 'matches' && (
+        <TouchableOpacity style={styles.chatButton}>
+          <Ionicons name="chatbubble-outline" size={20} color="#8A2BE2" />
+        </TouchableOpacity>
+      )}
+      {type === 'likes' && !item.isMatched && (
+        <TouchableOpacity style={styles.likeButton}>
+          <Ionicons name="heart-outline" size={20} color="#8A2BE2" />
+        </TouchableOpacity>
+      )}
+    </TouchableOpacity>
+  );
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{title}</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={data}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.userList}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 export default function ProfileScreen() {
   const [windowWidth, setWindowWidth] = useState(Dimensions.get('window').width);
   const [windowHeight, setWindowHeight] = useState(Dimensions.get('window').height);
@@ -98,6 +155,7 @@ export default function ProfileScreen() {
   });
 
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [activeModal, setActiveModal] = useState<'followers' | 'following' | 'likes' | 'matches' | null>(null);
 
   const handleEditPhoto = async () => {
     hapticFeedback.light();
@@ -146,6 +204,34 @@ export default function ProfileScreen() {
       <Text style={styles.interestText}>{item}</Text>
     </View>
   );
+
+  const dummyData = {
+    followers: [
+      { id: '1', name: 'Анна', status: 'Онлайн', avatar: 'https://example.com/avatar1.jpg' },
+      { id: '2', name: 'Мария', status: '2 часа назад', avatar: 'https://example.com/avatar2.jpg' },
+    ],
+    following: [
+      { id: '3', name: 'Петр', status: 'Онлайн', avatar: 'https://example.com/avatar3.jpg' },
+      { id: '4', name: 'Иван', status: '1 час назад', avatar: 'https://example.com/avatar4.jpg' },
+    ],
+    likes: [
+      { id: '5', name: 'София', status: 'Онлайн', avatar: 'https://example.com/avatar5.jpg', isMatched: true },
+      { id: '6', name: 'Алиса', status: '30 минут назад', avatar: 'https://example.com/avatar6.jpg', isMatched: false },
+    ],
+    matches: [
+      { id: '7', name: 'Елена', status: 'Онлайн', avatar: 'https://example.com/avatar7.jpg' },
+      { id: '8', name: 'Ольга', status: '5 минут назад', avatar: 'https://example.com/avatar8.jpg' },
+    ],
+  };
+
+  const getModalTitle = (type: 'followers' | 'following' | 'likes' | 'matches') => {
+    switch (type) {
+      case 'followers': return 'Подписчики';
+      case 'following': return 'Подписки';
+      case 'likes': return 'Лайки';
+      case 'matches': return 'Совпадения';
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -196,22 +282,34 @@ export default function ProfileScreen() {
           </View>
 
           <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
+            <TouchableOpacity 
+              style={styles.statItem}
+              onPress={() => setActiveModal('followers')}
+            >
               <Text style={styles.statNumber}>{formatNumber(profile.stats.followers)}</Text>
               <Text style={styles.statLabel}>Подписчики</Text>
-            </View>
-            <View style={styles.statItem}>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.statItem}
+              onPress={() => setActiveModal('following')}
+            >
               <Text style={styles.statNumber}>{formatNumber(profile.stats.following)}</Text>
               <Text style={styles.statLabel}>Подписки</Text>
-            </View>
-            <View style={styles.statItem}>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.statItem}
+              onPress={() => setActiveModal('likes')}
+            >
               <Text style={styles.statNumber}>{formatNumber(profile.stats.likes)}</Text>
               <Text style={styles.statLabel}>Лайки</Text>
-            </View>
-            <View style={styles.statItem}>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.statItem}
+              onPress={() => setActiveModal('matches')}
+            >
               <Text style={styles.statNumber}>{formatNumber(profile.stats.matches)}</Text>
               <Text style={styles.statLabel}>Совпадения</Text>
-            </View>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.section}>
@@ -269,6 +367,16 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {activeModal && (
+        <StatModal
+          visible={true}
+          onClose={() => setActiveModal(null)}
+          title={getModalTitle(activeModal)}
+          data={dummyData[activeModal]}
+          type={activeModal}
+        />
+      )}
 
       <Modal
         visible={showSettingsModal}
@@ -535,5 +643,49 @@ const styles = StyleSheet.create({
   },
   tabItem: {
     padding: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  userList: {
+    paddingBottom: 20,
+  },
+  userListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E3D3FF',
+  },
+  userListAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  userListInfo: {
+    flex: 1,
+  },
+  userListName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  userListStatus: {
+    fontSize: 14,
+    color: '#666',
+  },
+  chatButton: {
+    padding: 8,
+    backgroundColor: 'rgba(138, 43, 226, 0.1)',
+    borderRadius: 20,
+  },
+  likeButton: {
+    padding: 8,
+    backgroundColor: 'rgba(138, 43, 226, 0.1)',
+    borderRadius: 20,
   },
 }); 
