@@ -1,7 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Ionicons } from '@expo/vector-icons';
 import { View, StyleSheet } from 'react-native';
 import { HomeIcon, HeartIcon, MessageIcon, ProfileIcon, StreamIcon } from '../components/Icons';
 
@@ -170,31 +169,35 @@ const TabNavigator = () => {
         }}
       >
         <Tab.Screen
-          name="Home"
-          component={HomeScreen}
+          name="HomeTab"
+          component={HomeStackNavigator}
           options={{
             tabBarIcon: ({ color, size }) => <HomeIcon color={color} size={size} />,
+            title: 'Главная'
           }}
         />
         <Tab.Screen
-          name="Streams"
-          component={StreamsScreen}
+          name="StreamsTab"
+          component={StreamsStackNavigator}
           options={{
             tabBarIcon: ({ color, size }) => <StreamIcon color={color} size={size} />,
+            title: 'Стримы'
           }}
         />
         <Tab.Screen
-          name="Chat"
-          component={ChatListScreen}
+          name="ChatTab"
+          component={ChatStackNavigator}
           options={{
             tabBarIcon: ({ color, size }) => <MessageIcon color={color} size={size} />,
+            title: 'Чаты'
           }}
         />
         <Tab.Screen
-          name="Profile"
-          component={ProfileScreen}
+          name="ProfileTab"
+          component={ProfileStackNavigator}
           options={{
             tabBarIcon: ({ color, size }) => <ProfileIcon color={color} size={size} />,
+            title: 'Профиль'
           }}
         />
       </Tab.Navigator>
