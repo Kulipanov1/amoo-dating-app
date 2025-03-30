@@ -106,7 +106,7 @@ export default function ProfileScreen() {
   const { width: windowWidth } = Dimensions.get('window');
   const [windowHeight, setWindowHeight] = useState(Dimensions.get('window').height);
   const [isExpanded, setIsExpanded] = useState(false);
-  const isDesktop = windowWidth > 768;
+  const isDesktop = Platform.OS === 'web' && windowWidth > 768;
   const contentWidth = isDesktop ? 480 : windowWidth;
   
   useEffect(() => {
@@ -250,7 +250,10 @@ export default function ProfileScreen() {
     <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
       <AnimatedBackground />
       <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
-        <View style={[styles.mainContent, isDesktop && { width: contentWidth }]}>
+        <View style={[
+          styles.mainContent,
+          isDesktop && { width: contentWidth, maxHeight: 700 }
+        ]}>
           <View style={styles.logoContainer}>
             <Text style={styles.logoText}>Amoo</Text>
             <TouchableOpacity 
@@ -469,23 +472,12 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#F8F4FF',
-    ...(Platform.OS !== 'web' ? {
-      position: 'relative' as const,
-      overflow: 'hidden' as const,
-    } : {}),
   },
   desktopSafeArea: {
     backgroundColor: '#8A2BE2',
   },
   wrapper: {
     flex: 1,
-    ...(Platform.OS !== 'web' ? {
-      position: 'absolute' as const,
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-    } : {}),
   },
   desktopWrapper: {
     alignItems: 'center',
@@ -494,12 +486,10 @@ const styles = StyleSheet.create({
   mainContent: {
     flex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    maxHeight: isDesktop ? 700 : undefined,
     ...(Platform.OS === 'web' ? {
       borderRadius: 20,
       overflow: 'hidden' as const,
       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-      backdropFilter: 'blur(10px)',
     } : {}),
   },
   container: {
