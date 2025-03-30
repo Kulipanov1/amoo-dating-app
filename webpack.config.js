@@ -21,7 +21,8 @@ module.exports = async function (env, argv) {
     '@react-native/assets/registry': 'react-native-web/dist/modules/AssetRegistry',
     '../Utilities/Platform': 'react-native-web/dist/exports/Platform',
     './Platform': 'react-native-web/dist/exports/Platform',
-    'react-native/Libraries/Utilities/Platform': 'react-native-web/dist/exports/Platform'
+    'react-native/Libraries/Utilities/Platform': 'react-native-web/dist/exports/Platform',
+    '@expo/vector-icons': '@expo/vector-icons-web'
   };
 
   // Add support for Expo vector icons

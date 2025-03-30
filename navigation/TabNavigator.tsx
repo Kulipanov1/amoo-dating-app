@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { View, StyleSheet } from 'react-native';
+import { HomeIcon, HeartIcon, MessageIcon, ProfileIcon, StreamIcon } from '../components/Icons';
 
 import ProfileScreen from '../screens/ProfileScreen';
 import ChatListScreen from '../screens/ChatListScreen';
@@ -151,61 +152,57 @@ const StreamsStackNavigator = () => (
   </StreamsStack.Navigator>
 );
 
-export default function TabNavigator() {
+const TabNavigator = () => {
   return (
     <View style={styles.container}>
       <AnimatedBackground />
       <Tab.Navigator
-        screenOptions={({ route }) => ({
-          tabBarIcon: ({ focused, color, size }) => {
-            let iconName: keyof typeof Ionicons.glyphMap = 'home-outline';
-
-            if (route.name === 'HomeTab') {
-              iconName = focused ? 'home' : 'home-outline';
-            } else if (route.name === 'StreamsTab') {
-              iconName = focused ? 'videocam' : 'videocam-outline';
-            } else if (route.name === 'ProfileTab') {
-              iconName = focused ? 'person' : 'person-outline';
-            } else if (route.name === 'ChatTab') {
-              iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
-            }
-
-            return <Ionicons name={iconName} size={size} color={color} />;
-          },
-          tabBarActiveTintColor: '#8A2BE2',
-          tabBarInactiveTintColor: '#666',
+        screenOptions={{
           tabBarStyle: {
-            backgroundColor: 'white',
-            borderTopWidth: 1,
-            borderTopColor: '#E3D3FF',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderTopWidth: 0,
+            elevation: 0,
+            shadowOpacity: 0,
           },
+          tabBarActiveTintColor: '#FF4B6E',
+          tabBarInactiveTintColor: '#999',
           headerShown: false,
-        })}
+        }}
       >
         <Tab.Screen
-          name="HomeTab"
-          component={HomeStackNavigator}
-          options={{ title: 'Главная' }}
+          name="Home"
+          component={HomeScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => <HomeIcon color={color} size={size} />,
+          }}
         />
         <Tab.Screen
-          name="StreamsTab"
-          component={StreamsStackNavigator}
-          options={{ title: 'Стримы' }}
+          name="Streams"
+          component={StreamsScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => <StreamIcon color={color} size={size} />,
+          }}
         />
         <Tab.Screen
-          name="ProfileTab"
-          component={ProfileStackNavigator}
-          options={{ title: 'Профиль' }}
+          name="Chat"
+          component={ChatListScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => <MessageIcon color={color} size={size} />,
+          }}
         />
         <Tab.Screen
-          name="ChatTab"
-          component={ChatStackNavigator}
-          options={{ title: 'Чаты' }}
+          name="Profile"
+          component={ProfileScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => <ProfileIcon color={color} size={size} />,
+          }}
         />
       </Tab.Navigator>
     </View>
   );
-}
+};
+
+export default TabNavigator;
 
 const styles = StyleSheet.create({
   container: {
