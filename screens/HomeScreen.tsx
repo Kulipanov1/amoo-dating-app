@@ -57,9 +57,9 @@ const isWeb = Platform.OS === 'web';
 const isMobile = SCREEN_WIDTH < 768;
 
 const CARD_DIMENSIONS = {
-  width: isMobile ? SCREEN_WIDTH - 32 : Math.min(SCREEN_WIDTH * 0.7, 400),
-  height: isMobile ? SCREEN_HEIGHT * 0.6 : Math.min(SCREEN_HEIGHT * 0.7, 600),
-  expandedHeight: isMobile ? SCREEN_HEIGHT * 0.8 : Math.min(SCREEN_HEIGHT * 0.8, 700)
+  width: SCREEN_WIDTH,
+  height: SCREEN_HEIGHT - 180, // Оставляем место для кнопок и отступов
+  expandedHeight: SCREEN_HEIGHT - 100
 };
 
 export default function HomeScreen() {
@@ -270,14 +270,13 @@ export default function HomeScreen() {
           outputRotationRange={['0deg', '0deg', '0deg']}
           stackSeparation={0}
           stackScale={0}
-          inputRotationRange={[-1, 0, 1]}
+          inputRotationRange={[0, 0, 0]}
           overlayLabels={{}}
           onSwiping={handleSwiping}
           containerStyle={{
             flex: 1,
             alignItems: 'center',
             justifyContent: 'center',
-            paddingBottom: 100,
           }}
         />
         <View style={styles.buttonsContainer}>
@@ -325,8 +324,7 @@ const styles = StyleSheet.create({
   swiperWrapper: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 20,
+    justifyContent: 'center',
     width: '100%',
   },
   cardContainer: {
@@ -336,17 +334,8 @@ const styles = StyleSheet.create({
   card: {
     width: CARD_DIMENSIONS.width,
     height: CARD_DIMENSIONS.height,
-    borderRadius: 20,
     backgroundColor: 'white',
     overflow: 'hidden',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
   },
   imageContainer: {
     width: '100%',
