@@ -105,6 +105,9 @@ const StatModal = ({ visible, onClose, title, data, type }: StatModalProps) => {
 export default function ProfileScreen() {
   const { width: windowWidth } = Dimensions.get('window');
   const [windowHeight, setWindowHeight] = useState(Dimensions.get('window').height);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const isDesktop = windowWidth > 768;
+  const contentWidth = isDesktop ? 480 : windowWidth;
   
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
@@ -113,9 +116,6 @@ export default function ProfileScreen() {
 
     return () => subscription?.remove();
   }, []);
-
-  const isDesktop = windowWidth > 768;
-  const contentWidth = isDesktop ? 480 : windowWidth;
 
   const [profile, setProfile] = useState<UserProfile>({
     id: '1',
@@ -235,6 +235,17 @@ export default function ProfileScreen() {
 
   const photoSize = (windowWidth - 64) / 3;
 
+  const handleSuperLike = () => {
+    hapticFeedback.medium();
+    // Здесь добавить логику для суперлайка
+    // Например, отправка на сервер или анимация
+  };
+
+  const handleExpandProfile = () => {
+    setIsExpanded(!isExpanded);
+    hapticFeedback.light();
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
       <AnimatedBackground />
@@ -252,7 +263,10 @@ export default function ProfileScreen() {
           
           <ScrollView 
             style={styles.container}
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[
+              styles.scrollContent,
+              isExpanded && styles.expandedContent
+            ]}
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.profileHeader}>
@@ -370,6 +384,26 @@ export default function ProfileScreen() {
               </View>
             </View>
           </ScrollView>
+          
+          <View style={styles.actionButtons}>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.superLikeButton]}
+              onPress={handleSuperLike}
+            >
+              <Ionicons name="star" size={24} color="#FFD700" />
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.expandButton]}
+              onPress={handleExpandProfile}
+            >
+              <Ionicons 
+                name={isExpanded ? "chevron-down" : "chevron-up"} 
+                size={24} 
+                color="#8A2BE2" 
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -435,12 +469,23 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#F8F4FF',
+    ...(Platform.OS !== 'web' ? {
+      position: 'relative' as const,
+      overflow: 'hidden' as const,
+    } : {}),
   },
   desktopSafeArea: {
     backgroundColor: '#8A2BE2',
   },
   wrapper: {
     flex: 1,
+    ...(Platform.OS !== 'web' ? {
+      position: 'absolute' as const,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    } : {}),
   },
   desktopWrapper: {
     alignItems: 'center',
@@ -449,6 +494,7 @@ const styles = StyleSheet.create({
   mainContent: {
     flex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    maxHeight: isDesktop ? 700 : undefined,
     ...(Platform.OS === 'web' ? {
       borderRadius: 20,
       overflow: 'hidden' as const,
@@ -650,7 +696,8 @@ const styles = StyleSheet.create({
   photo: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
+    resizeMode: Platform.OS === 'web' ? 'contain' : 'cover',
+    backgroundColor: '#f0f0f0',
   },
   photoOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -780,5 +827,33 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: 'rgba(138, 43, 226, 0.1)',
     borderRadius: 20,
+  },
+  expandedContent: {
+    paddingBottom: 100,
+  },
+  actionButtons: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  superLikeButton: {
+    backgroundColor: '#FFF8E0',
+  },
+  expandButton: {
+    backgroundColor: '#F0E6FF',
   },
 }); 
