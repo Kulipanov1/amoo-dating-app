@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, Text, View, Dimensions, Image, RefreshControl, ScrollView, Animated as RNAnimated } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, Image, RefreshControl, ScrollView, Platform } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { hapticFeedback } from '../utils/haptics';
 import Skeleton from '../components/Skeleton';
@@ -50,6 +50,16 @@ const dummyUsers: User[] = [
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
+
+// Определяем размеры карточки в зависимости от устройства
+const isWeb = Platform.OS === 'web';
+const isMobile = SCREEN_WIDTH < 768;
+
+const CARD_DIMENSIONS = {
+  width: isMobile ? SCREEN_WIDTH : Math.min(SCREEN_WIDTH * 0.7, 600),
+  height: isMobile ? SCREEN_HEIGHT * 0.8 : Math.min(SCREEN_HEIGHT * 0.8, 800),
+  expandedHeight: isMobile ? SCREEN_HEIGHT * 0.9 : Math.min(SCREEN_HEIGHT * 0.9, 900)
+};
 
 export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
@@ -120,20 +130,21 @@ export default function HomeScreen() {
     if (!user) return null;
     
     const isExpanded = expandedCard === cardIndex;
-    const cardHeight = isExpanded ? SCREEN_HEIGHT * 0.8 : SCREEN_HEIGHT * 0.7;
+    const cardHeight = isExpanded ? CARD_DIMENSIONS.expandedHeight : CARD_DIMENSIONS.height;
     
     return (
       <View style={[
         styles.card,
         {
           height: cardHeight,
+          width: CARD_DIMENSIONS.width,
           transform: [
             { translateY: isExpanded ? -20 : 0 }
           ],
           backgroundColor: 'white',
         }
       ]}>
-        <View style={styles.imageContainer}>
+        <View style={[styles.imageContainer, { height: cardHeight * 0.7 }]}>
           <Image
             source={{ uri: user.image }}
             style={styles.cardImage}
@@ -169,8 +180,8 @@ export default function HomeScreen() {
   }, [expandedCard, glowColor, glowIntensity]);
 
   const renderSkeleton = useCallback(() => (
-    <View style={styles.cardContainer}>
-      <Skeleton width={SCREEN_WIDTH * 0.9} height={SCREEN_HEIGHT * 0.7} borderRadius={20} />
+    <View style={[styles.cardContainer, { width: CARD_DIMENSIONS.width }]}>
+      <Skeleton width={CARD_DIMENSIONS.width} height={CARD_DIMENSIONS.height} borderRadius={20} />
       <View style={styles.skeletonTextContainer}>
         <Skeleton width={200} height={24} style={styles.skeletonTitle} />
         <Skeleton width={150} height={16} style={styles.skeletonDescription} />
@@ -182,6 +193,7 @@ export default function HomeScreen() {
     return (
       <ScrollView 
         style={styles.container}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -193,47 +205,49 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Swiper
-        cards={users}
-        renderCard={(card) => renderCard(card, users.indexOf(card))}
-        onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
-        onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
-        onSwiped={handleSwiped}
-        cardIndex={currentIndex}
-        backgroundColor={'#F5F5F5'}
-        stackSize={3}
-        cardStyle={styles.cardContainer}
-        animateCardOpacity
-        swipeBackCard
-        verticalSwipe={false}
-        horizontalSwipe={true}
-        cardVerticalMargin={20}
-        cardHorizontalMargin={0}
-        disableBottomSwipe={true}
-        disableTopSwipe={true}
-        swipeAnimationDuration={350}
-        horizontalThreshold={80}
-        outputRotationRange={['0deg', '0deg', '0deg']}
-        overlayLabels={{
-          left: {
-            title: '',
-            style: {
-              container: {
-                backgroundColor: 'transparent',
+      <View style={styles.swiperWrapper}>
+        <Swiper
+          cards={users}
+          renderCard={(card) => renderCard(card, users.indexOf(card))}
+          onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
+          onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
+          onSwiped={handleSwiped}
+          cardIndex={currentIndex}
+          backgroundColor={'#F5F5F5'}
+          stackSize={3}
+          cardStyle={[styles.cardContainer, { width: CARD_DIMENSIONS.width }]}
+          animateCardOpacity
+          swipeBackCard
+          verticalSwipe={false}
+          horizontalSwipe={true}
+          cardVerticalMargin={10}
+          cardHorizontalMargin={0}
+          disableBottomSwipe={true}
+          disableTopSwipe={true}
+          swipeAnimationDuration={350}
+          horizontalThreshold={80}
+          outputRotationRange={['0deg', '0deg', '0deg']}
+          overlayLabels={{
+            left: {
+              title: '',
+              style: {
+                container: {
+                  backgroundColor: 'transparent',
+                }
+              }
+            },
+            right: {
+              title: '',
+              style: {
+                container: {
+                  backgroundColor: 'transparent',
+                }
               }
             }
-          },
-          right: {
-            title: '',
-            style: {
-              container: {
-                backgroundColor: 'transparent',
-              }
-            }
-          }
-        }}
-        onSwiping={handleSwiping}
-      />
+          }}
+          onSwiping={handleSwiping}
+        />
+      </View>
     </View>
   );
 }
@@ -242,25 +256,37 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  swiperWrapper: {
+    flex: 1,
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  swiperContainer: {
-    flex: 1,
-    height: SCREEN_HEIGHT * 0.8,
-  },
   cardContainer: {
-    width: SCREEN_WIDTH * 0.9,
-    height: SCREEN_HEIGHT * 0.7,
+    alignSelf: 'center',
   },
   card: {
-    flex: 1,
     borderRadius: 20,
     backgroundColor: 'white',
     overflow: 'hidden',
+    alignSelf: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   imageContainer: {
     width: '100%',
-    height: '70%',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     overflow: 'hidden',
@@ -278,16 +304,16 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   cardText: {
-    padding: 15,
+    padding: isMobile ? 15 : 20,
     flex: 1
   },
   cardTitle: {
-    fontSize: 24,
+    fontSize: isMobile ? 24 : 28,
     fontWeight: 'bold',
     marginBottom: 5
   },
   cardDescription: {
-    fontSize: 16,
+    fontSize: isMobile ? 16 : 18,
     color: '#666',
     marginBottom: 10
   },
@@ -298,12 +324,12 @@ const styles = StyleSheet.create({
     paddingTop: 10
   },
   expandedText: {
-    fontSize: 16,
+    fontSize: isMobile ? 16 : 18,
     color: '#666',
     marginBottom: 5
   },
   interestsTitle: {
-    fontSize: 18,
+    fontSize: isMobile ? 18 : 20,
     fontWeight: 'bold',
     marginTop: 10,
     marginBottom: 5
@@ -322,7 +348,7 @@ const styles = StyleSheet.create({
   },
   interestText: {
     color: 'white',
-    fontSize: 14
+    fontSize: isMobile ? 14 : 16
   },
   skeletonTextContainer: {
     padding: 15,
