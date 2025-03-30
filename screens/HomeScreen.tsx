@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { StyleSheet, Text, View, Dimensions, Image, RefreshControl, ScrollView, Platform, TouchableOpacity } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { hapticFeedback } from '../utils/haptics';
@@ -69,10 +69,9 @@ export default function HomeScreen() {
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const [lastSwipe, setLastSwipe] = useState({ x: 0, y: 0 });
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [borderColor, setBorderColor] = useState('#E8E8E8');
-  const [borderWidth, setBorderWidth] = useState(2);
   const [glowColor, setGlowColor] = useState('transparent');
   const [glowIntensity, setGlowIntensity] = useState(0);
+  const swiper = useRef<any>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -100,7 +99,10 @@ export default function HomeScreen() {
       setExpandedCard(prev => prev === cardIndex ? null : cardIndex);
     } else {
       console.log(direction === 'right' ? 'Нравится' : 'Не нравится', cardIndex);
+      setCurrentIndex(cardIndex + 1);
     }
+    setGlowColor('transparent');
+    setGlowIntensity(0);
   }, []);
 
   const handleSwiping = useCallback((x: number, y: number) => {
@@ -109,61 +111,45 @@ export default function HomeScreen() {
       const color = x > 0 ? '#8A2BE2' : x < 0 ? '#FF4B4B' : 'transparent';
       setGlowColor(color);
       setGlowIntensity(0.3);
-    } else if (y < 0) { // Свайп вверх
+    } else if (y < 0) {
       setGlowColor('#4CAF50');
       setGlowIntensity(0.3);
     }
   }, []);
 
-  const handleSwiped = useCallback((cardIndex: number) => {
-    const { x, y } = lastSwipe;
-    if (Math.abs(x) < 5 && Math.abs(y) < 5) return;
-    const direction = Math.abs(y) > Math.abs(x) ? 'up' : x > 0 ? 'right' : 'left';
-    handleSwipe(direction, cardIndex);
-    setCurrentIndex(cardIndex + 1);
-    setGlowColor('transparent');
-    setGlowIntensity(0);
-    setBorderColor('#E8E8E8');
-    setBorderWidth(2);
-  }, [lastSwipe, handleSwipe]);
-
   const handleLike = useCallback(() => {
-    if (currentIndex < users.length) {
+    if (swiper.current && currentIndex < users.length) {
       hapticFeedback.medium();
       setGlowColor('#8A2BE2');
       setGlowIntensity(0.3);
-      setTimeout(() => {
-        handleSwipe('right', currentIndex);
-      }, 200);
+      swiper.current.swipeRight();
     }
-  }, [currentIndex, users.length, handleSwipe]);
+  }, [currentIndex, users.length]);
 
   const handleDislike = useCallback(() => {
-    if (currentIndex < users.length) {
+    if (swiper.current && currentIndex < users.length) {
       hapticFeedback.medium();
       setGlowColor('#FF4B4B');
       setGlowIntensity(0.3);
-      setTimeout(() => {
-        handleSwipe('left', currentIndex);
-      }, 200);
+      swiper.current.swipeLeft();
     }
-  }, [currentIndex, users.length, handleSwipe]);
+  }, [currentIndex, users.length]);
 
   const handleSuperLike = useCallback(() => {
-    if (currentIndex < users.length) {
+    if (swiper.current && currentIndex < users.length) {
       hapticFeedback.medium();
       setGlowColor('#4CAF50');
       setGlowIntensity(0.3);
-      setTimeout(() => {
-        handleSwipe('up', currentIndex);
-      }, 200);
+      swiper.current.swipeTop();
     }
-  }, [currentIndex, users.length, handleSwipe]);
+  }, [currentIndex, users.length]);
 
   const handleRewind = useCallback(() => {
     if (currentIndex > 0) {
       hapticFeedback.medium();
       setCurrentIndex(currentIndex - 1);
+      setGlowColor('transparent');
+      setGlowIntensity(0);
     }
   }, [currentIndex]);
 
@@ -174,16 +160,20 @@ export default function HomeScreen() {
     const cardHeight = isExpanded ? CARD_DIMENSIONS.expandedHeight : CARD_DIMENSIONS.height;
     
     return (
-      <View style={[
-        styles.card,
-        {
-          height: cardHeight,
-          width: CARD_DIMENSIONS.width,
-          transform: [
-            { translateY: isExpanded ? -20 : 0 }
-          ],
-        }
-      ]}>
+      <TouchableOpacity 
+        activeOpacity={0.9}
+        onPress={() => setExpandedCard(prev => prev === cardIndex ? null : cardIndex)}
+        style={[
+          styles.card,
+          {
+            height: cardHeight,
+            width: CARD_DIMENSIONS.width,
+            transform: [
+              { translateY: isExpanded ? -20 : 0 }
+            ],
+          }
+        ]}
+      >
         <View style={[styles.imageContainer, { height: cardHeight * 0.7 }]}>
           <Image
             source={{ uri: user.image }}
@@ -215,7 +205,7 @@ export default function HomeScreen() {
             </View>
           )}
         </View>
-      </View>
+      </TouchableOpacity>
     );
   }, [expandedCard, glowColor, glowIntensity]);
 
@@ -247,12 +237,12 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <View style={styles.swiperWrapper}>
         <Swiper
+          ref={swiper}
           cards={users}
           renderCard={(card) => renderCard(card, users.indexOf(card))}
           onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
           onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
           onSwipedTop={(cardIndex: number) => handleSwipe('up', cardIndex)}
-          onSwiped={handleSwiped}
           cardIndex={currentIndex}
           backgroundColor={'#F5F5F5'}
           stackSize={3}
