@@ -1,75 +1,77 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Video, ResizeMode } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
-import Video from 'react-native-video';
 
-interface VideoMessageProps {
+interface Props {
   uri: string;
-  isCircular?: boolean;
+  style?: any;
 }
 
-export default function VideoMessage({ uri, isCircular = false }: VideoMessageProps) {
+export default function VideoMessage({ uri, style }: Props) {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const containerStyle = isCircular ? styles.circularContainer : styles.container;
-  const videoStyle = isCircular ? styles.circularVideo : styles.video;
+  const handlePlayPause = () => {
+    setIsPlaying(!isPlaying);
+  };
 
   return (
-    <View style={containerStyle}>
+    <View style={[styles.container, style]}>
       <Video
         source={{ uri }}
-        style={videoStyle}
-        resizeMode="cover"
-        repeat
-        paused={!isPlaying}
-        onError={(error) => console.error('Video error:', error)}
+        style={styles.video}
+        useNativeControls
+        resizeMode={ResizeMode.CONTAIN}
+        isLooping
+        shouldPlay={isPlaying}
+        onLoadStart={() => setIsLoading(true)}
+        onLoad={() => setIsLoading(false)}
       />
-      <TouchableOpacity 
-        style={styles.playButton}
-        onPress={() => setIsPlaying(!isPlaying)}
-      >
-        <Ionicons 
-          name={isPlaying ? "pause" : "play"} 
-          size={24} 
-          color="white" 
-        />
-      </TouchableOpacity>
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#8A2BE2" />
+        </View>
+      )}
+      {!isLoading && (
+        <TouchableOpacity style={styles.playButton} onPress={handlePlayPause}>
+          <Ionicons
+            name={isPlaying ? 'pause' : 'play'}
+            size={30}
+            color="white"
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    width: 250,
-    height: 200,
-    borderRadius: 12,
+    width: '100%',
+    aspectRatio: 16 / 9,
+    backgroundColor: '#000',
+    borderRadius: 10,
     overflow: 'hidden',
-    position: 'relative',
-  },
-  circularContainer: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    overflow: 'hidden',
-    position: 'relative',
   },
   video: {
     width: '100%',
     height: '100%',
   },
-  circularVideo: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 75,
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   playButton: {
     position: 'absolute',
     top: '50%',
     left: '50%',
-    transform: [{ translateX: -18 }, { translateY: -18 }],
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    transform: [{ translateX: -20 }, { translateY: -20 }],
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
