@@ -1,11 +1,13 @@
-export default {
-  name: 'Amoo Dating App',
-  slug: 'amoo-dating-app',
+module.exports = {
+  name: 'Amoo One',
+  slug: 'amoo-one',
   version: '1.0.0',
   orientation: 'portrait',
-  platforms: ['ios', 'android', 'web'],
+  icon: './assets/icon.png',
   userInterfaceStyle: 'light',
   splash: {
+    image: './assets/splash.png',
+    resizeMode: 'contain',
     backgroundColor: '#8A2BE2'
   },
   updates: {
@@ -20,11 +22,13 @@ export default {
   },
   android: {
     adaptiveIcon: {
+      foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#8A2BE2'
     },
     package: 'com.amoo.datingapp'
   },
   web: {
+    favicon: './assets/favicon.png',
     bundler: 'webpack'
   }
 }; 
