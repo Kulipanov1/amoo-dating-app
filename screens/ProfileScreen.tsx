@@ -15,6 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { hapticFeedback } from '../utils/haptics';
+import AnimatedBackground from '../components/AnimatedBackground';
 
 interface Achievement {
   id: string;
@@ -102,12 +103,11 @@ const StatModal = ({ visible, onClose, title, data, type }: StatModalProps) => {
 };
 
 export default function ProfileScreen() {
-  const [windowWidth, setWindowWidth] = useState(Dimensions.get('window').width);
+  const { width: windowWidth } = Dimensions.get('window');
   const [windowHeight, setWindowHeight] = useState(Dimensions.get('window').height);
   
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
-      setWindowWidth(window.width);
       setWindowHeight(window.height);
     });
 
@@ -233,8 +233,11 @@ export default function ProfileScreen() {
     }
   };
 
+  const photoSize = (windowWidth - 64) / 3;
+
   return (
     <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
+      <AnimatedBackground />
       <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
         <View style={[styles.mainContent, isDesktop && { width: contentWidth }]}>
           <View style={styles.logoContainer}>
@@ -334,12 +337,19 @@ export default function ProfileScreen() {
               />
             </View>
 
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Галерея</Text>
+            <View style={styles.galleryContainer}>
+              <Text style={styles.sectionTitle}>Фотографии</Text>
               <View style={styles.galleryGrid}>
                 {profile.photos.map((photo, index) => (
-                  <TouchableOpacity key={index} style={styles.galleryItem}>
-                    <Image source={{ uri: photo }} style={styles.galleryPhoto} />
+                  <TouchableOpacity
+                    key={index}
+                    style={[styles.photoContainer, { width: photoSize, height: photoSize }]}
+                    onPress={() => handleEditPhoto()}
+                  >
+                    <Image source={{ uri: photo }} style={styles.photo} />
+                    <View style={styles.photoOverlay}>
+                      <Ionicons name="expand" size={24} color="white" />
+                    </View>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -438,13 +448,12 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    backgroundColor: '#F8F4FF',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     ...(Platform.OS === 'web' ? {
       borderRadius: 20,
-      height: '95%',
-      maxWidth: 480,
       overflow: 'hidden' as const,
       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      backdropFilter: 'blur(10px)',
     } : {}),
   },
   container: {
@@ -617,20 +626,38 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
   },
+  galleryContainer: {
+    marginTop: 24,
+    paddingHorizontal: 16,
+  },
   galleryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    marginHorizontal: -8,
+    marginTop: 12,
   },
-  galleryItem: {
-    width: '31%',
-    aspectRatio: 1,
-    borderRadius: 12,
-    overflow: 'hidden',
+  photoContainer: {
+    margin: 8,
+    borderRadius: 16,
+    overflow: 'hidden' as const,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  galleryPhoto: {
+  photo: {
     width: '100%',
     height: '100%',
+    resizeMode: 'cover',
+  },
+  photoOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    opacity: 0,
   },
   achievementsGrid: {
     flexDirection: 'row',
