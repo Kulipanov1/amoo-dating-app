@@ -100,6 +100,7 @@ export default function HomeScreen() {
     } else {
       console.log(direction === 'right' ? 'Нравится' : 'Не нравится', cardIndex);
       setCurrentIndex(cardIndex + 1);
+      setExpandedCard(null);
     }
     setGlowColor('transparent');
     setGlowIntensity(0);
@@ -178,7 +179,7 @@ export default function HomeScreen() {
           }
         ]}
       >
-        <View style={[styles.imageContainer, { height: isExpanded ? cardHeight * 0.5 : cardHeight * 0.7 }]}>
+        <View style={[styles.imageContainer, { height: isExpanded ? cardHeight * 0.4 : cardHeight * 0.7 }]}>
           <Image
             source={{ uri: user.image }}
             style={styles.cardImage}
@@ -196,9 +197,16 @@ export default function HomeScreen() {
           <Text style={styles.cardDescription}>{user.bio}</Text>
           {isExpanded && (
             <View style={styles.expandedContent}>
-              <Text style={styles.expandedText}>📍 {user.location}</Text>
-              <Text style={styles.expandedText}>💼 {user.occupation}</Text>
-              <Text style={styles.interestsTitle}>Интересы:</Text>
+              <View style={styles.infoRow}>
+                <Ionicons name="location" size={20} color="#8A2BE2" />
+                <Text style={styles.expandedText}>{user.location}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Ionicons name="briefcase" size={20} color="#8A2BE2" />
+                <Text style={styles.expandedText}>{user.occupation}</Text>
+              </View>
+              <View style={styles.divider} />
+              <Text style={styles.interestsTitle}>Интересы и увлечения:</Text>
               <View style={styles.interestsContainer}>
                 {user.interests.map((interest, index) => (
                   <View key={index} style={styles.interestTag}>
@@ -206,9 +214,18 @@ export default function HomeScreen() {
                   </View>
                 ))}
               </View>
+              <View style={styles.divider} />
+              <Text style={styles.aboutTitle}>О себе:</Text>
+              <Text style={styles.aboutText}>{user.bio}</Text>
             </View>
           )}
         </View>
+        {!isExpanded && (
+          <View style={styles.swipeHint}>
+            <Ionicons name="chevron-up" size={24} color="#8A2BE2" />
+            <Text style={styles.swipeHintText}>Свайп вверх для подробностей</Text>
+          </View>
+        )}
       </TouchableOpacity>
     );
   }, [expandedCard, glowColor, glowIntensity]);
@@ -248,14 +265,14 @@ export default function HomeScreen() {
           onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
           onSwipedTop={(cardIndex: number) => handleSwipe('up', cardIndex)}
           cardIndex={currentIndex}
-          backgroundColor={'#F5F5F5'}
+          backgroundColor={'transparent'}
           stackSize={3}
           cardStyle={[styles.cardContainer, { width: CARD_DIMENSIONS.width }]}
           animateCardOpacity
           swipeBackCard
           verticalSwipe={true}
           horizontalSwipe={true}
-          cardVerticalMargin={10}
+          cardVerticalMargin={0}
           cardHorizontalMargin={0}
           disableBottomSwipe={true}
           swipeAnimationDuration={250}
@@ -267,6 +284,12 @@ export default function HomeScreen() {
           inputRotationRange={[-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2]}
           overlayLabels={{}}
           onSwiping={handleSwiping}
+          containerStyle={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+          }}
         />
         <View style={styles.buttonsContainer}>
           <TouchableOpacity 
@@ -314,16 +337,22 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingBottom: 80, // Место для кнопок
+    paddingBottom: 80,
+    position: 'relative',
+    width: '100%',
   },
   cardContainer: {
     alignSelf: 'center',
+    position: 'relative',
+    left: '50%',
+    transform: [{ translateX: -CARD_DIMENSIONS.width / 2 }],
   },
   card: {
     borderRadius: 20,
     backgroundColor: 'white',
     overflow: 'hidden',
     alignSelf: 'center',
+    position: 'relative',
     elevation: 5,
     shadowColor: '#000',
     shadowOffset: {
@@ -373,21 +402,56 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   expandedContent: {
-    marginTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    paddingTop: 10
+    marginTop: 15,
+    paddingTop: 15,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 10,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#f0f0f0',
+    marginVertical: 15,
+  },
+  aboutTitle: {
+    fontSize: isMobile ? 18 : 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  aboutText: {
+    fontSize: isMobile ? 16 : 18,
+    color: '#666',
+    lineHeight: 24,
+  },
+  swipeHint: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+  },
+  swipeHintText: {
+    color: '#8A2BE2',
+    fontSize: 14,
+    marginTop: 5,
+    opacity: 0.8,
   },
   expandedText: {
     fontSize: isMobile ? 16 : 18,
     color: '#666',
-    marginBottom: 5
+    flex: 1,
   },
   interestsTitle: {
     fontSize: isMobile ? 18 : 20,
     fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 5
+    marginBottom: 15,
+    color: '#333',
   },
   interestsContainer: {
     flexDirection: 'row',
@@ -395,15 +459,17 @@ const styles = StyleSheet.create({
     marginTop: 5
   },
   interestTag: {
-    backgroundColor: '#8A2BE2',
+    backgroundColor: 'rgba(138, 43, 226, 0.1)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
-    margin: 4
+    margin: 4,
+    borderWidth: 1,
+    borderColor: '#8A2BE2',
   },
   interestText: {
-    color: 'white',
-    fontSize: isMobile ? 14 : 16
+    color: '#8A2BE2',
+    fontSize: isMobile ? 14 : 16,
   },
   skeletonTextContainer: {
     padding: 15,
