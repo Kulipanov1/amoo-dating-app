@@ -239,13 +239,20 @@ export default function ProfileScreen() {
         <View style={[styles.mainContent, isDesktop && { width: contentWidth }]}>
           <View style={styles.logoContainer}>
             <Text style={styles.logoText}>Amoo</Text>
+            <TouchableOpacity 
+              style={styles.settingsButton}
+              onPress={() => setShowSettingsModal(true)}
+            >
+              <Ionicons name="settings-outline" size={22} color="white" />
+            </TouchableOpacity>
           </View>
           
           <ScrollView 
             style={styles.container}
             contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
           >
-            <View style={styles.header}>
+            <View style={styles.profileHeader}>
               <TouchableOpacity 
                 style={styles.avatarContainer}
                 onPress={handleEditPhoto}
@@ -255,31 +262,30 @@ export default function ProfileScreen() {
                     source={{ uri: profile.avatar }} 
                     style={styles.avatar}
                   />
-                </View>
-                <View style={styles.editAvatarButton}>
-                  <Ionicons name="camera" size={20} color="white" />
+                  <View style={styles.editAvatarButton}>
+                    <Ionicons name="camera" size={18} color="white" />
+                  </View>
                 </View>
               </TouchableOpacity>
 
               <View style={styles.userInfo}>
                 <View style={styles.nameContainer}>
                   <Text style={styles.name}>{profile.name}</Text>
-                  {profile.isVerified && (
-                    <Ionicons name="checkmark-circle" size={20} color="#8A2BE2" />
-                  )}
-                  {profile.isPremium && (
-                    <Ionicons name="star" size={20} color="#FFD700" />
-                  )}
+                  <View style={styles.badgesContainer}>
+                    {profile.isVerified && (
+                      <View style={styles.badge}>
+                        <Ionicons name="checkmark-circle" size={18} color="#8A2BE2" />
+                      </View>
+                    )}
+                    {profile.isPremium && (
+                      <View style={[styles.badge, styles.premiumBadge]}>
+                        <Ionicons name="star" size={18} color="#FFD700" />
+                      </View>
+                    )}
+                  </View>
                 </View>
                 <Text style={styles.status}>{profile.status}</Text>
               </View>
-
-              <TouchableOpacity 
-                style={styles.settingsButton}
-                onPress={() => setShowSettingsModal(true)}
-              >
-                <Ionicons name="settings-outline" size={24} color="#8A2BE2" />
-              </TouchableOpacity>
             </View>
 
             <View style={styles.statsContainer}>
@@ -290,6 +296,7 @@ export default function ProfileScreen() {
                 <Text style={styles.statNumber}>{formatNumber(profile.stats.followers)}</Text>
                 <Text style={styles.statLabel}>Подписчики</Text>
               </TouchableOpacity>
+              <View style={styles.statDivider} />
               <TouchableOpacity 
                 style={styles.statItem}
                 onPress={() => setActiveModal('following')}
@@ -297,6 +304,7 @@ export default function ProfileScreen() {
                 <Text style={styles.statNumber}>{formatNumber(profile.stats.following)}</Text>
                 <Text style={styles.statLabel}>Подписки</Text>
               </TouchableOpacity>
+              <View style={styles.statDivider} />
               <TouchableOpacity 
                 style={styles.statItem}
                 onPress={() => setActiveModal('likes')}
@@ -304,6 +312,7 @@ export default function ProfileScreen() {
                 <Text style={styles.statNumber}>{formatNumber(profile.stats.likes)}</Text>
                 <Text style={styles.statLabel}>Лайки</Text>
               </TouchableOpacity>
+              <View style={styles.statDivider} />
               <TouchableOpacity 
                 style={styles.statItem}
                 onPress={() => setActiveModal('matches')}
@@ -327,46 +336,30 @@ export default function ProfileScreen() {
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Галерея</Text>
-              <FlatList
-                data={profile.photos}
-                renderItem={renderPhoto}
-                keyExtractor={item => item}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.gallery}
-              />
+              <View style={styles.galleryGrid}>
+                {profile.photos.map((photo, index) => (
+                  <TouchableOpacity key={index} style={styles.galleryItem}>
+                    <Image source={{ uri: photo }} style={styles.galleryPhoto} />
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Достижения</Text>
-              <FlatList
-                data={profile.achievements}
-                renderItem={renderAchievement}
-                keyExtractor={item => item.id}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.achievementsList}
-              />
+              <View style={styles.achievementsGrid}>
+                {profile.achievements.map((achievement) => (
+                  <View key={achievement.id} style={styles.achievementCard}>
+                    <View style={styles.achievementIcon}>
+                      <Ionicons name={achievement.icon as any} size={24} color="#8A2BE2" />
+                    </View>
+                    <Text style={styles.achievementTitle}>{achievement.title}</Text>
+                    <Text style={styles.achievementDescription}>{achievement.description}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
           </ScrollView>
-
-          <View style={styles.bottomTabBar}>
-            <TouchableOpacity style={styles.tabItem}>
-              <Ionicons name="heart" size={24} color="#8A2BE2" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-              <Ionicons name="people" size={24} color="#8A2BE2" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-              <Ionicons name="videocam" size={24} color="#8A2BE2" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-              <Ionicons name="chatbubbles" size={24} color="#8A2BE2" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-              <Ionicons name="person" size={24} color="#8A2BE2" />
-            </TouchableOpacity>
-          </View>
         </View>
       </View>
 
@@ -451,6 +444,7 @@ const styles = StyleSheet.create({
       height: '95%',
       maxWidth: 480,
       overflow: 'hidden' as const,
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
     } : {}),
   },
   container: {
@@ -458,164 +452,214 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 20,
   },
   logoContainer: {
-    height: 50,
+    height: 56,
     backgroundColor: '#8A2BE2',
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
   },
   logoText: {
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#F8F4FF',
+  settingsButton: {
+    padding: 8,
   },
-  avatarContainer: {
-    position: 'relative',
-  },
-  avatarFrame: {
-    padding: 3,
-    borderRadius: 44,
-    backgroundColor: '#8A2BE2',
+  profileHeader: {
+    padding: 20,
+    backgroundColor: 'white',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
     elevation: 5,
   },
+  avatarContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  avatarFrame: {
+    position: 'relative',
+    padding: 3,
+    borderRadius: 50,
+    backgroundColor: '#8A2BE2',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 3,
     borderColor: 'white',
   },
   editAvatarButton: {
     position: 'absolute',
-    right: -4,
-    bottom: -4,
+    right: 0,
+    bottom: 0,
     backgroundColor: '#8A2BE2',
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
     borderColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   userInfo: {
-    flex: 1,
-    marginLeft: 16,
+    alignItems: 'center',
   },
   nameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    marginBottom: 4,
   },
   name: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
+    marginRight: 8,
+  },
+  badgesContainer: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  badge: {
+    backgroundColor: '#F0E6FF',
+    padding: 4,
+    borderRadius: 12,
+  },
+  premiumBadge: {
+    backgroundColor: '#FFF8E0',
   },
   status: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#666',
     marginTop: 4,
   },
-  settingsButton: {
-    padding: 8,
-  },
   statsContainer: {
     flexDirection: 'row',
-    backgroundColor: '#F8F4FF',
-    paddingVertical: 16,
-    marginTop: 1,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E3D3FF',
+    backgroundColor: 'white',
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 16,
+    marginHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   statItem: {
     flex: 1,
     alignItems: 'center',
   },
+  statDivider: {
+    width: 1,
+    backgroundColor: '#E3D3FF',
+    marginVertical: 8,
+  },
   statNumber: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#666',
     marginTop: 4,
   },
   section: {
-    backgroundColor: '#F8F4FF',
-    padding: 16,
-    marginTop: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E3D3FF',
+    backgroundColor: 'white',
+    padding: 20,
+    marginTop: 16,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   interestsList: {
     gap: 8,
   },
   interestTag: {
-    backgroundColor: '#E3D3FF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    backgroundColor: '#F0E6FF',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
     marginRight: 8,
   },
   interestText: {
     color: '#8A2BE2',
-    fontSize: 14,
+    fontSize: 15,
+    fontWeight: '500',
   },
-  gallery: {
+  galleryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
   },
-  galleryPhoto: {
-    width: 120,
-    height: 120,
-    borderRadius: 8,
-    marginRight: 8,
-    borderWidth: 2,
-    borderColor: '#8A2BE2',
+  galleryItem: {
+    width: '31%',
+    aspectRatio: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
-  achievementsList: {
+  galleryPhoto: {
+    width: '100%',
+    height: '100%',
+  },
+  achievementsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
   },
   achievementCard: {
-    backgroundColor: '#E3D3FF',
-    padding: 12,
-    borderRadius: 12,
+    backgroundColor: '#F0E6FF',
+    padding: 16,
+    borderRadius: 16,
     alignItems: 'center',
-    width: 120,
-    marginRight: 8,
+    width: '48%',
+  },
+  achievementIcon: {
+    backgroundColor: 'white',
+    padding: 12,
+    borderRadius: 20,
+    marginBottom: 12,
   },
   achievementTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#333',
-    marginTop: 8,
+    marginBottom: 4,
     textAlign: 'center',
   },
   achievementDescription: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#666',
-    marginTop: 4,
     textAlign: 'center',
   },
   modalContainer: {
@@ -624,16 +668,17 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#F8F4FF',
+    backgroundColor: 'white',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 16,
+    padding: 20,
     ...(Platform.OS === 'web' ? {
       width: 480,
       alignSelf: 'center',
       borderRadius: 20,
       marginTop: '10%',
       maxHeight: '80%',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
     } : {
       maxHeight: '80%',
     }),
@@ -664,17 +709,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     marginLeft: 12,
-  },
-  bottomTabBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 10,
-    backgroundColor: '#F8F4FF',
-    borderTopWidth: 1,
-    borderTopColor: '#E3D3FF',
-  },
-  tabItem: {
-    padding: 10,
   },
   modalOverlay: {
     flex: 1,
