@@ -151,7 +151,7 @@ export default function HomeScreen() {
   const handleRewind = useCallback(() => {
     if (currentIndex > 0 && swiper.current) {
       hapticFeedback.medium();
-      swiper.current.goBackFromLeft();
+      swiper.current.swipeBack();
       setCurrentIndex(currentIndex - 1);
       setGlowColor('transparent');
       setGlowIntensity(0);
@@ -196,11 +196,9 @@ export default function HomeScreen() {
   const renderCard = useCallback((user: User, cardIndex: number) => {
     if (!user) return null;
     
-    const isExpanded = expandedCard === cardIndex;
-    
     return (
       <View style={[styles.card, { height: CARD_DIMENSIONS.height }]}>
-        <View style={styles.imageContainer}>
+        <View style={[styles.imageContainer, { height: CARD_DIMENSIONS.height * 0.8 }]}>
           <Image
             source={{ uri: user.image }}
             style={styles.cardImage}
@@ -217,10 +215,9 @@ export default function HomeScreen() {
           <Text style={styles.cardTitle}>{user.name}, {user.age}</Text>
           <Text style={styles.cardDescription}>{user.bio}</Text>
         </View>
-        {isExpanded && renderDetailedInfo(user)}
       </View>
     );
-  }, [expandedCard, glowColor, glowIntensity]);
+  }, [glowColor, glowIntensity]);
 
   const renderSkeleton = useCallback(() => (
     <View style={[styles.cardContainer, { width: CARD_DIMENSIONS.width }]}>
@@ -357,6 +354,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
+    height: '80%',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     overflow: 'hidden',
@@ -384,14 +382,14 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   cardTitle: {
-    fontSize: isMobile ? 24 : 28,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 5
+    color: '#333',
+    marginBottom: 5,
   },
   cardDescription: {
-    fontSize: isMobile ? 16 : 18,
+    fontSize: 16,
     color: '#666',
-    marginBottom: 10
   },
   expandedContent: {
     marginTop: 15,
@@ -550,5 +548,12 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     padding: 15,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'white',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
 }); 
