@@ -109,6 +109,8 @@ const dummyPhotos = [
   'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fHBlcnNvbnxlbnwwfHwwfHw%3D&w=1000&q=80',
 ];
 
+const defaultAvatar = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
+
 export default function ProfileScreen() {
   const { width: windowWidth } = Dimensions.get('window');
   const [windowHeight, setWindowHeight] = useState(Dimensions.get('window').height);
@@ -128,12 +130,8 @@ export default function ProfileScreen() {
     id: '1',
     name: 'Александр Петров',
     status: 'Ищу интересные знакомства',
-    avatar: 'https://example.com/avatar.jpg',
-    photos: [
-      'https://example.com/photo1.jpg',
-      'https://example.com/photo2.jpg',
-      'https://example.com/photo3.jpg',
-    ],
+    avatar: defaultAvatar,
+    photos: dummyPhotos,
     interests: ['Путешествия', 'Спорт', 'Музыка', 'Кино', 'Искусство'],
     achievements: [
       {
@@ -203,7 +201,7 @@ export default function ProfileScreen() {
   );
 
   const renderPhoto = ({ item }: { item: string }) => (
-    <Image source={{ uri: item }} style={styles.galleryPhoto} />
+    <Image source={{ uri: item }} style={styles.photo} />
   );
 
   const renderInterest = ({ item }: { item: string }) => (
@@ -271,7 +269,7 @@ export default function ProfileScreen() {
           <View style={styles.profileInfo}>
             <View style={styles.avatarContainer}>
               <Image
-                source={profile.avatar ? { uri: profile.avatar } : require('../assets/default-avatar.png')}
+                source={{ uri: profile.avatar || defaultAvatar }}
                 style={styles.avatar}
               />
               <TouchableOpacity style={styles.editAvatarButton} onPress={handleEditPhoto}>
@@ -345,7 +343,7 @@ export default function ProfileScreen() {
             </ScrollView>
           </View>
 
-          <View style={styles.section}>
+          <View style={styles.achievementsSection}>
             <Text style={styles.sectionTitle}>Достижения</Text>
             <View style={styles.achievementsGrid}>
               {profile.achievements.map((achievement) => (
@@ -767,5 +765,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 4,
+  },
+  achievementsSection: {
+    backgroundColor: 'white',
+    padding: 20,
+    marginTop: 16,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
 }); 
