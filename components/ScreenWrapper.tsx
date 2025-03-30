@@ -1,48 +1,50 @@
 import React from 'react';
-import { View, StyleSheet, SafeAreaView } from 'react-native';
+import { View, StyleSheet, Platform, ViewStyle } from 'react-native';
 import AnimatedBackground from './AnimatedBackground';
 
-interface ScreenWrapperProps {
+interface Props {
   children: React.ReactNode;
   isDesktop?: boolean;
   contentWidth?: number;
 }
 
-export default function ScreenWrapper({ children, isDesktop, contentWidth }: ScreenWrapperProps) {
+export default function ScreenWrapper({ children, isDesktop, contentWidth }: Props) {
+  const contentStyle: ViewStyle[] = [
+    styles.content,
+    isDesktop && styles.desktopContent,
+    contentWidth ? { width: contentWidth } : undefined,
+  ].filter(Boolean) as ViewStyle[];
+
   return (
-    <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
+    <View style={[styles.container, isDesktop && styles.desktopContainer]}>
       <AnimatedBackground />
-      <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
-        <View style={[
-          styles.mainContent,
-          isDesktop && { width: contentWidth, maxHeight: 700 }
-        ]}>
-          {children}
-        </View>
+      <View style={contentStyle}>
+        {children}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
-    backgroundColor: '#F8F4FF',
-  },
-  desktopSafeArea: {
     backgroundColor: '#8A2BE2',
   },
-  wrapper: {
-    flex: 1,
-  },
-  desktopWrapper: {
+  desktopContainer: {
     alignItems: 'center',
-    paddingTop: 20,
+    paddingVertical: 20,
   },
-  mainContent: {
+  content: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 20,
-    overflow: 'hidden',
+    backgroundColor: 'white',
+    ...(Platform.OS === 'web' ? {
+      borderRadius: 20,
+      overflow: 'hidden',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    } : {}),
   },
+  desktopContent: {
+    maxWidth: 480,
+  },
+}); 
 }); 

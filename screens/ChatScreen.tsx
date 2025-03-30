@@ -9,143 +9,176 @@ import {
   Image,
   Platform,
   Dimensions,
-  SafeAreaView,
   KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
-import * as VideoRecorder from 'expo-camera';
 import { Audio } from 'expo-av';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { hapticFeedback } from '../utils/haptics';
+import * as ImagePicker from 'expo-image-picker';
+import { StackScreenProps } from '@react-navigation/stack';
 import ScreenWrapper from '../components/ScreenWrapper';
+
+type RootStackParamList = {
+  ChatList: undefined;
+  Chat: {
+    userId: string;
+    userName: string;
+  };
+  Profile: {
+    userId: string;
+  };
+};
+
+type Props = StackScreenProps<RootStackParamList, 'Chat'>;
 
 interface Message {
   id: string;
-  type: 'text' | 'image' | 'audio';
-  content: string;
+  text?: string;
+  image?: string;
+  audio?: string;
   timestamp: Date;
-  senderId: string;
-  status: 'sent' | 'delivered' | 'read';
+  isRead: boolean;
+  isSent: boolean;
+  isDelivered: boolean;
+  sender: {
+    id: string;
+    name: string;
+    avatar: string;
+  };
 }
-
-interface ChatUser {
-  id: string;
-  name: string;
-  avatar: string;
-  isOnline: boolean;
-  lastSeen?: Date;
-}
-
-const currentUser = {
-  id: 'current_user',
-  name: 'Вы',
-  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
-};
-
-const otherUser: ChatUser = {
-  id: 'other_user',
-  name: 'Анна',
-  avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-  isOnline: true,
-  lastSeen: new Date(),
-};
 
 const dummyMessages: Message[] = [
   {
     id: '1',
-    type: 'text',
-    content: 'Привет! Как дела?',
-    timestamp: new Date(Date.now() - 3600000),
-    senderId: 'other_user',
-    status: 'read',
+    text: 'Привет! Как дела?',
+    timestamp: new Date(Date.now() - 1000 * 60 * 5),
+    isRead: true,
+    isSent: true,
+    isDelivered: true,
+    sender: {
+      id: '2',
+      name: 'Анна Иванова',
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3',
+    },
   },
   {
     id: '2',
-    type: 'text',
-    content: 'Привет! Все хорошо, спасибо! Как ты?',
-    timestamp: new Date(Date.now() - 3500000),
-    senderId: 'current_user',
-    status: 'read',
+    text: 'Привет! Все хорошо, спасибо! У тебя как?',
+    timestamp: new Date(Date.now() - 1000 * 60 * 4),
+    isRead: true,
+    isSent: true,
+    isDelivered: true,
+    sender: {
+      id: '1',
+      name: 'Я',
+      avatar: 'https://example.com/my-avatar.jpg',
+    },
+  },
+  {
+    id: '3',
+    image: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-4.0.3',
+    timestamp: new Date(Date.now() - 1000 * 60 * 3),
+    isRead: true,
+    isSent: true,
+    isDelivered: true,
+    sender: {
+      id: '2',
+      name: 'Анна Иванова',
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3',
+    },
   },
 ];
 
-export default function ChatScreen({ route, navigation }) {
+export default function ChatScreen({ route, navigation }: Props) {
+  const [messages, setMessages] = useState<Message[]>(dummyMessages);
+  const [inputText, setInputText] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const flatListRef = useRef<FlatList>(null);
+  
   const { width: windowWidth } = Dimensions.get('window');
   const isDesktop = Platform.OS === 'web' && windowWidth > 768;
   const contentWidth = isDesktop ? 480 : windowWidth;
 
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputText, setInputText] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
-  const [showAttachMenu, setShowAttachMenu] = useState(false);
-  
-  const flatListRef = useRef<FlatList>(null);
-  const recordingRef = useRef<Audio.Recording | null>(null);
-  
-  useEffect(() => {
-    // Здесь можно загрузить историю сообщений
-    loadInitialMessages();
-  }, []);
+  const userId = '1'; // Текущий пользователь
+  const otherUser = {
+    id: route.params.userId,
+    name: route.params.userName,
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3',
+  };
 
-  const loadInitialMessages = () => {
-    // Имитация загрузки сообщений
-    const initialMessages: Message[] = [
-      {
-        id: '1',
-        type: 'text',
-        content: 'Привет! Как дела?',
-        timestamp: new Date(Date.now() - 3600000),
-        senderId: 'other_user',
-        status: 'read',
-      },
-      {
-        id: '2',
-        type: 'text',
-        content: 'Привет! Все хорошо, спасибо! Как ты?',
-        timestamp: new Date(Date.now() - 3500000),
-        senderId: 'current_user',
-        status: 'read',
-      },
-    ];
-    setMessages(initialMessages);
+  useEffect(() => {
+    navigation.setOptions({
+      title: otherUser.name,
+      headerRight: () => (
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => navigation.navigate('Profile', { userId: otherUser.id })}
+        >
+          <Image source={{ uri: otherUser.avatar }} style={styles.headerAvatar} />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, otherUser]);
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('ru-RU', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   const handleSend = () => {
     if (inputText.trim()) {
       const newMessage: Message = {
         id: Date.now().toString(),
-        type: 'text',
-        content: inputText.trim(),
+        text: inputText.trim(),
         timestamp: new Date(),
-        senderId: 'current_user',
-        status: 'sent',
+        isRead: false,
+        isSent: true,
+        isDelivered: false,
+        sender: {
+          id: userId,
+          name: 'Я',
+          avatar: 'https://example.com/my-avatar.jpg',
+        },
       };
+      
       setMessages(prev => [...prev, newMessage]);
       setInputText('');
-      scrollToBottom();
+      
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 100);
     }
   };
 
-  const handleAttachImage = async () => {
+  const handleImagePick = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 1,
     });
 
-    if (!result.canceled && result.assets[0]) {
+    if (!result.canceled) {
       const newMessage: Message = {
         id: Date.now().toString(),
-        type: 'image',
-        content: result.assets[0].uri,
+        image: result.assets[0].uri,
         timestamp: new Date(),
-        senderId: 'current_user',
-        status: 'sent',
+        isRead: false,
+        isSent: true,
+        isDelivered: false,
+        sender: {
+          id: userId,
+          name: 'Я',
+          avatar: 'https://example.com/my-avatar.jpg',
+        },
       };
+      
       setMessages(prev => [...prev, newMessage]);
-      scrollToBottom();
+      
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 100);
     }
-    setShowAttachMenu(false);
   };
 
   const startRecording = async () => {
@@ -155,10 +188,12 @@ export default function ChatScreen({ route, navigation }) {
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
+
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
-      recordingRef.current = recording;
+      
+      setRecording(recording);
       setIsRecording(true);
     } catch (err) {
       console.error('Failed to start recording', err);
@@ -166,68 +201,105 @@ export default function ChatScreen({ route, navigation }) {
   };
 
   const stopRecording = async () => {
-    if (!recordingRef.current) return;
+    if (!recording) return;
 
     try {
-      await recordingRef.current.stopAndUnloadAsync();
-      const uri = recordingRef.current.getURI();
-      recordingRef.current = null;
-      setIsRecording(false);
-
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+      
       if (uri) {
         const newMessage: Message = {
           id: Date.now().toString(),
-          type: 'audio',
-          content: uri,
+          audio: uri,
           timestamp: new Date(),
-          senderId: 'current_user',
-          status: 'sent',
+          isRead: false,
+          isSent: true,
+          isDelivered: false,
+          sender: {
+            id: userId,
+            name: 'Я',
+            avatar: 'https://example.com/my-avatar.jpg',
+          },
         };
+        
         setMessages(prev => [...prev, newMessage]);
-        scrollToBottom();
       }
     } catch (err) {
       console.error('Failed to stop recording', err);
     }
-  };
 
-  const scrollToBottom = () => {
-    if (flatListRef.current && messages.length > 0) {
-      flatListRef.current.scrollToEnd({ animated: true });
-    }
+    setRecording(null);
+    setIsRecording(false);
   };
 
   const renderMessage = ({ item }: { item: Message }) => {
-    const isOwnMessage = item.senderId === 'current_user';
+    const isOwnMessage = item.sender.id === userId;
 
     return (
       <View style={[
         styles.messageContainer,
         isOwnMessage ? styles.ownMessage : styles.otherMessage
       ]}>
-        {item.type === 'text' && (
-          <Text style={styles.messageText}>{item.content}</Text>
+        {!isOwnMessage && (
+          <Image source={{ uri: item.sender.avatar }} style={styles.messageAvatar} />
         )}
-        {item.type === 'image' && (
-          <Image source={{ uri: item.content }} style={styles.messageImage} />
-        )}
-        {item.type === 'audio' && (
-          <TouchableOpacity style={styles.audioContainer}>
-            <Ionicons name="play" size={24} color={isOwnMessage ? 'white' : '#8A2BE2'} />
-            <View style={styles.audioWaveform} />
-          </TouchableOpacity>
-        )}
-        <View style={styles.messageFooter}>
-          <Text style={styles.timestamp}>
-            {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </Text>
-          {isOwnMessage && (
-            <Ionicons
-              name={item.status === 'read' ? 'checkmark-done' : 'checkmark'}
-              size={16}
-              color={item.status === 'read' ? '#4CAF50' : '#999'}
+        
+        <View style={[
+          styles.messageBubble,
+          isOwnMessage ? styles.ownBubble : styles.otherBubble
+        ]}>
+          {item.text && (
+            <Text style={[
+              styles.messageText,
+              isOwnMessage && styles.ownMessageText
+            ]}>
+              {item.text}
+            </Text>
+          )}
+          
+          {item.image && (
+            <Image
+              source={{ uri: item.image }}
+              style={styles.messageImage}
+              resizeMode="cover"
             />
           )}
+          
+          {item.audio && (
+            <TouchableOpacity style={styles.audioContainer}>
+              <Ionicons
+                name="play"
+                size={24}
+                color={isOwnMessage ? 'white' : '#8A2BE2'}
+              />
+              <View style={[
+                styles.audioWaveform,
+                isOwnMessage && styles.ownAudioWaveform
+              ]}>
+                {/* Здесь можно добавить визуализацию аудио */}
+              </View>
+            </TouchableOpacity>
+          )}
+          
+          <View style={styles.messageFooter}>
+            <Text style={[
+              styles.messageTime,
+              isOwnMessage && styles.ownMessageTime
+            ]}>
+              {formatTime(item.timestamp)}
+            </Text>
+            {isOwnMessage && (
+              <View style={styles.messageStatus}>
+                {item.isDelivered && (
+                  <Ionicons
+                    name={item.isRead ? "checkmark-done" : "checkmark"}
+                    size={16}
+                    color={item.isRead ? "#4CAF50" : "#666"}
+                  />
+                )}
+              </View>
+            )}
+          </View>
         </View>
       </View>
     );
@@ -235,84 +307,59 @@ export default function ChatScreen({ route, navigation }) {
 
   return (
     <ScreenWrapper isDesktop={isDesktop} contentWidth={contentWidth}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#8A2BE2" />
-          </TouchableOpacity>
-          <View style={styles.userInfo}>
-            <Image source={{ uri: otherUser.avatar }} style={styles.avatar} />
-            <View>
-              <Text style={styles.userName}>{otherUser.name}</Text>
-              <Text style={styles.userStatus}>
-                {otherUser.isOnline ? 'В сети' : 'Был(а) недавно'}
-              </Text>
-            </View>
-          </View>
-        </View>
-
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
+      >
         <FlatList
           ref={flatListRef}
           data={messages}
           renderItem={renderMessage}
           keyExtractor={item => item.id}
-          contentContainerStyle={styles.messagesList}
-          onContentSizeChange={scrollToBottom}
+          contentContainerStyle={styles.messageList}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+          showsVerticalScrollIndicator={false}
         />
-
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
-        >
-          <View style={styles.inputContainer}>
+        
+        <View style={styles.inputContainer}>
+          <TouchableOpacity
+            style={styles.attachButton}
+            onPress={handleImagePick}
+          >
+            <Ionicons name="image" size={24} color="#8A2BE2" />
+          </TouchableOpacity>
+          
+          <TextInput
+            style={styles.input}
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder="Сообщение..."
+            multiline
+          />
+          
+          {inputText.trim() ? (
             <TouchableOpacity
-              style={styles.attachButton}
-              onPress={() => setShowAttachMenu(!showAttachMenu)}
+              style={styles.sendButton}
+              onPress={handleSend}
             >
-              <Ionicons name="attach" size={24} color="#8A2BE2" />
+              <Ionicons name="send" size={24} color="#8A2BE2" />
             </TouchableOpacity>
-
-            <TextInput
-              style={styles.input}
-              value={inputText}
-              onChangeText={setInputText}
-              placeholder="Сообщение..."
-              multiline
-            />
-
-            {inputText.length > 0 ? (
-              <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-                <Ionicons name="send" size={24} color="white" />
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                style={styles.micButton}
-                onPressIn={startRecording}
-                onPressOut={stopRecording}
-              >
-                <Ionicons
-                  name={isRecording ? "radio-button-on" : "mic"}
-                  size={24}
-                  color={isRecording ? "#FF4444" : "#8A2BE2"}
-                />
-              </TouchableOpacity>
-            )}
-          </View>
-        </KeyboardAvoidingView>
-
-        {showAttachMenu && (
-          <View style={styles.attachMenu}>
+          ) : (
             <TouchableOpacity
-              style={styles.attachMenuItem}
-              onPress={handleAttachImage}
+              style={styles.micButton}
+              onPressIn={startRecording}
+              onPressOut={stopRecording}
             >
-              <Ionicons name="image" size={24} color="#8A2BE2" />
-              <Text style={styles.attachMenuText}>Фото</Text>
+              <Ionicons
+                name={isRecording ? "radio-button-on" : "mic"}
+                size={24}
+                color={isRecording ? "#f44336" : "#8A2BE2"}
+              />
             </TouchableOpacity>
-            {/* Добавьте другие опции прикрепления файлов здесь */}
-          </View>
-        )}
-      </View>
+          )}
+        </View>
+      </KeyboardAvoidingView>
     </ScreenWrapper>
   );
 }
@@ -322,58 +369,59 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E3D3FF',
+  headerButton: {
+    marginRight: 16,
   },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 16,
+  headerAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 12,
-  },
-  userName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  userStatus: {
-    fontSize: 12,
-    color: '#666',
-  },
-  messagesList: {
-    padding: 16,
+  messageList: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   messageContainer: {
-    maxWidth: '80%',
+    flexDirection: 'row',
     marginVertical: 4,
-    padding: 12,
-    borderRadius: 16,
+    maxWidth: '80%',
   },
   ownMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: '#8A2BE2',
   },
   otherMessage: {
     alignSelf: 'flex-start',
+  },
+  messageAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 8,
+  },
+  messageBubble: {
+    backgroundColor: '#F0E6FF',
+    borderRadius: 20,
+    padding: 12,
+    maxWidth: '100%',
+  },
+  ownBubble: {
+    backgroundColor: '#8A2BE2',
+  },
+  otherBubble: {
     backgroundColor: '#F0E6FF',
   },
   messageText: {
     fontSize: 16,
     color: '#333',
   },
+  ownMessageText: {
+    color: 'white',
+  },
   messageImage: {
     width: 200,
     height: 200,
     borderRadius: 12,
+    marginVertical: 4,
   },
   audioContainer: {
     flexDirection: 'row',
@@ -381,75 +429,57 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   audioWaveform: {
-    width: 100,
-    height: 20,
+    flex: 1,
+    height: 32,
     backgroundColor: '#E3D3FF',
+    borderRadius: 16,
     marginLeft: 8,
-    borderRadius: 10,
+  },
+  ownAudioWaveform: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   messageFooter: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'flex-end',
+    alignItems: 'center',
     marginTop: 4,
   },
-  timestamp: {
+  messageTime: {
     fontSize: 12,
-    color: '#999',
+    color: '#666',
     marginRight: 4,
+  },
+  ownMessageTime: {
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  messageStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
+    padding: 8,
     borderTopWidth: 1,
     borderTopColor: '#E3D3FF',
-    backgroundColor: 'white',
   },
   attachButton: {
     padding: 8,
   },
   input: {
     flex: 1,
-    marginHorizontal: 8,
-    padding: 8,
     backgroundColor: '#F0E6FF',
     borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginHorizontal: 8,
+    fontSize: 16,
     maxHeight: 100,
   },
   sendButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#8A2BE2',
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 8,
   },
   micButton: {
     padding: 8,
-  },
-  attachMenu: {
-    position: 'absolute',
-    bottom: 76,
-    left: 16,
-    right: 16,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  attachMenuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-  },
-  attachMenuText: {
-    marginLeft: 12,
-    fontSize: 16,
-    color: '#333',
   },
 }); 

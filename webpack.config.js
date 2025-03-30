@@ -35,9 +35,9 @@ module.exports = async function (env, argv) {
   // Добавляем полифилы для node.js модулей
   config.resolve.fallback = {
     ...config.resolve.fallback,
-    "crypto": require.resolve("crypto-browserify"),
-    "stream": require.resolve("stream-browserify"),
-    "buffer": require.resolve("buffer/"),
+    crypto: require.resolve('crypto-browserify'),
+    stream: require.resolve('stream-browserify'),
+    buffer: require.resolve('buffer/'),
   };
 
   return config;
