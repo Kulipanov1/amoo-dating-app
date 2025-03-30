@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   FlatList,
   Modal,
   Platform,
+  Dimensions,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -43,6 +45,21 @@ interface UserProfile {
 }
 
 export default function ProfileScreen() {
+  const [windowWidth, setWindowWidth] = useState(Dimensions.get('window').width);
+  const [windowHeight, setWindowHeight] = useState(Dimensions.get('window').height);
+  
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setWindowWidth(window.width);
+      setWindowHeight(window.height);
+    });
+
+    return () => subscription?.remove();
+  }, []);
+
+  const isDesktop = windowWidth > 768;
+  const contentWidth = isDesktop ? Math.min(768, windowWidth * 0.8) : windowWidth;
+
   const [profile, setProfile] = useState<UserProfile>({
     id: '1',
     name: 'Александр Петров',
@@ -131,95 +148,126 @@ export default function ProfileScreen() {
   );
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.avatarContainer}
-          onPress={handleEditPhoto}
+    <SafeAreaView style={styles.safeArea}>
+      <View style={[styles.wrapper, isDesktop && { alignItems: 'center' }]}>
+        <View style={[styles.logoContainer, isDesktop && { width: contentWidth }]}>
+          <Text style={styles.logoText}>Amoo</Text>
+        </View>
+        
+        <ScrollView 
+          style={[styles.container, isDesktop && { width: contentWidth }]} 
+          contentContainerStyle={isDesktop && styles.desktopContainer}
         >
-          <Image 
-            source={{ uri: profile.avatar }} 
-            style={styles.avatar}
-          />
-          <View style={styles.editAvatarButton}>
-            <Ionicons name="camera" size={20} color="white" />
+          <View style={styles.header}>
+            <TouchableOpacity 
+              style={styles.avatarContainer}
+              onPress={handleEditPhoto}
+            >
+              <View style={styles.avatarFrame}>
+                <Image 
+                  source={{ uri: profile.avatar }} 
+                  style={styles.avatar}
+                />
+              </View>
+              <View style={styles.editAvatarButton}>
+                <Ionicons name="camera" size={20} color="white" />
+              </View>
+            </TouchableOpacity>
+
+            <View style={styles.userInfo}>
+              <View style={styles.nameContainer}>
+                <Text style={styles.name}>{profile.name}</Text>
+                {profile.isVerified && (
+                  <Ionicons name="checkmark-circle" size={20} color="#8A2BE2" />
+                )}
+                {profile.isPremium && (
+                  <Ionicons name="star" size={20} color="#FFD700" />
+                )}
+              </View>
+              <Text style={styles.status}>{profile.status}</Text>
+            </View>
+
+            <TouchableOpacity 
+              style={styles.settingsButton}
+              onPress={() => setShowSettingsModal(true)}
+            >
+              <Ionicons name="settings-outline" size={24} color="#8A2BE2" />
+            </TouchableOpacity>
           </View>
-        </TouchableOpacity>
 
-        <View style={styles.userInfo}>
-          <View style={styles.nameContainer}>
-            <Text style={styles.name}>{profile.name}</Text>
-            {profile.isVerified && (
-              <Ionicons name="checkmark-circle" size={20} color="#8A2BE2" />
-            )}
-            {profile.isPremium && (
-              <Ionicons name="star" size={20} color="#FFD700" />
-            )}
+          <View style={styles.statsContainer}>
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>{formatNumber(profile.stats.followers)}</Text>
+              <Text style={styles.statLabel}>Подписчики</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>{formatNumber(profile.stats.following)}</Text>
+              <Text style={styles.statLabel}>Подписки</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>{formatNumber(profile.stats.likes)}</Text>
+              <Text style={styles.statLabel}>Лайки</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>{formatNumber(profile.stats.matches)}</Text>
+              <Text style={styles.statLabel}>Совпадения</Text>
+            </View>
           </View>
-          <Text style={styles.status}>{profile.status}</Text>
-        </View>
 
-        <TouchableOpacity 
-          style={styles.settingsButton}
-          onPress={() => setShowSettingsModal(true)}
-        >
-          <Ionicons name="settings-outline" size={24} color="#666" />
-        </TouchableOpacity>
-      </View>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Интересы</Text>
+            <FlatList
+              data={profile.interests}
+              renderItem={renderInterest}
+              keyExtractor={item => item}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.interestsList}
+            />
+          </View>
 
-      <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{formatNumber(profile.stats.followers)}</Text>
-          <Text style={styles.statLabel}>Подписчики</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{formatNumber(profile.stats.following)}</Text>
-          <Text style={styles.statLabel}>Подписки</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{formatNumber(profile.stats.likes)}</Text>
-          <Text style={styles.statLabel}>Лайки</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{formatNumber(profile.stats.matches)}</Text>
-          <Text style={styles.statLabel}>Совпадения</Text>
-        </View>
-      </View>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Галерея</Text>
+            <FlatList
+              data={profile.photos}
+              renderItem={renderPhoto}
+              keyExtractor={item => item}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.gallery}
+            />
+          </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Интересы</Text>
-        <FlatList
-          data={profile.interests}
-          renderItem={renderInterest}
-          keyExtractor={item => item}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.interestsList}
-        />
-      </View>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Достижения</Text>
+            <FlatList
+              data={profile.achievements}
+              renderItem={renderAchievement}
+              keyExtractor={item => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.achievementsList}
+            />
+          </View>
+        </ScrollView>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Галерея</Text>
-        <FlatList
-          data={profile.photos}
-          renderItem={renderPhoto}
-          keyExtractor={item => item}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.gallery}
-        />
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Достижения</Text>
-        <FlatList
-          data={profile.achievements}
-          renderItem={renderAchievement}
-          keyExtractor={item => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.achievementsList}
-        />
+        <View style={[styles.bottomTabBar, isDesktop && { width: contentWidth }]}>
+          <TouchableOpacity style={styles.tabItem}>
+            <Ionicons name="heart" size={24} color="#8A2BE2" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.tabItem}>
+            <Ionicons name="people" size={24} color="#8A2BE2" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.tabItem}>
+            <Ionicons name="videocam" size={24} color="#8A2BE2" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.tabItem}>
+            <Ionicons name="chatbubbles" size={24} color="#8A2BE2" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.tabItem}>
+            <Ionicons name="person" size={24} color="#8A2BE2" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Modal
@@ -266,30 +314,62 @@ export default function ProfileScreen() {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F8F4FF',
+  },
+  wrapper: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+  },
+  desktopContainer: {
+    alignItems: 'center',
+  },
+  logoContainer: {
+    padding: 16,
+    backgroundColor: '#8A2BE2',
+    alignItems: 'center',
+  },
+  logoText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    backgroundColor: '#F8F4FF',
   },
   avatarContainer: {
     position: 'relative',
+  },
+  avatarFrame: {
+    padding: 3,
+    borderRadius: 44,
+    backgroundColor: '#8A2BE2',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
+    borderWidth: 2,
+    borderColor: 'white',
   },
   editAvatarButton: {
     position: 'absolute',
@@ -301,6 +381,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'white',
   },
   userInfo: {
     flex: 1,
@@ -326,7 +408,7 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     flexDirection: 'row',
-    backgroundColor: 'white',
+    backgroundColor: '#F8F4FF',
     paddingVertical: 16,
     marginTop: 1,
   },
@@ -345,7 +427,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   section: {
-    backgroundColor: 'white',
+    backgroundColor: '#F8F4FF',
     padding: 16,
     marginTop: 8,
   },
@@ -377,12 +459,14 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 8,
     marginRight: 8,
+    borderWidth: 2,
+    borderColor: '#8A2BE2',
   },
   achievementsList: {
     gap: 12,
   },
   achievementCard: {
-    backgroundColor: '#F8F4FF',
+    backgroundColor: '#E3D3FF',
     padding: 12,
     borderRadius: 12,
     alignItems: 'center',
@@ -440,5 +524,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     marginLeft: 12,
+  },
+  bottomTabBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 10,
+    backgroundColor: '#F8F4FF',
+    borderTopWidth: 1,
+    borderTopColor: '#E3D3FF',
+  },
+  tabItem: {
+    padding: 10,
   },
 }); 
