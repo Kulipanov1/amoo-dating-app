@@ -1,51 +1,45 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { StyleSheet, Text, View, Dimensions, Image, RefreshControl, ScrollView, Platform, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, Image, RefreshControl, ScrollView, Platform, TouchableOpacity, Modal } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import { hapticFeedback } from '../utils/haptics';
 import Skeleton from '../components/Skeleton';
 import { Ionicons } from '@expo/vector-icons';
 
 interface User {
-  id: number;
+  id: string;
   name: string;
   age: number;
-  image: string;
   bio: string;
+  images: string[];
   interests: string[];
-  location: string;
-  occupation: string;
+  location?: string;
+  occupation?: string;
 }
 
 const dummyUsers: User[] = [
   {
-    id: 1,
-    name: 'Анна',
+    id: "1",
+    name: "Анна",
     age: 25,
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-    bio: 'Люблю путешествия и фотографию',
-    interests: ['Путешествия', 'Фотография', 'Искусство', 'Музыка'],
-    location: 'Москва',
-    occupation: 'Фотограф'
+    bio: "Люблю путешествия и фотографию",
+    images: ["https://images.unsplash.com/photo-1494790108377-be9c29b29330"],
+    interests: ["Путешествия", "Фотография", "Искусство", "Музыка"]
   },
   {
-    id: 2,
-    name: 'Михаил',
+    id: "2",
+    name: "Михаил",
     age: 28,
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e',
-    bio: 'Занимаюсь спортом, ищу активную девушку',
-    interests: ['Спорт', 'Путешествия', 'Кулинария', 'Кино'],
-    location: 'Санкт-Петербург',
-    occupation: 'Тренер'
+    bio: "Занимаюсь спортом, ищу активную девушку",
+    images: ["https://images.unsplash.com/photo-1500648767791-00dcc994a43e"],
+    interests: ["Спорт", "Путешествия", "Кулинария", "Кино"]
   },
   {
-    id: 3,
-    name: 'Елена',
+    id: "3",
+    name: "Елена",
     age: 24,
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
-    bio: 'Обожаю музыку и искусство',
-    interests: ['Музыка', 'Искусство', 'Театр', 'Литература'],
-    location: 'Москва',
-    occupation: 'Дизайнер'
+    bio: "Обожаю музыку и искусство",
+    images: ["https://images.unsplash.com/photo-1534528741775-53994a69daeb"],
+    interests: ["Музыка", "Искусство", "Театр", "Литература"]
   }
 ];
 
@@ -72,6 +66,8 @@ export default function HomeScreen() {
   const [glowColor, setGlowColor] = useState('transparent');
   const [glowIntensity, setGlowIntensity] = useState(0);
   const swiper = useRef<any>(null);
+  const [showProfile, setShowProfile] = useState(false);
+  const [currentProfile, setCurrentProfile] = useState<User | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -164,31 +160,22 @@ export default function HomeScreen() {
     }
   }, [currentIndex]);
 
+  const handleSwipedUp = (index: number) => {
+    setCurrentProfile(users[index]);
+    setShowProfile(true);
+  };
+
   const renderDetailedInfo = (user: User) => (
-    <View style={styles.detailedInfo}>
-      <View style={styles.detailedHeader}>
-        <View style={styles.verifiedBadge}>
-          <Ionicons name="checkmark-circle" size={16} color="#8A2BE2" />
-          <Text style={styles.verifiedText}>Проверенный профиль</Text>
-        </View>
-      </View>
-      <View style={styles.userMainInfo}>
-        <Text style={styles.userName}>{user.name}, {user.age}</Text>
-        <View style={styles.locationRow}>
-          <Ionicons name="location-outline" size={18} color="#666" />
-          <Text style={styles.locationText}>{user.location}</Text>
-        </View>
-      </View>
-      <View style={styles.divider} />
-      <View style={styles.occupationRow}>
-        <Ionicons name="briefcase-outline" size={18} color="#666" />
-        <Text style={styles.occupationText}>{user.occupation}</Text>
-      </View>
-      <View style={styles.divider} />
-      <Text style={styles.bioTitle}>О себе</Text>
-      <Text style={styles.bioText}>{user.bio}</Text>
-      <View style={styles.divider} />
-      <Text style={styles.interestsTitle}>Интересы</Text>
+    <ScrollView style={styles.detailedInfo}>
+      <Text style={styles.detailedName}>{user.name}, {user.age}</Text>
+      <Text style={styles.detailedBio}>{user.bio}</Text>
+      {user.location && (
+        <Text style={styles.detailedLocation}>📍 {user.location}</Text>
+      )}
+      {user.occupation && (
+        <Text style={styles.detailedOccupation}>💼 {user.occupation}</Text>
+      )}
+      <Text style={styles.interestsTitle}>Интересы:</Text>
       <View style={styles.interestsContainer}>
         {user.interests.map((interest, index) => (
           <View key={index} style={styles.interestTag}>
@@ -196,7 +183,7 @@ export default function HomeScreen() {
           </View>
         ))}
       </View>
-    </View>
+    </ScrollView>
   );
 
   const renderCard = useCallback((user: User, cardIndex: number) => {
@@ -206,7 +193,7 @@ export default function HomeScreen() {
       <View style={[styles.card, { height: CARD_DIMENSIONS.height }]}>
         <View style={[styles.imageContainer, { height: CARD_DIMENSIONS.height * 0.8 }]}>
           <Image
-            source={{ uri: user.image }}
+            source={{ uri: user.images[0] }}
             style={styles.cardImage}
           />
           <View style={[
@@ -251,6 +238,10 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.logoText}>Amoo</Text>
+      </View>
+
       <View style={styles.swiperWrapper}>
         <Swiper
           ref={swiper}
@@ -258,7 +249,7 @@ export default function HomeScreen() {
           renderCard={(card) => renderCard(card, users.indexOf(card))}
           onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
           onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
-          onSwipedTop={(cardIndex: number) => handleSwipe('up', cardIndex)}
+          onSwipedTop={handleSwipedUp}
           cardIndex={currentIndex}
           backgroundColor={'transparent'}
           stackSize={2}
@@ -273,11 +264,60 @@ export default function HomeScreen() {
           swipeAnimationDuration={150}
           horizontalThreshold={50}
           verticalThreshold={30}
-          outputRotationRange={['0deg', '0deg', '0deg']}
-          stackSeparation={0}
-          stackScale={0}
-          inputRotationRange={[0, 0, 0]}
-          overlayLabels={{}}
+          outputRotationRange={['-0deg', '0deg', '0deg']}
+          stackSeparation={-30}
+          animateOverlayLabelsOpacity
+          overlayLabels={{
+            left: {
+              title: 'NOPE',
+              style: {
+                label: {
+                  backgroundColor: '#FF0000',
+                  color: '#fff',
+                  fontSize: 24
+                },
+                wrapper: {
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
+                  justifyContent: 'flex-start',
+                  marginTop: 20,
+                  marginLeft: -20
+                }
+              }
+            },
+            right: {
+              title: 'LIKE',
+              style: {
+                label: {
+                  backgroundColor: '#4CCC93',
+                  color: '#fff',
+                  fontSize: 24
+                },
+                wrapper: {
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  justifyContent: 'flex-start',
+                  marginTop: 20,
+                  marginLeft: 20
+                }
+              }
+            },
+            top: {
+              title: 'SUPER LIKE',
+              style: {
+                label: {
+                  backgroundColor: '#8A2BE2',
+                  color: '#fff',
+                  fontSize: 24
+                },
+                wrapper: {
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }
+              }
+            }
+          }}
           onSwiping={handleSwiping}
           containerStyle={{
             flex: 1,
@@ -312,6 +352,24 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      <Modal
+        visible={showProfile}
+        animationType="slide"
+        onRequestClose={() => setShowProfile(false)}
+      >
+        {currentProfile && (
+          <View style={styles.modalContainer}>
+            {renderDetailedInfo(currentProfile)}
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setShowProfile(false)}
+            >
+              <Ionicons name="close" size={30} color="#8A2BE2" />
+            </TouchableOpacity>
+          </View>
+        )}
+      </Modal>
     </View>
   );
 }
@@ -319,7 +377,18 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#F8F4FF',
+  },
+  header: {
+    padding: 16,
+    backgroundColor: '#8A2BE2',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  logoText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
   },
   scrollContent: {
     flexGrow: 1,
@@ -476,64 +545,37 @@ const styles = StyleSheet.create({
     padding: 20,
     zIndex: 1000,
   },
-  detailedHeader: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginBottom: 10,
-  },
-  verifiedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(138, 43, 226, 0.1)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 15,
-    gap: 5,
-  },
-  verifiedText: {
-    color: '#8A2BE2',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  userMainInfo: {
-    marginBottom: 15,
-  },
-  userName: {
+  detailedName: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 5,
   },
-  locationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  locationText: {
+  detailedBio: {
     fontSize: 16,
     color: '#666',
+    marginBottom: 15,
   },
-  occupationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    marginVertical: 10,
-  },
-  occupationText: {
+  detailedLocation: {
     fontSize: 16,
     color: '#666',
-  },
-  bioTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
     marginBottom: 10,
   },
-  bioText: {
+  detailedOccupation: {
     fontSize: 16,
     color: '#666',
-    lineHeight: 22,
-    marginBottom: 15,
+    marginBottom: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#F8F4FF',
+    padding: 20,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    padding: 10,
   },
   cardContent: {
     position: 'absolute',

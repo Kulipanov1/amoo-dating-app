@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
@@ -13,23 +14,21 @@ export default function TabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#8A2BE2',
-        tabBarInactiveTintColor: '#666',
         tabBarStyle: {
-          backgroundColor: 'white',
+          backgroundColor: '#F8F4FF',
           borderTopWidth: 1,
-          borderTopColor: '#f0f0f0',
+          borderTopColor: '#E3D3FF',
           height: 60,
           paddingBottom: 8,
           paddingTop: 8,
+          marginBottom: Platform.OS === 'ios' ? 20 : 10,
         },
+        tabBarActiveTintColor: '#8A2BE2',
+        tabBarInactiveTintColor: '#666',
         headerStyle: {
-          backgroundColor: 'white',
-          elevation: 0,
-          shadowOpacity: 0,
-          borderBottomWidth: 1,
-          borderBottomColor: '#f0f0f0',
+          backgroundColor: '#8A2BE2',
         },
+        headerTintColor: '#fff',
         headerTitleStyle: {
           color: '#333',
           fontSize: 18,
