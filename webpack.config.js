@@ -4,9 +4,17 @@ const path = require('path');
 module.exports = async function (env, argv) {
   const config = await createExpoWebpackConfigAsync(env, argv);
 
+  // Add SVG support
+  config.module.rules.push({
+    test: /\.svg$/,
+    use: ['@svgr/webpack']
+  });
+
   config.resolve.alias = {
     ...config.resolve.alias,
     'react-native$': 'react-native-web',
+    'react-native-maps': 'react-native-web-maps',
+    '@react-native-community/async-storage': 'react-native-web/dist/exports/AsyncStorage',
     'react-native/Libraries/ReactPrivate/ReactNativePrivateInterface': 'react-native-web/dist/index',
     'react-native/Libraries/ReactPrivate/ReactNativePrivateInitializeCore': 'react-native-web/dist/index',
     '../Components/AccessibilityInfo/legacySendAccessibilityEvent': 'react-native-web/dist/modules/AccessibilityInfo',
