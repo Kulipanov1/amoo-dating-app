@@ -108,11 +108,17 @@ export default function HomeScreen() {
 
   const handleSwiping = useCallback((x: number, y: number) => {
     setLastSwipe({ x, y });
-    if (Math.abs(x) > Math.abs(y)) {
+    // Определяем основное направление свайпа
+    const isHorizontal = Math.abs(x) > Math.abs(y);
+    const isVertical = Math.abs(y) > Math.abs(x);
+
+    if (isHorizontal) {
+      // Для горизонтального свайпа игнорируем вертикальное смещение
       const color = x > 0 ? '#8A2BE2' : x < 0 ? '#FF4B4B' : 'transparent';
       setGlowColor(color);
       setGlowIntensity(0.3);
-    } else if (y < 0) {
+    } else if (isVertical && y < 0) {
+      // Для вертикального свайпа вверх игнорируем горизонтальное смещение
       setGlowColor('#4CAF50');
       setGlowIntensity(0.3);
       if (Math.abs(y) > 30) {
@@ -255,7 +261,7 @@ export default function HomeScreen() {
           onSwipedTop={(cardIndex: number) => handleSwipe('up', cardIndex)}
           cardIndex={currentIndex}
           backgroundColor={'transparent'}
-          stackSize={3}
+          stackSize={2}
           cardStyle={styles.cardContainer}
           animateCardOpacity
           swipeBackCard
@@ -264,8 +270,8 @@ export default function HomeScreen() {
           cardVerticalMargin={0}
           cardHorizontalMargin={0}
           disableBottomSwipe={true}
-          swipeAnimationDuration={200}
-          horizontalThreshold={60}
+          swipeAnimationDuration={150}
+          horizontalThreshold={50}
           verticalThreshold={30}
           outputRotationRange={['0deg', '0deg', '0deg']}
           stackSeparation={0}
