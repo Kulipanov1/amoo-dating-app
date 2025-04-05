@@ -61,8 +61,8 @@ export default function HomeScreen() {
   const windowHeight = Dimensions.get('window').height;
   const isDesktop = windowWidth > 768;
   
-  const cardWidth = isDesktop ? DESKTOP_CONTENT_WIDTH : windowWidth * 0.95;
-  const cardHeight = isDesktop ? DESKTOP_CONTENT_HEIGHT - 120 : windowHeight - 200;
+  const cardWidth = isDesktop ? DESKTOP_CONTENT_WIDTH : Math.min(windowWidth * 0.9, 480);
+  const cardHeight = isDesktop ? DESKTOP_CONTENT_HEIGHT - 120 : Math.min(windowHeight - 180, 700);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -79,6 +79,41 @@ export default function HomeScreen() {
       setShowProfile(true);
     }
   }, [users]);
+
+  const handleLike = useCallback(() => {
+    if (swiper.current) {
+      hapticFeedback.medium();
+      setGlowColor('#FF4B6E');
+      setGlowIntensity(0.3);
+      swiper.current.swipeRight();
+    }
+  }, []);
+
+  const handleDislike = useCallback(() => {
+    if (swiper.current) {
+      hapticFeedback.medium();
+      setGlowColor('#FF4B4B');
+      setGlowIntensity(0.3);
+      swiper.current.swipeLeft();
+    }
+  }, []);
+
+  const handleSuperLike = useCallback(() => {
+    if (swiper.current) {
+      hapticFeedback.medium();
+      setGlowColor('#00E0FF');
+      setGlowIntensity(0.3);
+      swiper.current.swipeTop();
+    }
+  }, []);
+
+  const handleRewind = useCallback(() => {
+    if (currentIndex > 0 && swiper.current) {
+      hapticFeedback.medium();
+      swiper.current.swipeBack();
+      setCurrentIndex(currentIndex - 1);
+    }
+  }, [currentIndex]);
 
   const renderCard = (user: User) => {
     if (!user) return null;
@@ -163,7 +198,7 @@ export default function HomeScreen() {
       <AnimatedBackground />
       <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
         <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
-          <View style={[styles.mainContent, isDesktop && { width: cardWidth, height: cardHeight + 180 }]}>
+          <View style={[styles.mainContent, isDesktop && { width: cardWidth + 40 }]}>
             <View style={styles.header}>
               <Text style={styles.logoText}>Amoo</Text>
             </View>
@@ -188,20 +223,35 @@ export default function HomeScreen() {
                 outputRotationRange={['-5deg', '0deg', '5deg']}
                 swipeAnimationDuration={350}
                 onSwipedTop={(cardIndex) => handleSwipe('top', cardIndex)}
+                onSwipedLeft={() => setGlowIntensity(0)}
+                onSwipedRight={() => setGlowIntensity(0)}
+                onSwipedAll={() => setUsers(dummyUsers)}
               />
             </View>
 
             <View style={styles.actionButtons}>
-              <TouchableOpacity style={[styles.actionButton, styles.smallButton]}>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.smallButton]}
+                onPress={handleRewind}
+              >
                 <BackArrowIcon size={30} color="#666" />
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionButton, styles.largeButton]}>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.largeButton]}
+                onPress={handleDislike}
+              >
                 <DislikeIcon size={30} color="#FF4B4B" />
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionButton, styles.largeButton]}>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.largeButton]}
+                onPress={handleSuperLike}
+              >
                 <SuperLikeIcon size={30} color="#00E0FF" />
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionButton, styles.largeButton]}>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.largeButton]}
+                onPress={handleLike}
+              >
                 <LikeIcon size={30} color="#FF4B6E" />
               </TouchableOpacity>
             </View>
@@ -223,7 +273,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F4FF',
+    backgroundColor: '#8A2BE2',
   },
   loadingText: {
     fontSize: 18,
@@ -238,16 +288,16 @@ const styles = StyleSheet.create({
   },
   wrapper: {
     flex: 1,
-  },
-  desktopWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  desktopWrapper: {
     paddingVertical: 20,
   },
   mainContent: {
     flex: 1,
     backgroundColor: 'transparent',
-    maxWidth: DESKTOP_CONTENT_WIDTH,
+    maxWidth: DESKTOP_CONTENT_WIDTH + 40,
     alignSelf: 'center',
     width: '100%',
     borderRadius: 20,
@@ -255,21 +305,25 @@ const styles = StyleSheet.create({
   },
   header: {
     height: 56,
-    backgroundColor: '#8A2BE2',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
   },
   logoText: {
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   swiperContainer: {
     flex: 1,
-    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 10,
+    paddingBottom: 20,
   },
   cardContainer: {
     backgroundColor: 'transparent',
@@ -291,6 +345,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     position: 'relative',
+    borderRadius: 20,
+    overflow: 'hidden',
   },
   cardImage: {
     width: '100%',
@@ -311,7 +367,7 @@ const styles = StyleSheet.create({
     right: 0,
     padding: 20,
     paddingBottom: 30,
-    background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%)',
+    background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 100%)',
   },
   cardTitle: {
     fontSize: 28,
