@@ -298,6 +298,7 @@ const ProfileScreen: React.FC = () => {
   );
 
   const handleEditProfile = () => {
+    hapticFeedback.light();
     navigation.navigate('EditProfile');
   };
 

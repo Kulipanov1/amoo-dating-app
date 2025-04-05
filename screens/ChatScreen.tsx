@@ -108,10 +108,18 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
   useEffect(() => {
     navigation.setOptions({
       title: otherUser.name,
+      headerLeft: () => (
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="chevron-back" size={24} color="#333" />
+        </TouchableOpacity>
+      ),
       headerRight: () => (
         <TouchableOpacity
           style={styles.headerButton}
-          onPress={() => navigation.navigate('Profile', { userId: otherUser.id })}
+          onPress={() => navigation.navigate('UserProfile', { userId: otherUser.id })}
         >
           <Image source={{ uri: otherUser.avatar }} style={styles.headerAvatar} />
         </TouchableOpacity>
@@ -633,6 +641,15 @@ const styles = StyleSheet.create({
   attachmentsList: {
     flex: 1,
     padding: 16,
+  },
+  headerButton: {
+    padding: 8,
+    marginHorizontal: 8,
+  },
+  headerAvatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
   },
 });
 

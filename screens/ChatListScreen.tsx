@@ -122,7 +122,7 @@ const ChatListScreen: React.FC = () => {
           <Text style={styles.userName}>{item.user.name}</Text>
           <Text style={styles.timeStamp}>{formatTimestamp(item.lastMessage.timestamp)}</Text>
         </View>
-        <Text style={styles.lastMessage} numberOfLines={1}>
+        <Text style={styles.lastMessage} numberOfLines={2}>
           {item.lastMessage.text}
         </Text>
       </View>
@@ -188,21 +188,22 @@ const styles = StyleSheet.create({
   },
   chatItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
+    alignItems: 'flex-start',
+    paddingVertical: 16,
     width: '100%',
     maxWidth: 600,
     borderBottomWidth: 1,
     borderBottomColor: '#E3D3FF',
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     marginRight: 12,
   },
   chatInfo: {
     flex: 1,
+    minHeight: 60,
   },
   chatHeader: {
     flexDirection: 'row',
@@ -223,6 +224,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginRight: 40,
+    lineHeight: 20,
   },
   unreadBadge: {
     position: 'absolute',

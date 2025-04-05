@@ -97,30 +97,31 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     });
   };
 
+  const handleSwipeUp = (cardIndex: number) => {
+    hapticFeedback.light();
+    setCurrentProfile(users[cardIndex]);
+    setShowProfile(true);
+  };
+
   const handleLike = () => {
-    handleSwipe('right');
+    hapticFeedback.light();
+    if (swiper.current) {
+      swiper.current.swipeRight();
+    }
   };
 
   const handleDislike = () => {
-    handleSwipe('left');
+    hapticFeedback.light();
+    if (swiper.current) {
+      swiper.current.swipeLeft();
+    }
   };
 
   const handleSuperLike = () => {
-    RNAnimated.sequence([
-      RNAnimated.spring(pan, {
-        toValue: { x: 0, y: -500 },
-        useNativeDriver: true,
-        bounciness: 0,
-        speed: 20,
-      }),
-      RNAnimated.timing(pan, {
-        toValue: { x: 0, y: 0 },
-        duration: 0,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % users.length);
-    });
+    hapticFeedback.medium();
+    if (swiper.current) {
+      swiper.current.swipeTop();
+    }
   };
 
   const handleRewind = useCallback(() => {
@@ -130,11 +131,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       setCurrentIndex(currentIndex - 1);
     }
   }, [currentIndex]);
-
-  const handleSwipeUp = (cardIndex: number) => {
-    setCurrentProfile(users[cardIndex]);
-    setShowProfile(true);
-  };
 
   const renderCard = (user: User) => {
     if (!user) return null;
@@ -230,16 +226,69 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 cards={users}
                 renderCard={renderCard}
                 onSwipedAll={() => setUsers(dummyUsers)}
-                cardIndex={0}
+                cardIndex={currentIndex}
                 backgroundColor="transparent"
                 stackSize={3}
                 stackSeparation={15}
                 animateCardOpacity
-                verticalThreshold={150}
-                horizontalThreshold={120}
+                verticalThreshold={windowHeight * 0.15}
+                horizontalThreshold={windowWidth * 0.3}
                 onSwipedTop={handleSwipeUp}
-                onSwipedLeft={() => handleSwipe('left')}
-                onSwipedRight={() => handleSwipe('right')}
+                onSwipedLeft={() => handleDislike()}
+                onSwipedRight={() => handleLike()}
+                disableTopSwipe={false}
+                disableBottomSwipe={true}
+                overlayLabels={{
+                  left: {
+                    title: 'НEТЪ',
+                    style: {
+                      label: {
+                        backgroundColor: '#FF4B4B',
+                        color: 'white',
+                        fontSize: 24
+                      },
+                      wrapper: {
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        justifyContent: 'flex-start',
+                        marginTop: 30,
+                        marginLeft: 30
+                      }
+                    }
+                  },
+                  right: {
+                    title: 'ДА',
+                    style: {
+                      label: {
+                        backgroundColor: '#4CAF50',
+                        color: 'white',
+                        fontSize: 24
+                      },
+                      wrapper: {
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        justifyContent: 'flex-start',
+                        marginTop: 30,
+                        marginRight: 30
+                      }
+                    }
+                  },
+                  top: {
+                    title: 'ПОДРОБНЕЕ',
+                    style: {
+                      label: {
+                        backgroundColor: '#8A2BE2',
+                        color: 'white',
+                        fontSize: 24
+                      },
+                      wrapper: {
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }
+                    }
+                  }
+                }}
               />
             </View>
 
