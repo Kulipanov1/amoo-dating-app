@@ -53,11 +53,42 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 const isWeb = Platform.OS === 'web';
 const isMobile = SCREEN_WIDTH < 768;
 
-const CARD_DIMENSIONS = {
-  width: SCREEN_WIDTH * 0.9, // Уменьшаем ширину карточки
-  height: SCREEN_HEIGHT - 250, // Увеличиваем отступ снизу
-  expandedHeight: SCREEN_HEIGHT - 200
+// Фиксированные размеры для десктопной версии
+const DESKTOP_CONTENT_WIDTH = 480;
+const DESKTOP_CONTENT_HEIGHT = 700;
+
+interface CardDimensions {
+  width: number;
+  height: number;
+  expandedHeight: number;
+}
+
+const getCardDimensions = (windowWidth: number, windowHeight: number, isDesktop: boolean): CardDimensions => {
+  if (isDesktop) {
+    return {
+      width: DESKTOP_CONTENT_WIDTH * 0.9,
+      height: DESKTOP_CONTENT_HEIGHT - 180,
+      expandedHeight: DESKTOP_CONTENT_HEIGHT - 150
+    };
+  }
+  return {
+    width: windowWidth * 0.9,
+    height: windowHeight - 250,
+    expandedHeight: windowHeight - 200
+  };
 };
+
+const getDesktopStyles = (width: number, height: number) => ({
+  width,
+  height,
+  backgroundColor: '#F8F4FF',
+  borderRadius: 20,
+  overflow: 'hidden' as const,
+  ...(Platform.OS === 'web' ? {
+    // @ts-ignore
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+  } : {}),
+});
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -74,6 +105,9 @@ export default function HomeScreen() {
   const [currentProfile, setCurrentProfile] = useState<User | null>(null);
   const [windowWidth, setWindowWidth] = useState(Dimensions.get('window').width);
   const [windowHeight, setWindowHeight] = useState(Dimensions.get('window').height);
+  const [dimensions, setDimensions] = useState<CardDimensions>(
+    getCardDimensions(Dimensions.get('window').width, Dimensions.get('window').height, Dimensions.get('window').width > 768)
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -92,6 +126,11 @@ export default function HomeScreen() {
 
     return () => subscription?.remove();
   }, []);
+
+  useEffect(() => {
+    const isDesktop = windowWidth > 768;
+    setDimensions(getCardDimensions(windowWidth, windowHeight, isDesktop));
+  }, [windowWidth, windowHeight]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -125,17 +164,20 @@ export default function HomeScreen() {
     const isVertical = Math.abs(y) > Math.abs(x);
 
     if (isHorizontal) {
-      // Для горизонтального свайпа игнорируем вертикальное смещение
-      const color = x > 0 ? '#8A2BE2' : x < 0 ? '#FF4B4B' : 'transparent';
+      // Для горизонтального свайпа
+      const color = x > 0 ? '#FF4B6E' : x < 0 ? '#FF4B4B' : 'transparent';
       setGlowColor(color);
       setGlowIntensity(0.3);
     } else if (isVertical && y < 0) {
-      // Для вертикального свайпа вверх игнорируем горизонтальное смещение
-      setGlowColor('#4CAF50');
-      setGlowIntensity(0.3);
-      if (Math.abs(y) > 30) {
+      // Для вертикального свайпа вверх
+      if (Math.abs(y) > 20) { // Уменьшаем порог для более легкого срабатывания
         setExpandedCard(currentIndex);
+        setGlowColor('#4CAF50');
+        setGlowIntensity(0.2);
       }
+    } else {
+      setGlowColor('transparent');
+      setGlowIntensity(0);
     }
   }, [currentIndex]);
 
@@ -204,13 +246,20 @@ export default function HomeScreen() {
     </ScrollView>
   );
 
+  const isDesktop = windowWidth > 768;
+  const contentWidth = isDesktop ? DESKTOP_CONTENT_WIDTH : windowWidth;
+  const contentHeight = isDesktop ? DESKTOP_CONTENT_HEIGHT : windowHeight;
+
   const renderCard = useCallback((user: User, cardIndex: number) => {
     if (!user) return null;
     
     const isExpanded = expandedCard === cardIndex;
     
     return (
-      <View style={[styles.card, { height: CARD_DIMENSIONS.height }]}>
+      <View style={[styles.card, { 
+        width: dimensions.width,
+        height: dimensions.height 
+      }]}>
         <View style={styles.imageContainer}>
           <Image
             source={{ uri: user.images[0] }}
@@ -249,21 +298,17 @@ export default function HomeScreen() {
         </View>
       </View>
     );
-  }, [glowColor, glowIntensity, expandedCard]);
+  }, [glowColor, glowIntensity, expandedCard, dimensions]);
 
   const renderSkeleton = useCallback(() => (
-    <View style={[styles.cardContainer, { width: CARD_DIMENSIONS.width }]}>
-      <Skeleton width={CARD_DIMENSIONS.width} height={CARD_DIMENSIONS.height} borderRadius={20} />
+    <View style={[styles.cardContainer, { width: dimensions.width }]}>
+      <Skeleton width={dimensions.width} height={dimensions.height} borderRadius={20} />
       <View style={styles.skeletonTextContainer}>
         <Skeleton width={200} height={24} style={styles.skeletonTitle} />
         <Skeleton width={150} height={16} style={styles.skeletonDescription} />
       </View>
     </View>
-  ), []);
-
-  const isDesktop = windowWidth > 768;
-  const contentWidth = isDesktop ? 480 : windowWidth;
-  const contentHeight = isDesktop ? Math.min(700, windowHeight - 40) : windowHeight;
+  ), [dimensions]);
 
   if (isLoading) {
     return (
@@ -311,10 +356,7 @@ export default function HomeScreen() {
         <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
           <View style={[
             styles.mainContent,
-            isDesktop && {
-              width: contentWidth,
-              height: contentHeight,
-            }
+            isDesktop && getDesktopStyles(contentWidth, contentHeight)
           ]}>
             <View style={styles.header}>
               <Text style={styles.logoText}>Amoo</Text>
@@ -328,10 +370,17 @@ export default function HomeScreen() {
                 onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
                 onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
                 onSwipedTop={(cardIndex: number) => handleSwipe('up', cardIndex)}
+                onSwiping={handleSwiping}
                 cardIndex={currentIndex}
                 backgroundColor={'transparent'}
                 stackSize={2}
-                cardStyle={styles.cardContainer}
+                cardStyle={[
+                  styles.cardContainer,
+                  {
+                    width: dimensions.width,
+                    height: dimensions.height
+                  }
+                ]}
                 animateCardOpacity
                 swipeBackCard
                 verticalSwipe={true}
@@ -341,7 +390,7 @@ export default function HomeScreen() {
                 disableBottomSwipe={true}
                 swipeAnimationDuration={150}
                 horizontalThreshold={50}
-                verticalThreshold={30}
+                verticalThreshold={25}
                 outputRotationRange={['-0deg', '0deg', '0deg']}
                 stackSeparation={15}
                 overlayLabels={{}}
@@ -410,11 +459,6 @@ const styles = StyleSheet.create({
   mainContent: {
     flex: 1,
     backgroundColor: '#F8F4FF',
-    ...(Platform.OS === 'web' ? {
-      borderRadius: 20,
-      overflow: 'hidden',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-    } : {}),
   },
   header: {
     height: 56,
@@ -444,7 +488,6 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   card: {
-    flex: 1,
     borderRadius: 20,
     backgroundColor: '#fff',
     shadowColor: '#000',
@@ -461,6 +504,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     position: 'relative',
+    borderRadius: 20,
+    overflow: 'hidden',
   },
   cardImage: {
     width: '100%',
@@ -501,10 +546,11 @@ const styles = StyleSheet.create({
     textShadowRadius: 3
   },
   expandedContent: {
-    marginTop: 15,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    marginTop: 10,
+    backgroundColor: 'rgba(0,0,0,0.6)',
     padding: 15,
     borderRadius: 10,
+    transform: [{ translateY: -20 }],
   },
   infoRow: {
     flexDirection: 'row',
@@ -559,7 +605,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     gap: 15,
-    maxWidth: CARD_DIMENSIONS.width,
+    maxWidth: dimensions?.width || SCREEN_WIDTH * 0.9,
     alignSelf: 'center',
     backgroundColor: 'transparent',
   },
@@ -667,5 +713,13 @@ const styles = StyleSheet.create({
   boostButton: {
     borderWidth: 2,
     borderColor: '#8A2BE2',
+  },
+  swipeUpIndicator: {
+    position: 'absolute',
+    top: 20,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    opacity: 0.8,
   },
 }); 
