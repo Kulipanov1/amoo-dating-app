@@ -103,45 +103,49 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <AnimatedBackground />
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.header}>
-          <Text style={styles.logoText}>Amoo</Text>
-        </View>
+      <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
+        <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
+          <View style={[styles.mainContent, isDesktop && { width: DESKTOP_CONTENT_WIDTH, height: DESKTOP_CONTENT_HEIGHT }]}>
+            <View style={styles.header}>
+              <Text style={styles.logoText}>Amoo</Text>
+            </View>
 
-        <View style={styles.swiperContainer}>
-          <Swiper
-            ref={swiper}
-            cards={users}
-            renderCard={renderCard}
-            cardIndex={currentIndex}
-            backgroundColor="transparent"
-            stackSize={3}
-            cardStyle={styles.cardContainer}
-            animateCardOpacity
-            verticalSwipe={true}
-            horizontalSwipe={true}
-            stackSeparation={15}
-            cardVerticalMargin={20}
-            cardHorizontalMargin={10}
-            disableBottomSwipe={true}
-            inputRotationRange={[-7, 0, 7]}
-            outputRotationRange={['-10deg', '0deg', '10deg']}
-          />
-        </View>
+            <View style={styles.swiperContainer}>
+              <Swiper
+                ref={swiper}
+                cards={users}
+                renderCard={renderCard}
+                cardIndex={currentIndex}
+                backgroundColor="transparent"
+                stackSize={3}
+                cardStyle={styles.cardContainer}
+                animateCardOpacity
+                verticalSwipe={true}
+                horizontalSwipe={true}
+                stackSeparation={15}
+                cardVerticalMargin={20}
+                cardHorizontalMargin={10}
+                disableBottomSwipe={true}
+                inputRotationRange={[-7, 0, 7]}
+                outputRotationRange={['-10deg', '0deg', '10deg']}
+              />
+            </View>
 
-        <View style={styles.actionButtons}>
-          <TouchableOpacity style={[styles.actionButton, styles.smallButton]}>
-            <BackArrowIcon size={30} color="#666" />
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionButton, styles.largeButton]}>
-            <DislikeIcon size={30} color="#FF4B4B" />
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionButton, styles.largeButton]}>
-            <SuperLikeIcon size={30} color="#00E0FF" />
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionButton, styles.largeButton]}>
-            <LikeIcon size={30} color="#FF4B6E" />
-          </TouchableOpacity>
+            <View style={styles.actionButtons}>
+              <TouchableOpacity style={[styles.actionButton, styles.smallButton]}>
+                <BackArrowIcon size={30} color="#666" />
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, styles.largeButton]}>
+                <DislikeIcon size={30} color="#FF4B4B" />
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, styles.largeButton]}>
+                <SuperLikeIcon size={30} color="#00E0FF" />
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, styles.largeButton]}>
+                <LikeIcon size={30} color="#FF4B6E" />
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </SafeAreaView>
     </View>
@@ -161,11 +165,30 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
+  desktopSafeArea: {
+    backgroundColor: '#8A2BE2',
+  },
+  wrapper: {
+    flex: 1,
+  },
+  desktopWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  mainContent: {
+    flex: 1,
+    backgroundColor: '#F8F4FF',
+    maxWidth: DESKTOP_CONTENT_WIDTH,
+    alignSelf: 'center',
+    width: '100%',
+  },
   header: {
     height: 56,
     backgroundColor: '#8A2BE2',
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
   },
   logoText: {
     fontSize: 24,
@@ -175,6 +198,8 @@ const styles = StyleSheet.create({
   swiperContainer: {
     flex: 1,
     backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardContainer: {
     backgroundColor: 'transparent',
@@ -195,6 +220,7 @@ const styles = StyleSheet.create({
   cardImage: {
     width: '100%',
     height: '100%',
+    borderRadius: 20,
   },
   imageTint: {
     position: 'absolute',
@@ -230,11 +256,12 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 20,
     paddingHorizontal: 10,
     backgroundColor: '#F8F4FF',
+    gap: 20,
   },
   actionButton: {
     backgroundColor: '#fff',
