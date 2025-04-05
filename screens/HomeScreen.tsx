@@ -126,8 +126,9 @@ export default function HomeScreen() {
                 cardVerticalMargin={20}
                 cardHorizontalMargin={10}
                 disableBottomSwipe={true}
-                inputRotationRange={[-7, 0, 7]}
-                outputRotationRange={['-10deg', '0deg', '10deg']}
+                inputRotationRange={[-15, 0, 15]}
+                outputRotationRange={['-5deg', '0deg', '5deg']}
+                swipeAnimationDuration={350}
               />
             </View>
 
@@ -182,6 +183,8 @@ const styles = StyleSheet.create({
     maxWidth: DESKTOP_CONTENT_WIDTH,
     alignSelf: 'center',
     width: '100%',
+    borderRadius: 20,
+    overflow: 'hidden',
   },
   header: {
     height: 56,
@@ -203,6 +206,8 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     backgroundColor: 'transparent',
+    borderRadius: 20,
+    overflow: 'hidden',
   },
   card: {
     borderRadius: 20,
@@ -228,6 +233,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    borderRadius: 20,
   },
   cardContent: {
     position: 'absolute',
@@ -237,6 +243,8 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 30,
     backgroundColor: 'rgba(0,0,0,0.5)',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   cardTitle: {
     fontSize: 24,
