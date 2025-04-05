@@ -6,13 +6,33 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalization } from '../src/contexts/LocalizationContext';
 
 // Types
-import {
-  RootStackParamList,
-  ChatStackParamList,
-  ProfileStackParamList,
-  HomeStackParamList,
-  StreamsStackParamList,
-} from '../src/types/navigation';
+type RootStackParamList = {
+  HomeTab: undefined;
+  ChatTab: undefined;
+  StreamsTab: undefined;
+  ProfileTab: undefined;
+};
+
+type ChatStackParamList = {
+  ChatList: undefined;
+  Chat: { userName: string };
+  SingleChat: undefined;
+  ChatRoom: undefined;
+};
+
+type ProfileStackParamList = {
+  Profile: undefined;
+};
+
+type HomeStackParamList = {
+  Home: undefined;
+  Map: undefined;
+};
+
+type StreamsStackParamList = {
+  Streams: undefined;
+  Live: undefined;
+};
 
 // Screens
 import HomeScreen from '../screens/HomeScreen';

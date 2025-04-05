@@ -16,16 +16,28 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.amoo.dating"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#8A2BE2"
-      }
+      },
+      "package": "com.amoo.dating"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-localization",
+      "expo-image-picker",
+      "expo-camera",
+      "expo-location",
+      "expo-av"
+    ],
+    "updates": {
+      "fallbackToCacheTimeout": 0
     }
   }
 } 
