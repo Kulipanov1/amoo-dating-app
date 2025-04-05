@@ -6,6 +6,7 @@ import Skeleton from '../components/Skeleton';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import AnimatedBackground from '../components/AnimatedBackground';
+import { SuperLikeIcon, LikeIcon, DislikeIcon, BackArrowIcon } from '../components/Icons';
 
 interface User {
   id: string;
@@ -205,10 +206,11 @@ export default function HomeScreen() {
     
     return (
       <View style={[styles.card, { height: CARD_DIMENSIONS.height }]}>
-        <View style={[styles.imageContainer, { height: CARD_DIMENSIONS.height * 0.8 }]}>
+        <View style={[styles.imageContainer, { height: CARD_DIMENSIONS.height }]}>
           <Image
             source={{ uri: user.images[0] }}
             style={styles.cardImage}
+            resizeMode="cover"
           />
           <View style={[
             styles.imageTint,
@@ -320,90 +322,22 @@ export default function HomeScreen() {
                 outputRotationRange={['-0deg', '0deg', '0deg']}
                 stackSeparation={-30}
                 animateOverlayLabelsOpacity
-                overlayLabels={{
-                  left: {
-                    title: 'NOPE',
-                    style: {
-                      label: {
-                        backgroundColor: '#FF0000',
-                        color: '#fff',
-                        fontSize: 24
-                      },
-                      wrapper: {
-                        flexDirection: 'column',
-                        alignItems: 'flex-end',
-                        justifyContent: 'flex-start',
-                        marginTop: 20,
-                        marginLeft: -20
-                      }
-                    }
-                  },
-                  right: {
-                    title: 'LIKE',
-                    style: {
-                      label: {
-                        backgroundColor: '#4CCC93',
-                        color: '#fff',
-                        fontSize: 24
-                      },
-                      wrapper: {
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        justifyContent: 'flex-start',
-                        marginTop: 20,
-                        marginLeft: 20
-                      }
-                    }
-                  },
-                  top: {
-                    title: 'SUPER LIKE',
-                    style: {
-                      label: {
-                        backgroundColor: '#8A2BE2',
-                        color: '#fff',
-                        fontSize: 24
-                      },
-                      wrapper: {
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }
-                    }
-                  }
-                }}
-                onSwiping={handleSwiping}
-                containerStyle={{
-                  flex: 1,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
               />
-              <View style={styles.buttonsContainer}>
-                <TouchableOpacity 
-                  style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
-                  onPress={handleRewind}
-                >
-                  <Ionicons name="arrow-undo" size={24} color="#8A2BE2" />
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.actionButton, { backgroundColor: 'rgba(255, 75, 75, 0.1)' }]} 
-                  onPress={handleDislike}
-                >
-                  <Ionicons name="close" size={28} color="#FF4B4B" />
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.actionButton, { backgroundColor: 'rgba(138, 43, 226, 0.1)' }]} 
-                  onPress={handleLike}
-                >
-                  <Ionicons name="heart" size={24} color="#8A2BE2" />
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.actionButton, { backgroundColor: 'rgba(76, 175, 80, 0.1)' }]} 
-                  onPress={handleSuperLike}
-                >
-                  <Ionicons name="flame" size={24} color="#4CAF50" />
-                </TouchableOpacity>
-              </View>
+            </View>
+
+            <View style={styles.actionButtons}>
+              <TouchableOpacity style={[styles.actionButton, styles.smallButton]} onPress={handleRewind}>
+                <BackArrowIcon size={30} color="#666" />
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, styles.largeButton]} onPress={handleDislike}>
+                <DislikeIcon size={30} color="#FF4B4B" />
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, styles.largeButton]} onPress={handleSuperLike}>
+                <SuperLikeIcon size={30} color="#00E0FF" />
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, styles.largeButton]} onPress={handleLike}>
+                <LikeIcon size={30} color="#FF4B6E" />
+              </TouchableOpacity>
             </View>
 
             <Modal
@@ -488,24 +422,27 @@ const styles = StyleSheet.create({
   },
   card: {
     flex: 1,
-    backgroundColor: 'white',
     borderRadius: 20,
-    overflow: 'hidden',
+    backgroundColor: '#fff',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    overflow: 'hidden'
   },
   imageContainer: {
     width: '100%',
-    height: '100%',
-    position: 'absolute',
+    overflow: 'hidden',
+    borderRadius: 20,
   },
   cardImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
+    borderRadius: 20,
   },
   imageTint: {
     position: 'absolute',
@@ -527,12 +464,18 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
+    color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3
   },
   cardDescription: {
     fontSize: 16,
-    color: '#666',
+    color: '#fff',
+    marginTop: 8,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3
   },
   expandedContent: {
     marginTop: 15,
@@ -598,21 +541,26 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   actionButton: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    backgroundColor: '#fff',
+    borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#8A2BE2',
-    elevation: 5,
-    shadowColor: '#8A2BE2',
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+    elevation: 5,
+  },
+  smallButton: {
+    width: 45,
+    height: 45,
+  },
+  largeButton: {
+    width: 60,
+    height: 60,
   },
   expandedText: {
     fontSize: isMobile ? 16 : 18,
@@ -667,19 +615,15 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    padding: 20,
+    background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
   },
   actionButtons: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#E3D3FF',
+    paddingVertical: 20,
+    paddingHorizontal: 10,
   },
   rewindButton: {
     borderWidth: 2,
