@@ -87,10 +87,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     }
   };
 
-  const handleSwipeUp = (cardIndex: number) => {
+  const handleSwipeUp = () => {
     hapticFeedback.light();
-    setCurrentProfile(users[cardIndex]);
-    setShowProfile(true);
+    if (users[currentIndex]) {
+      setCurrentProfile(users[currentIndex]);
+      setShowProfile(true);
+    }
   };
 
   const handleLike = () => {
@@ -111,12 +113,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     hapticFeedback.medium();
     if (swiper.current) {
       swiper.current.swipeTop();
+      setTimeout(() => {
+        setCurrentIndex(currentIndex + 1);
+      }, 300);
     }
   };
 
   const handleRewind = useCallback(() => {
+    hapticFeedback.medium();
     if (currentIndex > 0 && swiper.current) {
-      hapticFeedback.medium();
       swiper.current.swipeBack();
       setCurrentIndex(currentIndex - 1);
     }
@@ -223,11 +228,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 animateCardOpacity
                 verticalThreshold={windowHeight * 0.15}
                 horizontalThreshold={windowWidth * 0.3}
-                onSwipedTop={handleSwipeUp}
-                onSwiped={(cardIndex) => {
-                  setCurrentIndex(cardIndex + 1);
+                onSwipedTop={() => {
+                  if (swiper.current) {
+                    swiper.current.swipeBack();
+                    handleSwipeUp();
+                  }
                 }}
-                disableTopSwipe={false}
+                onSwiped={(cardIndex) => {
+                  if (!showProfile) {
+                    setCurrentIndex(cardIndex + 1);
+                  }
+                }}
                 disableBottomSwipe={true}
                 infinite={false}
                 showSecondCard={true}
