@@ -54,9 +54,9 @@ const isWeb = Platform.OS === 'web';
 const isMobile = SCREEN_WIDTH < 768;
 
 const CARD_DIMENSIONS = {
-  width: SCREEN_WIDTH,
-  height: SCREEN_HEIGHT - 180, // Оставляем место для кнопок и отступов
-  expandedHeight: SCREEN_HEIGHT - 100
+  width: SCREEN_WIDTH * 0.9, // Уменьшаем ширину карточки
+  height: SCREEN_HEIGHT - 250, // Увеличиваем отступ снизу
+  expandedHeight: SCREEN_HEIGHT - 200
 };
 
 export default function HomeScreen() {
@@ -107,6 +107,7 @@ export default function HomeScreen() {
   const handleSwipe = useCallback((direction: 'left' | 'right' | 'up', cardIndex: number) => {
     hapticFeedback.medium();
     if (direction === 'up') {
+      // Только расширяем карточку для показа доп. информации
       setExpandedCard(cardIndex);
     } else {
       console.log(direction === 'right' ? 'Нравится' : 'Не нравится', cardIndex);
@@ -159,9 +160,11 @@ export default function HomeScreen() {
   const handleSuperLike = useCallback(() => {
     if (swiper.current && currentIndex < users.length) {
       hapticFeedback.medium();
-      setGlowColor('#4CAF50');
+      setGlowColor('#00E0FF');
       setGlowIntensity(0.3);
-      swiper.current.swipeTop();
+      // Просто делаем суперлайк без открытия карточки
+      console.log('Суперлайк');
+      swiper.current.swipeRight();
     }
   }, [currentIndex, users.length]);
 
@@ -204,9 +207,11 @@ export default function HomeScreen() {
   const renderCard = useCallback((user: User, cardIndex: number) => {
     if (!user) return null;
     
+    const isExpanded = expandedCard === cardIndex;
+    
     return (
       <View style={[styles.card, { height: CARD_DIMENSIONS.height }]}>
-        <View style={[styles.imageContainer, { height: CARD_DIMENSIONS.height }]}>
+        <View style={styles.imageContainer}>
           <Image
             source={{ uri: user.images[0] }}
             style={styles.cardImage}
@@ -223,10 +228,28 @@ export default function HomeScreen() {
         <View style={styles.cardContent}>
           <Text style={styles.cardTitle}>{user.name}, {user.age}</Text>
           <Text style={styles.cardDescription}>{user.bio}</Text>
+          
+          {isExpanded && (
+            <View style={styles.expandedContent}>
+              {user.location && (
+                <Text style={styles.expandedText}>📍 {user.location}</Text>
+              )}
+              {user.occupation && (
+                <Text style={styles.expandedText}>💼 {user.occupation}</Text>
+              )}
+              <View style={styles.interestsContainer}>
+                {user.interests.map((interest, index) => (
+                  <View key={index} style={styles.interestTag}>
+                    <Text style={styles.interestText}>{interest}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
         </View>
       </View>
     );
-  }, [glowColor, glowIntensity]);
+  }, [glowColor, glowIntensity, expandedCard]);
 
   const renderSkeleton = useCallback(() => (
     <View style={[styles.cardContainer, { width: CARD_DIMENSIONS.width }]}>
@@ -304,7 +327,7 @@ export default function HomeScreen() {
                 renderCard={(card) => renderCard(card, users.indexOf(card))}
                 onSwipedLeft={(cardIndex: number) => handleSwipe('left', cardIndex)}
                 onSwipedRight={(cardIndex: number) => handleSwipe('right', cardIndex)}
-                onSwipedTop={handleSwipedUp}
+                onSwipedTop={(cardIndex: number) => handleSwipe('up', cardIndex)}
                 cardIndex={currentIndex}
                 backgroundColor={'transparent'}
                 stackSize={2}
@@ -313,15 +336,15 @@ export default function HomeScreen() {
                 swipeBackCard
                 verticalSwipe={true}
                 horizontalSwipe={true}
-                cardVerticalMargin={0}
-                cardHorizontalMargin={0}
+                cardVerticalMargin={20}
+                cardHorizontalMargin={10}
                 disableBottomSwipe={true}
                 swipeAnimationDuration={150}
                 horizontalThreshold={50}
                 verticalThreshold={30}
                 outputRotationRange={['-0deg', '0deg', '0deg']}
-                stackSeparation={-30}
-                animateOverlayLabelsOpacity
+                stackSeparation={15}
+                overlayLabels={{}}
               />
             </View>
 
@@ -432,12 +455,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    overflow: 'hidden'
+    overflow: 'hidden',
   },
   imageContainer: {
     width: '100%',
-    overflow: 'hidden',
-    borderRadius: 20,
+    height: '100%',
+    position: 'relative',
   },
   cardImage: {
     width: '100%',
@@ -479,7 +502,9 @@ const styles = StyleSheet.create({
   },
   expandedContent: {
     marginTop: 15,
-    paddingTop: 15,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 15,
+    borderRadius: 10,
   },
   infoRow: {
     flexDirection: 'row',
@@ -501,20 +526,18 @@ const styles = StyleSheet.create({
   interestsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 5
+    marginTop: 10,
+    gap: 8,
   },
   interestTag: {
-    backgroundColor: 'rgba(138, 43, 226, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
-    margin: 4,
-    borderWidth: 1,
-    borderColor: '#8A2BE2',
   },
   interestText: {
-    color: '#8A2BE2',
-    fontSize: isMobile ? 14 : 16,
+    color: '#fff',
+    fontSize: 14,
   },
   skeletonTextContainer: {
     padding: 15,
@@ -563,9 +586,12 @@ const styles = StyleSheet.create({
     height: 60,
   },
   expandedText: {
-    fontSize: isMobile ? 16 : 18,
-    color: '#666',
-    flex: 1,
+    fontSize: 16,
+    color: '#fff',
+    marginBottom: 8,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   detailedInfo: {
     position: 'absolute',
@@ -616,6 +642,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 20,
+    paddingBottom: 30,
     background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
   },
   actionButtons: {
