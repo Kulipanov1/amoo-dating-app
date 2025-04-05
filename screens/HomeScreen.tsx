@@ -103,7 +103,7 @@ export default function HomeScreen() {
       hapticFeedback.medium();
       setGlowColor('#00E0FF');
       setGlowIntensity(0.3);
-      swiper.current.swipeTop();
+      swiper.current.swipeRight();
     }
   }, []);
 
@@ -219,9 +219,11 @@ export default function HomeScreen() {
                 cardVerticalMargin={10}
                 cardHorizontalMargin={0}
                 disableBottomSwipe={true}
-                inputRotationRange={[-15, 0, 15]}
-                outputRotationRange={['-5deg', '0deg', '5deg']}
-                swipeAnimationDuration={350}
+                inputRotationRange={[-8, 0, 8]}
+                outputRotationRange={['-3deg', '0deg', '3deg']}
+                swipeAnimationDuration={800}
+                verticalThreshold={150}
+                horizontalThreshold={120}
                 onSwipedTop={(cardIndex) => handleSwipe('top', cardIndex)}
                 onSwipedLeft={() => setGlowIntensity(0)}
                 onSwipedRight={() => setGlowIntensity(0)}
@@ -261,10 +263,15 @@ export default function HomeScreen() {
 
       <Modal
         visible={showProfile}
+        transparent={true}
         animationType="slide"
         onRequestClose={() => setShowProfile(false)}
       >
-        {currentProfile && renderExpandedProfile(currentProfile)}
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {currentProfile && renderExpandedProfile(currentProfile)}
+          </View>
+        </View>
       </Modal>
     </View>
   );
@@ -417,15 +424,16 @@ const styles = StyleSheet.create({
     height: 60,
   },
   expandedProfile: {
-    flex: 1,
-    backgroundColor: '#F8F4FF',
+    backgroundColor: 'transparent',
   },
   expandedHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    padding: 15,
     backgroundColor: '#8A2BE2',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   expandedName: {
     fontSize: 24,
@@ -447,37 +455,37 @@ const styles = StyleSheet.create({
   },
   expandedImage: {
     width: '100%',
-    height: 300,
+    height: 200,
     objectFit: 'cover',
   },
   expandedContent: {
-    padding: 20,
+    padding: 15,
   },
   expandedBio: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#333',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 10,
   },
   infoLabel: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
-    marginRight: 10,
+    marginRight: 8,
   },
   infoText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#333',
   },
   interestsTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    marginTop: 20,
-    marginBottom: 15,
+    marginTop: 15,
+    marginBottom: 10,
   },
   interestsContainer: {
     flexDirection: 'row',
@@ -486,12 +494,24 @@ const styles = StyleSheet.create({
   },
   interestTag: {
     backgroundColor: '#8A2BE2',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
   },
   interestText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 13,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#F8F4FF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '70%',
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
   },
 });
