@@ -77,24 +77,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   }, []);
 
   const handleSwipe = (direction: 'left' | 'right') => {
+    hapticFeedback.light();
     const xPosition = direction === 'left' ? -500 : 500;
     
-    RNAnimated.sequence([
-      RNAnimated.spring(pan, {
-        toValue: { x: xPosition, y: 0 },
-        useNativeDriver: true,
-        bounciness: 0,
-        speed: 20,
-      }),
-      RNAnimated.timing(pan, {
-        toValue: { x: 0, y: 0 },
-        duration: 0,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      // Обновляем индекс текущего профиля
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % users.length);
-    });
+    if (swiper.current) {
+      if (direction === 'left') {
+        swiper.current.swipeLeft();
+      } else {
+        swiper.current.swipeRight();
+      }
+    }
   };
 
   const handleSwipeUp = (cardIndex: number) => {
@@ -105,16 +97,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const handleLike = () => {
     hapticFeedback.light();
-    if (swiper.current) {
-      swiper.current.swipeRight();
-    }
+    handleSwipe('right');
   };
 
   const handleDislike = () => {
     hapticFeedback.light();
-    if (swiper.current) {
-      swiper.current.swipeLeft();
-    }
+    handleSwipe('left');
   };
 
   const handleSuperLike = () => {
@@ -234,10 +222,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 verticalThreshold={windowHeight * 0.15}
                 horizontalThreshold={windowWidth * 0.3}
                 onSwipedTop={handleSwipeUp}
-                onSwipedLeft={() => handleDislike()}
-                onSwipedRight={() => handleLike()}
+                onSwipedLeft={(cardIndex) => {
+                  handleDislike();
+                  setCurrentIndex(cardIndex + 1);
+                }}
+                onSwipedRight={(cardIndex) => {
+                  handleLike();
+                  setCurrentIndex(cardIndex + 1);
+                }}
                 disableTopSwipe={false}
                 disableBottomSwipe={true}
+                infinite={false}
+                showSecondCard={true}
+                cardHorizontalMargin={0}
+                cardVerticalMargin={0}
+                outputRotationRange={["-10deg", "0deg", "10deg"]}
                 overlayLabels={{
                   left: {
                     title: 'НEТЪ',
