@@ -273,28 +273,28 @@ export default function HomeScreen() {
               opacity: glowIntensity,
             }
           ]} />
-        </View>
-        <View style={styles.cardContent}>
-          <Text style={styles.cardTitle}>{user.name}, {user.age}</Text>
-          <Text style={styles.cardDescription}>{user.bio}</Text>
-          
-          {isExpanded && (
-            <View style={styles.expandedContent}>
-              {user.location && (
-                <Text style={styles.expandedText}>📍 {user.location}</Text>
-              )}
-              {user.occupation && (
-                <Text style={styles.expandedText}>💼 {user.occupation}</Text>
-              )}
-              <View style={styles.interestsContainer}>
-                {user.interests.map((interest, index) => (
-                  <View key={index} style={styles.interestTag}>
-                    <Text style={styles.interestText}>{interest}</Text>
-                  </View>
-                ))}
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>{user.name}, {user.age}</Text>
+            <Text style={styles.cardDescription}>{user.bio}</Text>
+            
+            {isExpanded && (
+              <View style={styles.expandedContent}>
+                {user.location && (
+                  <Text style={styles.expandedText}>📍 {user.location}</Text>
+                )}
+                {user.occupation && (
+                  <Text style={styles.expandedText}>💼 {user.occupation}</Text>
+                )}
+                <View style={styles.interestsContainer}>
+                  {user.interests.map((interest, index) => (
+                    <View key={index} style={styles.interestTag}>
+                      <Text style={styles.interestText}>{interest}</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
-            </View>
-          )}
+            )}
+          </View>
         </View>
       </View>
     );
@@ -374,13 +374,7 @@ export default function HomeScreen() {
                 cardIndex={currentIndex}
                 backgroundColor={'transparent'}
                 stackSize={2}
-                cardStyle={[
-                  styles.cardContainer,
-                  {
-                    width: dimensions.width,
-                    height: dimensions.height
-                  }
-                ]}
+                cardStyle={styles.cardContainer}
                 animateCardOpacity
                 swipeBackCard
                 verticalSwipe={true}
@@ -439,11 +433,10 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: '#F8F4FF',
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8F4FF',
   },
   desktopSafeArea: {
     backgroundColor: '#8A2BE2',
@@ -465,6 +458,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#8A2BE2',
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
   },
   logoText: {
     fontSize: 24,
@@ -479,15 +473,13 @@ const styles = StyleSheet.create({
   },
   swiperWrapper: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+    backgroundColor: 'transparent',
   },
   cardContainer: {
-    flex: 1,
-    padding: 16,
+    backgroundColor: 'transparent',
   },
   card: {
+    flex: 1,
     borderRadius: 20,
     backgroundColor: '#fff',
     shadowColor: '#000',
@@ -550,7 +542,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.6)',
     padding: 15,
     borderRadius: 10,
-    transform: [{ translateY: -20 }],
   },
   infoRow: {
     flexDirection: 'row',
@@ -689,7 +680,7 @@ const styles = StyleSheet.create({
     right: 0,
     padding: 20,
     paddingBottom: 30,
-    background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   actionButtons: {
     flexDirection: 'row',
@@ -697,6 +688,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 20,
     paddingHorizontal: 10,
+    backgroundColor: '#F8F4FF',
+    width: '100%',
   },
   rewindButton: {
     borderWidth: 2,
