@@ -1,12 +1,17 @@
 {
   "common": {
-    "loading": "Loading...",
+    "home": "Home",
+    "chats": "Chats",
+    "streams": "Streams",
+    "profile": "Profile",
+    "settings": "Settings",
     "error": "Error",
     "success": "Success",
     "cancel": "Cancel",
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
+    "loading": "Loading...",
     "close": "Close",
     "next": "Next",
     "back": "Back",
@@ -97,7 +102,8 @@
     "report": "Report",
     "typing": "typing...",
     "offline": "offline",
-    "lastSeen": "last seen"
+    "lastSeen": "last seen",
+    "newMessage": "New Message"
   },
   "settings": {
     "title": "Settings",
@@ -128,6 +134,12 @@
       "blockContacts": "Block Contacts",
       "dataUsage": "Data Usage"
     }
+  },
+  "streams": {
+    "goLive": "Go Live",
+    "endStream": "End Stream",
+    "viewers": "Viewers",
+    "noStreams": "No active streams"
   },
   "errors": {
     "default": "Something went wrong",

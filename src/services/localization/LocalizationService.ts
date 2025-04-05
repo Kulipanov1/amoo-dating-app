@@ -1,23 +1,6 @@
 import { I18n } from 'i18n-js';
 import * as Localization from 'expo-localization';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, updateDoc } from 'firebase/firestore';
-
-// Firebase конфигурация
-const firebaseConfig = {
-  // Здесь должны быть ваши настройки Firebase
-  apiKey: "your-api-key",
-  authDomain: "your-auth-domain",
-  projectId: "your-project-id",
-  storageBucket: "your-storage-bucket",
-  messagingSenderId: "your-messaging-sender-id",
-  appId: "your-app-id"
-};
-
-// Инициализация Firebase
-const app = initializeApp(firebaseConfig);
-const firestore = getFirestore(app);
 
 // Import translations
 import en from '../../locales/en.json';
@@ -34,16 +17,13 @@ export class LocalizationService {
   private static instance: LocalizationService;
   private i18n: I18n;
   private readonly LOCALE_STORAGE_KEY = '@app_locale';
-  private readonly DEFAULT_LOCALE = 'en';
-  private readonly SUPPORTED_LOCALES = ['en', 'ru', 'es', 'de', 'fr'];
+  private readonly DEFAULT_LOCALE = 'ru';
+  private readonly SUPPORTED_LOCALES = ['en', 'ru'];
 
   private constructor() {
     this.i18n = new I18n({
       en,
-      ru,
-      es,
-      de,
-      fr
+      ru
     });
 
     this.i18n.defaultLocale = this.DEFAULT_LOCALE;
@@ -76,7 +56,7 @@ export class LocalizationService {
     }
   }
 
-  public async changeLocale(locale: string, userId?: string): Promise<void> {
+  public async changeLocale(locale: string): Promise<void> {
     try {
       if (!this.SUPPORTED_LOCALES.includes(locale)) {
         throw new Error(`Unsupported locale: ${locale}`);
@@ -84,15 +64,6 @@ export class LocalizationService {
 
       this.i18n.locale = locale;
       await AsyncStorage.setItem(this.LOCALE_STORAGE_KEY, locale);
-
-      // Update user preferences in Firestore if userId is provided
-      if (userId) {
-        const userRef = doc(firestore, 'users', userId);
-        await updateDoc(userRef, {
-          preferredLocale: locale,
-          updatedAt: new Date()
-        });
-      }
     } catch (error) {
       console.error('Error changing locale:', error);
       throw error;
@@ -114,10 +85,7 @@ export class LocalizationService {
   public getLocaleDisplayName(locale: string): string {
     const localeNames: { [key: string]: string } = {
       en: 'English',
-      ru: 'Русский',
-      es: 'Español',
-      de: 'Deutsch',
-      fr: 'Français'
+      ru: 'Русский'
     };
     return localeNames[locale] || locale;
   }
@@ -138,8 +106,6 @@ export class LocalizationService {
   }
 
   public getTextDirection(): 'ltr' | 'rtl' {
-    // Add RTL languages here if needed in the future
-    const rtlLocales: string[] = [];
-    return rtlLocales.includes(this.i18n.locale) ? 'rtl' : 'ltr';
+    return 'ltr';
   }
 } 
