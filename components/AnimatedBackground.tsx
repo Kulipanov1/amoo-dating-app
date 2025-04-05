@@ -1,206 +1,103 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, Dimensions, Platform } from 'react-native';
+import { StyleSheet, Animated, View, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export default function AnimatedBackground() {
-  const { width, height } = Dimensions.get('window');
-  const isDesktop = Platform.OS === 'web' && width > 768;
-
-  const animation1 = useRef(new Animated.Value(0)).current;
-  const animation2 = useRef(new Animated.Value(0)).current;
-  const animation3 = useRef(new Animated.Value(0)).current;
+const AnimatedBackground = () => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const moveAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const animate = () => {
-      Animated.parallel([
-        Animated.sequence([
-          Animated.timing(animation1, {
-            toValue: 1,
-            duration: 20000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(animation1, {
-            toValue: 0,
-            duration: 20000,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(animation2, {
-            toValue: 1,
-            duration: 25000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(animation2, {
-            toValue: 0,
-            duration: 25000,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(animation3, {
-            toValue: 1,
-            duration: 30000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(animation3, {
-            toValue: 0,
-            duration: 30000,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]).start(() => animate());
+    const fadeIn = Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    });
+
+    const move = Animated.loop(
+      Animated.sequence([
+        Animated.timing(moveAnim, {
+          toValue: 1,
+          duration: 15000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(moveAnim, {
+          toValue: 0,
+          duration: 15000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    fadeIn.start();
+    move.start();
+
+    return () => {
+      move.stop();
     };
+  }, []);
 
-    animate();
-  }, [animation1, animation2, animation3]);
+  const { width, height } = Dimensions.get('window');
+  const gradientSize = Math.max(width, height) * 1.5;
 
-  const translateX1 = animation1.interpolate({
+  const translateX = moveAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, width * 0.7],
+    outputRange: [-gradientSize / 4, gradientSize / 4],
   });
 
-  const translateY1 = animation1.interpolate({
+  const translateY = moveAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, height * 0.4],
-  });
-
-  const rotate1 = animation1.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
-  const translateX2 = animation2.interpolate({
-    inputRange: [0, 1],
-    outputRange: [width * 0.5, -width * 0.3],
-  });
-
-  const translateY2 = animation2.interpolate({
-    inputRange: [0, 1],
-    outputRange: [height * 0.6, height * 0.2],
-  });
-
-  const rotate2 = animation2.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['360deg', '0deg'],
-  });
-
-  const translateX3 = animation3.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-width * 0.2, width * 0.4],
-  });
-
-  const translateY3 = animation3.interpolate({
-    inputRange: [0, 1],
-    outputRange: [height * 0.3, height * 0.7],
-  });
-
-  const rotate3 = animation3.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['180deg', '540deg'],
+    outputRange: [-gradientSize / 4, gradientSize / 4],
   });
 
   return (
-    <View style={[styles.container, isDesktop && styles.desktopContainer]}>
-      <LinearGradient
-        colors={['#8A2BE2', '#9400D3', '#8A2BE2']}
-        style={StyleSheet.absoluteFill}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      />
-      
+    <View style={styles.container}>
       <Animated.View
         style={[
-          styles.shape,
+          styles.gradientContainer,
           {
-            transform: [
-              { translateX: translateX1 },
-              { translateY: translateY1 },
-              { rotate: rotate1 },
-            ],
+            transform: [{ translateX }, { translateY }],
+            opacity: fadeAnim,
           },
         ]}
       >
         <LinearGradient
-          colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.05)']}
-          style={styles.gradient}
+          colors={['#8A2BE2', '#4CAF50', '#8A2BE2']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
+          style={[styles.gradient, { width: gradientSize, height: gradientSize }]}
         />
       </Animated.View>
-      
-      <Animated.View
-        style={[
-          styles.shape,
-          styles.shape2,
-          {
-            transform: [
-              { translateX: translateX2 },
-              { translateY: translateY2 },
-              { rotate: rotate2 },
-            ],
-          },
-        ]}
-      >
-        <LinearGradient
-          colors={['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.02)']}
-          style={styles.gradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        />
-      </Animated.View>
-
-      <Animated.View
-        style={[
-          styles.shape,
-          styles.shape3,
-          {
-            transform: [
-              { translateX: translateX3 },
-              { translateY: translateY3 },
-              { rotate: rotate3 },
-            ],
-          },
-        ]}
-      >
-        <LinearGradient
-          colors={['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.03)']}
-          style={styles.gradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        />
-      </Animated.View>
+      <View style={styles.overlay} />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
-    overflow: 'hidden',
-    zIndex: -1,
-  },
-  desktopContainer: {
-    borderRadius: 20,
-  },
-  shape: {
     position: 'absolute',
-    width: 400,
-    height: 400,
-    borderRadius: 200,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     overflow: 'hidden',
   },
-  shape2: {
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-  },
-  shape3: {
-    width: 250,
-    height: 250,
-    borderRadius: 125,
+  gradientContainer: {
+    position: 'absolute',
+    top: '-50%',
+    left: '-50%',
   },
   gradient: {
-    flex: 1,
+    borderRadius: 1000,
+    opacity: 0.3,
   },
-}); 
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+  },
+});
+
+export default AnimatedBackground; 

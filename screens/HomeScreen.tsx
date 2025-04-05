@@ -61,8 +61,8 @@ export default function HomeScreen() {
   const windowHeight = Dimensions.get('window').height;
   const isDesktop = windowWidth > 768;
   
-  const cardWidth = isDesktop ? DESKTOP_CONTENT_WIDTH * 0.9 : windowWidth * 0.9;
-  const cardHeight = isDesktop ? DESKTOP_CONTENT_HEIGHT - 180 : windowHeight - 250;
+  const cardWidth = isDesktop ? DESKTOP_CONTENT_WIDTH : windowWidth * 0.95;
+  const cardHeight = isDesktop ? DESKTOP_CONTENT_HEIGHT - 120 : windowHeight - 200;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -92,10 +92,10 @@ export default function HomeScreen() {
             resizeMode="cover"
           />
           <View style={[styles.imageTint, { backgroundColor: glowColor, opacity: glowIntensity }]} />
-        </View>
-        <View style={styles.cardContent}>
-          <Text style={styles.cardTitle}>{user.name}, {user.age}</Text>
-          <Text style={styles.cardDescription}>{user.bio}</Text>
+          <View style={styles.cardContent}>
+            <Text style={styles.cardTitle}>{user.name}, {user.age}</Text>
+            <Text style={styles.cardDescription}>{user.bio}</Text>
+          </View>
         </View>
       </View>
     );
@@ -163,7 +163,7 @@ export default function HomeScreen() {
       <AnimatedBackground />
       <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
         <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
-          <View style={[styles.mainContent, isDesktop && { width: DESKTOP_CONTENT_WIDTH, height: DESKTOP_CONTENT_HEIGHT }]}>
+          <View style={[styles.mainContent, isDesktop && { width: cardWidth, height: cardHeight + 180 }]}>
             <View style={styles.header}>
               <Text style={styles.logoText}>Amoo</Text>
             </View>
@@ -181,8 +181,8 @@ export default function HomeScreen() {
                 verticalSwipe={true}
                 horizontalSwipe={true}
                 stackSeparation={15}
-                cardVerticalMargin={20}
-                cardHorizontalMargin={10}
+                cardVerticalMargin={10}
+                cardHorizontalMargin={0}
                 disableBottomSwipe={true}
                 inputRotationRange={[-15, 0, 15]}
                 outputRotationRange={['-5deg', '0deg', '5deg']}
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   desktopSafeArea: {
-    backgroundColor: '#8A2BE2',
+    backgroundColor: 'transparent',
   },
   wrapper: {
     flex: 1,
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    backgroundColor: '#F8F4FF',
+    backgroundColor: 'transparent',
     maxWidth: DESKTOP_CONTENT_WIDTH,
     alignSelf: 'center',
     width: '100%',
@@ -259,6 +259,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   logoText: {
     fontSize: 24,
@@ -268,13 +270,9 @@ const styles = StyleSheet.create({
   swiperContainer: {
     flex: 1,
     backgroundColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   cardContainer: {
     backgroundColor: 'transparent',
-    borderRadius: 20,
-    overflow: 'hidden',
   },
   card: {
     borderRadius: 20,
@@ -290,9 +288,9 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   imageContainer: {
-    flex: 1,
-    borderRadius: 20,
-    overflow: 'hidden',
+    width: '100%',
+    height: '100%',
+    position: 'relative',
   },
   cardImage: {
     width: '100%',
@@ -305,7 +303,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: 20,
   },
   cardContent: {
     position: 'absolute',
@@ -314,25 +311,23 @@ const styles = StyleSheet.create({
     right: 0,
     padding: 20,
     paddingBottom: 30,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 100%)',
   },
   cardTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#fff',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    textShadowRadius: 5,
   },
   cardDescription: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#fff',
     marginTop: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    textShadowRadius: 5,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -340,7 +335,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 20,
     paddingHorizontal: 10,
-    backgroundColor: '#F8F4FF',
+    backgroundColor: 'transparent',
     gap: 20,
   },
   actionButton: {
