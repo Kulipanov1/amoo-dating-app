@@ -78,8 +78,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const handleSwipe = (direction: 'left' | 'right') => {
     hapticFeedback.light();
-    const xPosition = direction === 'left' ? -500 : 500;
-    
     if (swiper.current) {
       if (direction === 'left') {
         swiper.current.swipeLeft();
@@ -97,12 +95,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
   const handleLike = () => {
     hapticFeedback.light();
-    handleSwipe('right');
+    if (swiper.current) {
+      swiper.current.swipeRight();
+    }
   };
 
   const handleDislike = () => {
     hapticFeedback.light();
-    handleSwipe('left');
+    if (swiper.current) {
+      swiper.current.swipeLeft();
+    }
   };
 
   const handleSuperLike = () => {
@@ -222,12 +224,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 verticalThreshold={windowHeight * 0.15}
                 horizontalThreshold={windowWidth * 0.3}
                 onSwipedTop={handleSwipeUp}
-                onSwipedLeft={(cardIndex) => {
-                  handleDislike();
-                  setCurrentIndex(cardIndex + 1);
-                }}
-                onSwipedRight={(cardIndex) => {
-                  handleLike();
+                onSwiped={(cardIndex) => {
                   setCurrentIndex(cardIndex + 1);
                 }}
                 disableTopSwipe={false}
@@ -237,6 +234,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 cardHorizontalMargin={0}
                 cardVerticalMargin={0}
                 outputRotationRange={["-10deg", "0deg", "10deg"]}
+                useViewOverflow={Platform.OS === 'web'}
                 overlayLabels={{
                   left: {
                     title: 'НEТЪ',
