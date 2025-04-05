@@ -1,0 +1,142 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "next": "Weiter",
+    "back": "Zurück",
+    "done": "Fertig",
+    "search": "Suchen",
+    "noResults": "Keine Ergebnisse",
+    "retry": "Wiederholen",
+    "confirm": "Bestätigen",
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "auth": {
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "signOut": "Abmelden",
+    "forgotPassword": "Passwort vergessen?",
+    "resetPassword": "Passwort zurücksetzen",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "name": "Name",
+    "phone": "Telefon",
+    "or": "oder",
+    "continueWith": "Weiter mit",
+    "alreadyHaveAccount": "Bereits ein Konto?",
+    "dontHaveAccount": "Noch kein Konto?",
+    "passwordResetSent": "Anweisungen zum Zurücksetzen des Passworts wurden gesendet",
+    "verificationEmailSent": "Bestätigungs-E-Mail wurde gesendet",
+    "errors": {
+      "invalidEmail": "Ungültige E-Mail-Adresse",
+      "invalidPassword": "Das Passwort muss mindestens 8 Zeichen lang sein",
+      "passwordMismatch": "Die Passwörter stimmen nicht überein",
+      "emailInUse": "Diese E-Mail-Adresse wird bereits verwendet",
+      "invalidCredentials": "Ungültige E-Mail oder Passwort",
+      "weakPassword": "Das Passwort ist zu schwach",
+      "userNotFound": "Benutzer nicht gefunden",
+      "tooManyRequests": "Zu viele Versuche. Bitte später erneut versuchen"
+    }
+  },
+  "profile": {
+    "title": "Profil",
+    "edit": "Profil bearbeiten",
+    "settings": "Einstellungen",
+    "photos": "Fotos",
+    "about": "Über mich",
+    "interests": "Interessen",
+    "location": "Standort",
+    "distance": "Entfernung",
+    "ageRange": "Altersbereich",
+    "showMe": "Zeige mich",
+    "gender": {
+      "title": "Geschlecht",
+      "male": "Männlich",
+      "female": "Weiblich",
+      "other": "Andere"
+    },
+    "verification": {
+      "title": "Verifizierung",
+      "verified": "Verifiziert",
+      "notVerified": "Nicht verifiziert",
+      "pending": "Ausstehend",
+      "verify": "Jetzt verifizieren",
+      "uploadPhoto": "Foto hochladen",
+      "uploadDocument": "Dokument hochladen"
+    }
+  },
+  "matches": {
+    "title": "Matches",
+    "newMatch": "Neues Match!",
+    "noMatches": "Noch keine Matches",
+    "startSwiping": "Beginne zu swipen, um Matches zu finden",
+    "like": "Gefällt mir",
+    "nope": "Gefällt mir nicht",
+    "superLike": "Super Like",
+    "rewind": "Zurück",
+    "itsMatch": "Es ist ein Match!",
+    "keepSwiping": "Weiter swipen",
+    "sendMessage": "Nachricht senden"
+  },
+  "chat": {
+    "title": "Nachrichten",
+    "noMessages": "Noch keine Nachrichten",
+    "startChat": "Chat beginnen",
+    "typeMessage": "Nachricht eingeben...",
+    "send": "Senden",
+    "unmatch": "Match aufheben",
+    "block": "Blockieren",
+    "report": "Melden",
+    "typing": "schreibt...",
+    "offline": "offline",
+    "lastSeen": "zuletzt online"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "account": "Konto",
+    "notifications": "Benachrichtigungen",
+    "privacy": "Datenschutz",
+    "language": "Sprache",
+    "theme": "Design",
+    "help": "Hilfe & Support",
+    "about": "Über uns",
+    "terms": "Nutzungsbedingungen",
+    "privacy": "Datenschutzerklärung",
+    "deleteAccount": "Konto löschen",
+    "notifications": {
+      "matches": "Neue Matches",
+      "messages": "Neue Nachrichten",
+      "likes": "Neue Likes",
+      "superLikes": "Super Likes",
+      "inApp": "In-App Benachrichtigungen",
+      "email": "E-Mail-Benachrichtigungen",
+      "push": "Push-Benachrichtigungen"
+    },
+    "privacy": {
+      "showOnline": "Online-Status anzeigen",
+      "showDistance": "Entfernung anzeigen",
+      "showAge": "Alter anzeigen",
+      "hideProfile": "Profil verbergen",
+      "blockContacts": "Kontakte blockieren",
+      "dataUsage": "Datennutzung"
+    }
+  },
+  "errors": {
+    "default": "Etwas ist schief gelaufen",
+    "network": "Netzwerkfehler",
+    "timeout": "Zeitüberschreitung",
+    "unauthorized": "Nicht autorisiert",
+    "forbidden": "Zugriff verweigert",
+    "notFound": "Nicht gefunden",
+    "serverError": "Serverfehler",
+    "validation": "Validierungsfehler"
+  }
+} 

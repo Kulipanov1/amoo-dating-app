@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Dimensions, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Dimensions, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 const gradientSize = Math.max(width, height) * 2;
 
-export default function AnimatedBackground() {
+const AnimatedBackground: React.FC = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const moveAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -16,57 +16,53 @@ export default function AnimatedBackground() {
   const orb3Anim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Основная анимация фона
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
+    // Анимация появления
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1500,
+      useNativeDriver: true,
+    }).start();
+
+    // Анимация движения
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(moveAnim, {
+          toValue: 1,
+          duration: 20000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(moveAnim, {
+          toValue: 0,
+          duration: 20000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Анимация вращения
+    Animated.loop(
+      Animated.timing(rotateAnim, {
         toValue: 1,
-        duration: 1500,
+        duration: 30000,
         useNativeDriver: true,
-      }),
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(moveAnim, {
-            toValue: 1,
-            duration: 20000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(moveAnim, {
-            toValue: 0,
-            duration: 20000,
-            useNativeDriver: true,
-          }),
-        ])
-      ),
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(rotateAnim, {
-            toValue: 1,
-            duration: 30000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(rotateAnim, {
-            toValue: 0,
-            duration: 30000,
-            useNativeDriver: true,
-          }),
-        ])
-      ),
-      // Пульсация
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(scaleAnim, {
-            toValue: 1.1,
-            duration: 4000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleAnim, {
-            toValue: 1,
-            duration: 4000,
-            useNativeDriver: true,
-          }),
-        ])
-      ),
-    ]).start();
+      })
+    ).start();
+
+    // Анимация масштабирования
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.2,
+          duration: 15000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 15000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
 
     // Анимации орбов
     const orbAnimations = [orb1Anim, orb2Anim, orb3Anim].map((anim, index) =>
@@ -89,7 +85,12 @@ export default function AnimatedBackground() {
     orbAnimations.forEach(animation => animation.start());
 
     return () => {
-      [fadeAnim, moveAnim, rotateAnim, scaleAnim, orb1Anim, orb2Anim, orb3Anim].forEach(anim => {
+      // Очистка анимаций при размонтировании
+      fadeAnim.stopAnimation();
+      moveAnim.stopAnimation();
+      rotateAnim.stopAnimation();
+      scaleAnim.stopAnimation();
+      [orb1Anim, orb2Anim, orb3Anim].forEach(anim => {
         anim.stopAnimation();
       });
     };
@@ -155,7 +156,7 @@ export default function AnimatedBackground() {
           colors={['#9932CC', '#8A2BE2', '#9400D3', '#8A2BE2']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={[styles.gradient, { width: gradientSize, height: gradientSize }]}
+          style={styles.gradient}
         />
       </Animated.View>
 
@@ -172,21 +173,23 @@ export default function AnimatedBackground() {
       <View style={styles.overlay} />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
+    ...StyleSheet.absoluteFillObject,
     overflow: 'hidden',
   },
   gradientContainer: {
+    width: gradientSize,
+    height: gradientSize,
     position: 'absolute',
-    left: -gradientSize / 2,
     top: -gradientSize / 2,
+    left: -gradientSize / 2,
   },
   gradient: {
+    width: '100%',
+    height: '100%',
     opacity: 0.4,
   },
   orbsContainer: {
@@ -222,9 +225,9 @@ const styles = StyleSheet.create({
     shadowRadius: 50,
   },
   overlay: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(138, 43, 226, 0.2)',
   },
-}); 
+});
+
+export default AnimatedBackground; 

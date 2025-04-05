@@ -1,0 +1,142 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "next": "Suivant",
+    "back": "Retour",
+    "done": "Terminé",
+    "search": "Rechercher",
+    "noResults": "Aucun résultat",
+    "retry": "Réessayer",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "auth": {
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "signOut": "Se déconnecter",
+    "forgotPassword": "Mot de passe oublié ?",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "name": "Nom",
+    "phone": "Téléphone",
+    "or": "ou",
+    "continueWith": "Continuer avec",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "dontHaveAccount": "Vous n'avez pas de compte ?",
+    "passwordResetSent": "Instructions de réinitialisation envoyées",
+    "verificationEmailSent": "E-mail de vérification envoyé",
+    "errors": {
+      "invalidEmail": "Adresse e-mail invalide",
+      "invalidPassword": "Le mot de passe doit contenir au moins 8 caractères",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "emailInUse": "Cette adresse e-mail est déjà utilisée",
+      "invalidCredentials": "E-mail ou mot de passe incorrect",
+      "weakPassword": "Le mot de passe est trop faible",
+      "userNotFound": "Utilisateur non trouvé",
+      "tooManyRequests": "Trop de tentatives. Réessayez plus tard"
+    }
+  },
+  "profile": {
+    "title": "Profil",
+    "edit": "Modifier le profil",
+    "settings": "Paramètres",
+    "photos": "Photos",
+    "about": "À propos",
+    "interests": "Centres d'intérêt",
+    "location": "Localisation",
+    "distance": "Distance",
+    "ageRange": "Tranche d'âge",
+    "showMe": "Me montrer",
+    "gender": {
+      "title": "Genre",
+      "male": "Homme",
+      "female": "Femme",
+      "other": "Autre"
+    },
+    "verification": {
+      "title": "Vérification",
+      "verified": "Vérifié",
+      "notVerified": "Non vérifié",
+      "pending": "En attente",
+      "verify": "Vérifier maintenant",
+      "uploadPhoto": "Télécharger une photo",
+      "uploadDocument": "Télécharger un document"
+    }
+  },
+  "matches": {
+    "title": "Matchs",
+    "newMatch": "Nouveau match !",
+    "noMatches": "Pas encore de matchs",
+    "startSwiping": "Commencez à swiper pour trouver des matchs",
+    "like": "J'aime",
+    "nope": "Passer",
+    "superLike": "Super like",
+    "rewind": "Retour",
+    "itsMatch": "C'est un match !",
+    "keepSwiping": "Continuer à swiper",
+    "sendMessage": "Envoyer un message"
+  },
+  "chat": {
+    "title": "Messages",
+    "noMessages": "Pas encore de messages",
+    "startChat": "Démarrer la conversation",
+    "typeMessage": "Écrivez un message...",
+    "send": "Envoyer",
+    "unmatch": "Supprimer le match",
+    "block": "Bloquer",
+    "report": "Signaler",
+    "typing": "écrit...",
+    "offline": "hors ligne",
+    "lastSeen": "vu(e) pour la dernière fois"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "account": "Compte",
+    "notifications": "Notifications",
+    "privacy": "Confidentialité",
+    "language": "Langue",
+    "theme": "Thème",
+    "help": "Aide et support",
+    "about": "À propos",
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité",
+    "deleteAccount": "Supprimer le compte",
+    "notifications": {
+      "matches": "Nouveaux matchs",
+      "messages": "Nouveaux messages",
+      "likes": "Nouveaux j'aime",
+      "superLikes": "Super likes",
+      "inApp": "Notifications dans l'app",
+      "email": "Notifications par e-mail",
+      "push": "Notifications push"
+    },
+    "privacy": {
+      "showOnline": "Afficher le statut en ligne",
+      "showDistance": "Afficher la distance",
+      "showAge": "Afficher l'âge",
+      "hideProfile": "Masquer le profil",
+      "blockContacts": "Bloquer des contacts",
+      "dataUsage": "Utilisation des données"
+    }
+  },
+  "errors": {
+    "default": "Une erreur est survenue",
+    "network": "Erreur réseau",
+    "timeout": "Délai d'attente dépassé",
+    "unauthorized": "Non autorisé",
+    "forbidden": "Accès refusé",
+    "notFound": "Non trouvé",
+    "serverError": "Erreur serveur",
+    "validation": "Erreur de validation"
+  }
+} 

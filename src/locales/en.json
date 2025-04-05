@@ -1,0 +1,142 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "next": "Next",
+    "back": "Back",
+    "done": "Done",
+    "search": "Search",
+    "noResults": "No results found",
+    "retry": "Retry",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Name",
+    "phone": "Phone",
+    "or": "or",
+    "continueWith": "Continue with",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "passwordResetSent": "Password reset instructions have been sent to your email",
+    "verificationEmailSent": "Verification email has been sent",
+    "errors": {
+      "invalidEmail": "Invalid email address",
+      "invalidPassword": "Password must be at least 8 characters long",
+      "passwordMismatch": "Passwords do not match",
+      "emailInUse": "Email is already in use",
+      "invalidCredentials": "Invalid email or password",
+      "weakPassword": "Password is too weak",
+      "userNotFound": "User not found",
+      "tooManyRequests": "Too many attempts. Please try again later"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "edit": "Edit Profile",
+    "settings": "Settings",
+    "photos": "Photos",
+    "about": "About",
+    "interests": "Interests",
+    "location": "Location",
+    "distance": "Distance",
+    "ageRange": "Age Range",
+    "showMe": "Show Me",
+    "gender": {
+      "title": "Gender",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "verification": {
+      "title": "Verification",
+      "verified": "Verified",
+      "notVerified": "Not Verified",
+      "pending": "Pending",
+      "verify": "Verify Now",
+      "uploadPhoto": "Upload Photo",
+      "uploadDocument": "Upload Document"
+    }
+  },
+  "matches": {
+    "title": "Matches",
+    "newMatch": "New Match!",
+    "noMatches": "No matches yet",
+    "startSwiping": "Start swiping to find matches",
+    "like": "Like",
+    "nope": "Nope",
+    "superLike": "Super Like",
+    "rewind": "Rewind",
+    "itsMatch": "It's a Match!",
+    "keepSwiping": "Keep Swiping",
+    "sendMessage": "Send Message"
+  },
+  "chat": {
+    "title": "Messages",
+    "noMessages": "No messages yet",
+    "startChat": "Start chatting",
+    "typeMessage": "Type a message...",
+    "send": "Send",
+    "unmatch": "Unmatch",
+    "block": "Block",
+    "report": "Report",
+    "typing": "typing...",
+    "offline": "offline",
+    "lastSeen": "last seen"
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "notifications": "Notifications",
+    "privacy": "Privacy",
+    "language": "Language",
+    "theme": "Theme",
+    "help": "Help & Support",
+    "about": "About",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "deleteAccount": "Delete Account",
+    "notifications": {
+      "matches": "New Matches",
+      "messages": "New Messages",
+      "likes": "New Likes",
+      "superLikes": "Super Likes",
+      "inApp": "In-App Notifications",
+      "email": "Email Notifications",
+      "push": "Push Notifications"
+    },
+    "privacy": {
+      "showOnline": "Show Online Status",
+      "showDistance": "Show Distance",
+      "showAge": "Show Age",
+      "hideProfile": "Hide Profile",
+      "blockContacts": "Block Contacts",
+      "dataUsage": "Data Usage"
+    }
+  },
+  "errors": {
+    "default": "Something went wrong",
+    "network": "Network error",
+    "timeout": "Request timeout",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Access denied",
+    "notFound": "Not found",
+    "serverError": "Server error",
+    "validation": "Validation error"
+  }
+} 

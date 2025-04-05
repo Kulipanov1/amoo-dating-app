@@ -1,0 +1,142 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "next": "Siguiente",
+    "back": "Atrás",
+    "done": "Hecho",
+    "search": "Buscar",
+    "noResults": "Sin resultados",
+    "retry": "Reintentar",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "signOut": "Cerrar sesión",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "resetPassword": "Restablecer contraseña",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "name": "Nombre",
+    "phone": "Teléfono",
+    "or": "o",
+    "continueWith": "Continuar con",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "dontHaveAccount": "¿No tienes una cuenta?",
+    "passwordResetSent": "Se han enviado instrucciones para restablecer la contraseña",
+    "verificationEmailSent": "Se ha enviado un correo de verificación",
+    "errors": {
+      "invalidEmail": "Correo electrónico inválido",
+      "invalidPassword": "La contraseña debe tener al menos 8 caracteres",
+      "passwordMismatch": "Las contraseñas no coinciden",
+      "emailInUse": "El correo electrónico ya está en uso",
+      "invalidCredentials": "Correo electrónico o contraseña incorrectos",
+      "weakPassword": "La contraseña es demasiado débil",
+      "userNotFound": "Usuario no encontrado",
+      "tooManyRequests": "Demasiados intentos. Inténtalo más tarde"
+    }
+  },
+  "profile": {
+    "title": "Perfil",
+    "edit": "Editar perfil",
+    "settings": "Configuración",
+    "photos": "Fotos",
+    "about": "Sobre mí",
+    "interests": "Intereses",
+    "location": "Ubicación",
+    "distance": "Distancia",
+    "ageRange": "Rango de edad",
+    "showMe": "Mostrarme",
+    "gender": {
+      "title": "Género",
+      "male": "Hombre",
+      "female": "Mujer",
+      "other": "Otro"
+    },
+    "verification": {
+      "title": "Verificación",
+      "verified": "Verificado",
+      "notVerified": "No verificado",
+      "pending": "Pendiente",
+      "verify": "Verificar ahora",
+      "uploadPhoto": "Subir foto",
+      "uploadDocument": "Subir documento"
+    }
+  },
+  "matches": {
+    "title": "Coincidencias",
+    "newMatch": "¡Nueva coincidencia!",
+    "noMatches": "Aún no hay coincidencias",
+    "startSwiping": "Comienza a deslizar para encontrar coincidencias",
+    "like": "Me gusta",
+    "nope": "No me gusta",
+    "superLike": "Super like",
+    "rewind": "Deshacer",
+    "itsMatch": "¡Es una coincidencia!",
+    "keepSwiping": "Seguir deslizando",
+    "sendMessage": "Enviar mensaje"
+  },
+  "chat": {
+    "title": "Mensajes",
+    "noMessages": "No hay mensajes aún",
+    "startChat": "Iniciar chat",
+    "typeMessage": "Escribe un mensaje...",
+    "send": "Enviar",
+    "unmatch": "Deshacer coincidencia",
+    "block": "Bloquear",
+    "report": "Reportar",
+    "typing": "escribiendo...",
+    "offline": "desconectado",
+    "lastSeen": "última vez"
+  },
+  "settings": {
+    "title": "Configuración",
+    "account": "Cuenta",
+    "notifications": "Notificaciones",
+    "privacy": "Privacidad",
+    "language": "Idioma",
+    "theme": "Tema",
+    "help": "Ayuda y soporte",
+    "about": "Acerca de",
+    "terms": "Términos de uso",
+    "privacy": "Política de privacidad",
+    "deleteAccount": "Eliminar cuenta",
+    "notifications": {
+      "matches": "Nuevas coincidencias",
+      "messages": "Nuevos mensajes",
+      "likes": "Nuevos me gusta",
+      "superLikes": "Super likes",
+      "inApp": "Notificaciones en la app",
+      "email": "Notificaciones por correo",
+      "push": "Notificaciones push"
+    },
+    "privacy": {
+      "showOnline": "Mostrar estado en línea",
+      "showDistance": "Mostrar distancia",
+      "showAge": "Mostrar edad",
+      "hideProfile": "Ocultar perfil",
+      "blockContacts": "Bloquear contactos",
+      "dataUsage": "Uso de datos"
+    }
+  },
+  "errors": {
+    "default": "Algo salió mal",
+    "network": "Error de red",
+    "timeout": "Tiempo de espera agotado",
+    "unauthorized": "No autorizado",
+    "forbidden": "Acceso denegado",
+    "notFound": "No encontrado",
+    "serverError": "Error del servidor",
+    "validation": "Error de validación"
+  }
+} 

@@ -46,7 +46,7 @@ const dummyUsers: User[] = [
 const DESKTOP_CONTENT_WIDTH = 480;
 const DESKTOP_CONTENT_HEIGHT = 700;
 
-export default function HomeScreen() {
+const HomeScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -275,7 +275,9 @@ export default function HomeScreen() {
       </Modal>
     </View>
   );
-}
+};
+
+export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
