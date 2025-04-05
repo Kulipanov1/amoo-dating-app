@@ -2,12 +2,24 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { View, StyleSheet } from 'react-native';
-import { HomeIcon, HeartIcon, MessageIcon, ProfileIcon, StreamIcon } from '../components/Icons';
-import { HomeScreen } from '../screens/HomeScreen';
-import { SettingsScreen } from '../src/screens/SettingsScreen';
-import { useLocalization } from '../src/contexts/LocalizationContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalization } from '../src/contexts/LocalizationContext';
 
+// Types
+import {
+  RootStackParamList,
+  ChatStackParamList,
+  ProfileStackParamList,
+  HomeStackParamList,
+  StreamsStackParamList,
+  ChatScreenProps,
+  SingleChatScreenProps,
+  ChatRoomScreenProps
+} from '../src/types/navigation';
+
+// Screens
+import HomeScreen from '../screens/HomeScreen';
+import { SettingsScreen } from '../src/screens/SettingsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ChatListScreen from '../screens/ChatListScreen';
 import ChatScreen from '../screens/ChatScreen';
@@ -16,16 +28,11 @@ import SingleChatScreen from '../screens/SingleChatScreen';
 import ChatRoomScreen from '../screens/ChatRoomScreen';
 import LiveScreen from '../screens/LiveScreen';
 import MapScreen from '../screens/MapScreen';
-import AnimatedBackground from '../components/AnimatedBackground';
-import {
-  ChatStackParamList,
-  ProfileStackParamList,
-  HomeStackParamList,
-  StreamsStackParamList,
-  TabParamList,
-} from '../types/navigation';
 
-const Tab = createBottomTabNavigator<TabParamList>();
+// Components
+import AnimatedBackground from '../components/AnimatedBackground';
+
+const Tab = createBottomTabNavigator<RootStackParamList>();
 const ChatStack = createStackNavigator<ChatStackParamList>();
 const ProfileStack = createStackNavigator<ProfileStackParamList>();
 const HomeStack = createStackNavigator<HomeStackParamList>();
@@ -56,7 +63,7 @@ const ChatStackNavigator = () => (
       name="Chat"
       component={ChatScreen}
       options={({ route }) => ({
-        title: route.params.userName,
+        title: route.params?.userName || 'Чат',
       })}
     />
     <ChatStack.Screen
@@ -204,26 +211,17 @@ const TabNavigator = () => {
         <Tab.Screen
           name="StreamsTab"
           component={StreamsStackNavigator}
-          options={{
-            tabBarIcon: ({ color, size }) => <StreamIcon color={color} size={size} />,
-            title: 'Стримы'
-          }}
+          options={{ title: t('streams.title') }}
         />
         <Tab.Screen
           name="ChatTab"
           component={ChatStackNavigator}
-          options={{
-            tabBarIcon: ({ color, size }) => <MessageIcon color={color} size={size} />,
-            title: 'Чаты'
-          }}
+          options={{ title: t('chat.title') }}
         />
         <Tab.Screen
           name="ProfileTab"
           component={ProfileStackNavigator}
-          options={{
-            tabBarIcon: ({ color, size }) => <ProfileIcon color={color} size={size} />,
-            title: 'Профиль'
-          }}
+          options={{ title: t('profile.title') }}
         />
         <Tab.Screen
           name="SettingsTab"

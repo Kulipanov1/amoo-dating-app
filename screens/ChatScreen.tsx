@@ -20,6 +20,7 @@ import { SendIcon, CameraIcon, MicrophoneIcon } from '../components/Icons';
 import Message from '../components/Message';
 import AnimatedBackground from '../components/AnimatedBackground';
 import { ChatStackParamList } from '../types/navigation';
+import { ChatScreenProps } from '../src/types/navigation';
 
 type Props = StackScreenProps<ChatStackParamList, 'Chat'>;
 
@@ -81,7 +82,7 @@ const dummyMessages: Message[] = [
   },
 ];
 
-const ChatScreen: React.FC<Props> = ({ route, navigation }) => {
+const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
   const [messages, setMessages] = useState<Message[]>(dummyMessages);
   const [inputText, setInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);

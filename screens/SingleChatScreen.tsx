@@ -24,6 +24,7 @@ import VideoMessage from '../components/VideoMessage';
 import AudioMessage from '../components/AudioMessage';
 import VideoRecorder from '../components/VideoRecorder';
 import TypingIndicator from '../components/TypingIndicator';
+import { SingleChatScreenProps } from '../src/types/navigation';
 
 interface RouteParams {
   chatId: string;
@@ -60,7 +61,7 @@ interface ChatUser {
   isTyping?: boolean;
 }
 
-export default function SingleChatScreen({ route }: Props) {
+const SingleChatScreen: React.FC<SingleChatScreenProps> = ({ route }) => {
   const { chatId, user } = route.params;
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
@@ -460,7 +461,7 @@ export default function SingleChatScreen({ route }: Props) {
       />
     </KeyboardAvoidingView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -680,4 +681,6 @@ const styles = StyleSheet.create({
     color: '#666',
     marginLeft: 8,
   },
-}); 
+});
+
+export default SingleChatScreen; 

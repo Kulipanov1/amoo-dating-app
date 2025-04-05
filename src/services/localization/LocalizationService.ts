@@ -1,8 +1,23 @@
 import { I18n } from 'i18n-js';
 import * as Localization from 'expo-localization';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { firestore } from '../firebase/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+
+// Firebase конфигурация
+const firebaseConfig = {
+  // Здесь должны быть ваши настройки Firebase
+  apiKey: "your-api-key",
+  authDomain: "your-auth-domain",
+  projectId: "your-project-id",
+  storageBucket: "your-storage-bucket",
+  messagingSenderId: "your-messaging-sender-id",
+  appId: "your-app-id"
+};
+
+// Инициализация Firebase
+const app = initializeApp(firebaseConfig);
+const firestore = getFirestore(app);
 
 // Import translations
 import en from '../../locales/en.json';

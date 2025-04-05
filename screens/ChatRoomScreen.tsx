@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 import { ChatStackParamList } from '../types/navigation';
+import { ChatRoomScreenProps } from '../src/types/navigation';
 
 type Props = StackScreenProps<ChatStackParamList, 'ChatRoom'>;
 
@@ -23,7 +24,7 @@ interface Message {
   timestamp: number;
 }
 
-export default function ChatRoomScreen({ route, navigation }: Props) {
+const ChatRoomScreen: React.FC<ChatRoomScreenProps> = ({ route, navigation }) => {
   const { chatId, userName, userAvatar } = route.params;
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
@@ -81,7 +82,9 @@ export default function ChatRoomScreen({ route, navigation }: Props) {
       </View>
     </KeyboardAvoidingView>
   );
-}
+};
+
+export default ChatRoomScreen;
 
 const styles = StyleSheet.create({
   container: {
