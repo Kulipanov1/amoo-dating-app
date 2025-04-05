@@ -13,6 +13,7 @@ export type ChatStackParamList = {
   Chat: {
     userId: string;
     userName: string;
+    userAvatar: string;
   };
   SingleChat: {
     chatId: string;
@@ -26,6 +27,9 @@ export type ChatStackParamList = {
     chatId: string;
     userName: string;
     userAvatar: string;
+  };
+  UserProfile: {
+    userId: string;
   };
 };
 
@@ -49,6 +53,14 @@ export type StreamsStackParamList = {
     streamId: string;
     userName: string;
   };
+};
+
+export type ChatScreenNavigationProp = StackNavigationProp<ChatStackParamList, 'Chat'>;
+export type ChatScreenRouteProp = RouteProp<ChatStackParamList, 'Chat'>;
+
+export type ChatScreenProps = {
+  navigation: ChatScreenNavigationProp;
+  route: ChatScreenRouteProp;
 };
 
 export type HomeScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'Home'>;

@@ -17,6 +17,8 @@ export type ChatStackParamList = {
 
 export type ProfileStackParamList = {
   Profile: undefined;
+  EditProfile: undefined;
+  Settings: undefined;
 };
 
 export type HomeStackParamList = {
@@ -54,8 +56,10 @@ export type MapScreenProps = {
   route: RouteProp<HomeStackParamList, 'Map'>;
 };
 
+export type ProfileScreenNavigationProp = StackNavigationProp<ProfileStackParamList, 'Profile'>;
+
 export type ProfileScreenProps = {
-  navigation: StackNavigationProp<ProfileStackParamList, 'Profile'>;
+  navigation: ProfileScreenNavigationProp;
   route: RouteProp<ProfileStackParamList, 'Profile'>;
 };
 

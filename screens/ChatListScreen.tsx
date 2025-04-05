@@ -13,12 +13,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 import ScreenWrapper from '../components/ScreenWrapper';
 import AnimatedBackground from '../components/AnimatedBackground';
+import { useNavigation } from '@react-navigation/native';
+import { ChatScreenNavigationProp } from '../types/navigation';
 
 type RootStackParamList = {
   ChatList: undefined;
   Chat: {
     userId: string;
     userName: string;
+    userAvatar: string;
   };
   Profile: {
     userId: string;
@@ -27,131 +30,107 @@ type RootStackParamList = {
 
 type Props = StackScreenProps<RootStackParamList, 'ChatList'>;
 
-interface ChatPreview {
+interface ChatItem {
   id: string;
   user: {
     id: string;
     name: string;
     avatar: string;
-    isOnline: boolean;
-    lastSeen?: Date;
   };
   lastMessage: {
     text: string;
-    timestamp: Date;
-    isRead: boolean;
+    timestamp: number;
+    unread: boolean;
   };
-  unreadCount: number;
 }
 
-const dummyChats: ChatPreview[] = [
+const dummyChats: ChatItem[] = [
   {
     id: '1',
     user: {
-      id: '2',
+      id: '101',
       name: 'Анна Иванова',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3',
-      isOnline: true,
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
     },
     lastMessage: {
       text: 'Привет! Как дела?',
-      timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 минут назад
-      isRead: false,
+      timestamp: Date.now() - 5 * 60 * 1000,
+      unread: true,
     },
-    unreadCount: 1,
   },
   {
     id: '2',
     user: {
-      id: '3',
+      id: '102',
       name: 'Мария Петрова',
-      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-4.0.3',
-      isOnline: false,
-      lastSeen: new Date(Date.now() - 1000 * 60 * 30), // 30 минут назад
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
     },
     lastMessage: {
       text: 'Отличная фотография!',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 час назад
-      isRead: true,
+      timestamp: Date.now() - 60 * 60 * 1000,
+      unread: false,
     },
-    unreadCount: 0,
   },
   {
     id: '3',
     user: {
-      id: '4',
+      id: '103',
       name: 'Дмитрий Соколов',
-      avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3',
-      isOnline: true,
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e',
     },
     lastMessage: {
       text: 'Где встретимся?',
-      timestamp: new Date(Date.now() - 1000 * 60 * 120), // 2 часа назад
-      isRead: true,
+      timestamp: Date.now() - 2 * 60 * 60 * 1000,
+      unread: false,
     },
-    unreadCount: 0,
   },
 ];
 
-export default function ChatListScreen({ navigation }: Props) {
+const ChatListScreen: React.FC = () => {
+  const navigation = useNavigation<ChatScreenNavigationProp>();
   const { width: windowWidth } = Dimensions.get('window');
   const isDesktop = Platform.OS === 'web' && windowWidth > 768;
   const contentWidth = isDesktop ? 480 : windowWidth;
 
-  const formatTimestamp = (date: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / (1000 * 60));
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const formatTimestamp = (timestamp: number): string => {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / (60 * 1000));
+    const hours = Math.floor(diff / (60 * 60 * 1000));
 
     if (minutes < 60) {
       return `${minutes} мин`;
     } else if (hours < 24) {
       return `${hours} ч`;
     } else {
-      return `${days} д`;
+      return new Date(timestamp).toLocaleDateString();
     }
   };
 
-  const renderChatItem = ({ item }: { item: ChatPreview }) => (
+  const renderChatItem = ({ item }: { item: ChatItem }) => (
     <TouchableOpacity
       style={styles.chatItem}
       onPress={() => navigation.navigate('Chat', {
         userId: item.user.id,
         userName: item.user.name,
+        userAvatar: item.user.avatar,
       })}
     >
-      <View style={styles.avatarContainer}>
-        <Image source={{ uri: item.user.avatar }} style={styles.avatar} />
-        {item.user.isOnline && <View style={styles.onlineIndicator} />}
-      </View>
-
+      <Image source={{ uri: item.user.avatar }} style={styles.avatar} />
       <View style={styles.chatInfo}>
         <View style={styles.chatHeader}>
           <Text style={styles.userName}>{item.user.name}</Text>
-          <Text style={styles.timestamp}>
-            {formatTimestamp(item.lastMessage.timestamp)}
-          </Text>
+          <Text style={styles.timeStamp}>{formatTimestamp(item.lastMessage.timestamp)}</Text>
         </View>
-
-        <View style={styles.lastMessage}>
-          <Text 
-            style={[
-              styles.messageText,
-              !item.lastMessage.isRead && styles.unreadText
-            ]}
-            numberOfLines={1}
-          >
-            {item.lastMessage.text}
-          </Text>
-          {item.unreadCount > 0 && (
-            <View style={styles.unreadBadge}>
-              <Text style={styles.unreadCount}>{item.unreadCount}</Text>
-            </View>
-          )}
-        </View>
+        <Text style={styles.lastMessage} numberOfLines={1}>
+          {item.lastMessage.text}
+        </Text>
       </View>
+      {item.lastMessage.unread && (
+        <View style={styles.unreadBadge}>
+          <Text style={styles.unreadCount}>1</Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 
@@ -170,7 +149,7 @@ export default function ChatListScreen({ navigation }: Props) {
           <FlatList
             data={dummyChats}
             renderItem={renderChatItem}
-            keyExtractor={item => item.id}
+            keyExtractor={(item) => item.id}
             contentContainerStyle={styles.chatList}
             showsVerticalScrollIndicator={false}
           />
@@ -178,14 +157,12 @@ export default function ChatListScreen({ navigation }: Props) {
       </ScreenWrapper>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#fff',
   },
   header: {
     height: 56,
@@ -205,34 +182,24 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   chatList: {
-    paddingVertical: 8,
+    flex: 1,
+    paddingHorizontal: 16,
+    alignItems: 'flex-start',
   },
   chatItem: {
     flexDirection: 'row',
-    padding: 16,
     alignItems: 'center',
+    paddingVertical: 12,
+    width: '100%',
+    maxWidth: 600,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0E6FF',
-  },
-  avatarContainer: {
-    position: 'relative',
-    marginRight: 12,
+    borderBottomColor: '#E3D3FF',
   },
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-  },
-  onlineIndicator: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#4CAF50',
-    borderWidth: 2,
-    borderColor: 'white',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
   },
   chatInfo: {
     flex: 1,
@@ -248,37 +215,32 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
-  timestamp: {
+  timeStamp: {
     fontSize: 12,
     color: '#666',
   },
   lastMessage: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  messageText: {
-    flex: 1,
     fontSize: 14,
     color: '#666',
-    marginRight: 8,
-  },
-  unreadText: {
-    color: '#333',
-    fontWeight: '500',
+    marginRight: 40,
   },
   unreadBadge: {
+    position: 'absolute',
+    right: 0,
+    top: '50%',
     backgroundColor: '#8A2BE2',
+    borderRadius: 10,
     minWidth: 20,
     height: 20,
-    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 6,
   },
   unreadCount: {
-    color: 'white',
+    color: '#fff',
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
   },
-}); 
+});
+
+export default ChatListScreen; 

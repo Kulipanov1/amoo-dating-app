@@ -18,6 +18,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { hapticFeedback } from '../utils/haptics';
 import AnimatedBackground from '../components/AnimatedBackground';
 import { useLocalization } from '../src/contexts/LocalizationContext';
+import { useNavigation } from '@react-navigation/native';
+import { ProfileScreenNavigationProp } from '../types/navigation';
 
 interface Achievement {
   id: string;
@@ -113,7 +115,8 @@ const dummyPhotos = [
 
 const defaultAvatar = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
 
-const ProfileScreen = () => {
+const ProfileScreen: React.FC = () => {
+  const navigation = useNavigation<ProfileScreenNavigationProp>();
   const { t, getCurrentLocale, changeLocale, getSupportedLocales, getLocaleDisplayName } = useLocalization();
   const { width: windowWidth } = Dimensions.get('window');
   const [windowHeight, setWindowHeight] = useState(Dimensions.get('window').height);
@@ -157,6 +160,8 @@ const ProfileScreen = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [showOnline, setShowOnline] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
+  const [currentLocale, setCurrentLocale] = useState(getCurrentLocale());
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
@@ -255,8 +260,9 @@ const ProfileScreen = () => {
     hapticFeedback.light();
   };
 
-  const handleLanguageChange = (locale: string) => {
-    changeLocale(locale);
+  const handleLanguageChange = async (locale: string) => {
+    await changeLocale(locale);
+    setCurrentLocale(locale);
   };
 
   const renderSettingItem = (
@@ -292,8 +298,7 @@ const ProfileScreen = () => {
   );
 
   const handleEditProfile = () => {
-    hapticFeedback.light();
-    // TODO: Добавить навигацию к редактированию профиля
+    navigation.navigate('EditProfile');
   };
 
   const handleStatPress = (type: 'followers' | 'following' | 'likes' | 'matches') => {
@@ -325,6 +330,78 @@ const ProfileScreen = () => {
     hapticFeedback.light();
     // TODO: Добавить навигацию к информации о приложении
   };
+
+  const renderSettings = () => (
+    <Modal
+      visible={showSettings}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={() => setShowSettings(false)}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{t('settings.title')}</Text>
+            <TouchableOpacity onPress={() => setShowSettings(false)}>
+              <Ionicons name="close" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.settingsList}>
+            <View style={styles.settingSection}>
+              <Text style={styles.settingSectionTitle}>{t('settings.language')}</Text>
+              <TouchableOpacity
+                style={[styles.languageOption, currentLocale === 'ru' && styles.selectedLanguage]}
+                onPress={() => handleLanguageChange('ru')}
+              >
+                <Text style={styles.languageText}>Русский</Text>
+                {currentLocale === 'ru' && (
+                  <Ionicons name="checkmark" size={20} color="#8A2BE2" />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.languageOption, currentLocale === 'en' && styles.selectedLanguage]}
+                onPress={() => handleLanguageChange('en')}
+              >
+                <Text style={styles.languageText}>English</Text>
+                {currentLocale === 'en' && (
+                  <Ionicons name="checkmark" size={20} color="#8A2BE2" />
+                )}
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.settingSection}>
+              <Text style={styles.settingSectionTitle}>{t('settings.notifications')}</Text>
+              <TouchableOpacity style={styles.settingItem}>
+                <Text style={styles.settingText}>{t('settings.pushNotifications')}</Text>
+                <Ionicons name="toggle" size={32} color="#8A2BE2" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.settingItem}>
+                <Text style={styles.settingText}>{t('settings.emailNotifications')}</Text>
+                <Ionicons name="toggle-outline" size={32} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.settingSection}>
+              <Text style={styles.settingSectionTitle}>{t('settings.privacy')}</Text>
+              <TouchableOpacity style={styles.settingItem}>
+                <Text style={styles.settingText}>{t('settings.profileVisibility')}</Text>
+                <Ionicons name="toggle" size={32} color="#8A2BE2" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.settingItem}>
+                <Text style={styles.settingText}>{t('settings.onlineStatus')}</Text>
+                <Ionicons name="toggle" size={32} color="#8A2BE2" />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity style={styles.logoutButton}>
+              <Text style={styles.logoutText}>{t('settings.logout')}</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
 
   return (
     <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
@@ -462,84 +539,7 @@ const ProfileScreen = () => {
         />
       )}
 
-      <Modal
-        visible={showSettingsModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowSettingsModal(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Настройки</Text>
-              <TouchableOpacity
-                onPress={() => setShowSettingsModal(false)}
-                style={styles.closeButton}
-              >
-                <Ionicons name="close" size={24} color="#666" />
-              </TouchableOpacity>
-            </View>
-
-            {renderSettingItem(
-              'notifications',
-              'Уведомления',
-              notificationsEnabled,
-              () => setNotificationsEnabled(!notificationsEnabled),
-              true
-            )}
-            
-            {renderSettingItem(
-              'moon',
-              'Темная тема',
-              darkMode,
-              () => setDarkMode(!darkMode),
-              true
-            )}
-            
-            {renderSettingItem(
-              'eye',
-              'Показывать статус',
-              showOnline,
-              () => setShowOnline(!showOnline),
-              true
-            )}
-            
-            {renderSettingItem(
-              'language',
-              'Язык',
-              getLocaleDisplayName(getCurrentLocale()),
-              () => {
-                // TODO: Добавить модальное окно выбора языка
-              }
-            )}
-            
-            {renderSettingItem(
-              'shield-checkmark',
-              'Конфиденциальность',
-              undefined,
-              handlePrivacyPress
-            )}
-            
-            {renderSettingItem(
-              'help-circle',
-              'Помощь',
-              undefined,
-              handleHelpPress
-            )}
-            
-            {renderSettingItem(
-              'information-circle',
-              'О приложении',
-              undefined,
-              handleAboutPress
-            )}
-
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-              <Text style={styles.logoutButtonText}>Выйти</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      {renderSettings()}
     </SafeAreaView>
   );
 };
@@ -810,9 +810,9 @@ const styles = StyleSheet.create({
   },
   settingItem: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 15,
+    alignItems: 'center',
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#E3D3FF',
   },
@@ -877,16 +877,16 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   logoutButton: {
-    backgroundColor: '#8A2BE2',
+    backgroundColor: '#FF4B4B',
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 8,
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 24,
   },
-  logoutButtonText: {
+  logoutText: {
+    color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
@@ -931,6 +931,38 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: 'rgba(138, 43, 226, 0.1)',
     borderRadius: 20,
+  },
+  settingsList: {
+    padding: 20,
+  },
+  settingSection: {
+    marginBottom: 24,
+  },
+  settingSectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 12,
+  },
+  settingText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  languageOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  selectedLanguage: {
+    backgroundColor: '#F0E6FF',
+  },
+  languageText: {
+    fontSize: 16,
+    color: '#333',
   },
 });
 

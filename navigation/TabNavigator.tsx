@@ -1,10 +1,11 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { View, StyleSheet, TextStyle } from 'react-native';
+import { View, StyleSheet, TextStyle, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalization } from '../src/contexts/LocalizationContext';
 import { StackNavigationOptions } from '@react-navigation/stack';
+import { useNavigation } from '@react-navigation/native';
 import {
   RootStackParamList,
   ChatStackParamList,
@@ -49,9 +50,38 @@ const screenOptions: StackNavigationOptions = {
     fontWeight: '600' as TextStyle['fontWeight'],
   },
   headerBackTitleVisible: false,
-  headerBackImage: () => (
-    <Ionicons name="chevron-back" size={24} color="#333" style={{ marginLeft: 10 }} />
+  headerLeft: () => {
+    const navigation = useNavigation();
+    return (
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+        <Ionicons name="chevron-back" size={24} color="#333" style={{ marginLeft: 10 }} />
+      </TouchableOpacity>
+    );
+  },
+  headerTitle: ({ children }) => (
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Ionicons 
+        name={getHeaderIcon(typeof children === 'string' ? children : '')} 
+        size={24} 
+        color="#8A2BE2" 
+        style={{ marginRight: 8 }} 
+      />
+      <Text style={{ fontSize: 18, fontWeight: '600', color: '#333' }}>{children}</Text>
+    </View>
   ),
+};
+
+const getHeaderIcon = (title: string): keyof typeof Ionicons.glyphMap => {
+  switch (title) {
+    case 'Чаты':
+      return 'chatbubbles';
+    case 'Профиль':
+      return 'person';
+    case 'Стримы':
+      return 'videocam';
+    default:
+      return 'home';
+  }
 };
 
 const ChatStackNavigator = () => {

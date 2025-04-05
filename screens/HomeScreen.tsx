@@ -311,6 +311,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
   },
   desktopWrapper: {
     paddingVertical: 20,
@@ -320,6 +321,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    width: '100%',
+    maxWidth: DESKTOP_CONTENT_WIDTH,
   },
   header: {
     height: 56,
@@ -340,8 +343,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 10,
-    paddingBottom: 20,
+    width: '100%',
   },
   cardContainer: {
     width: '100%',

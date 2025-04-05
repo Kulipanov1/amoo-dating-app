@@ -10,6 +10,7 @@ import {
   Platform,
   Dimensions,
   KeyboardAvoidingView,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
@@ -20,7 +21,7 @@ import { SendIcon, CameraIcon, MicrophoneIcon } from '../components/Icons';
 import Message from '../components/Message';
 import AnimatedBackground from '../components/AnimatedBackground';
 import { ChatStackParamList } from '../types/navigation';
-import { ChatScreenProps } from '../src/types/navigation';
+import { ChatScreenProps } from '../types/navigation';
 
 type Props = StackScreenProps<ChatStackParamList, 'Chat'>;
 
@@ -82,12 +83,16 @@ const dummyMessages: Message[] = [
   },
 ];
 
+type AttachmentType = 'media' | 'documents' | 'links';
+
 const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
   const [messages, setMessages] = useState<Message[]>(dummyMessages);
   const [inputText, setInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const flatListRef = useRef<FlatList>(null);
+  const [showAttachments, setShowAttachments] = useState(false);
+  const [attachmentType, setAttachmentType] = useState<AttachmentType>('media');
   
   const { width: windowWidth } = Dimensions.get('window');
   const isDesktop = Platform.OS === 'web' && windowWidth > 768;
@@ -226,6 +231,40 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
     setIsRecording(false);
   };
 
+  const handleUserPress = () => {
+    navigation.navigate('UserProfile', { userId: route.params.userId });
+  };
+
+  const renderAttachments = () => {
+    switch (attachmentType) {
+      case 'media':
+        return (
+          <FlatList
+            data={[]}
+            renderItem={() => null}
+            numColumns={3}
+            style={styles.attachmentsList}
+          />
+        );
+      case 'documents':
+        return (
+          <FlatList
+            data={[]}
+            renderItem={() => null}
+            style={styles.attachmentsList}
+          />
+        );
+      case 'links':
+        return (
+          <FlatList
+            data={[]}
+            renderItem={() => null}
+            style={styles.attachmentsList}
+          />
+        );
+    }
+  };
+
   const renderMessage = ({ item }: { item: Message }) => {
     const isOwnMessage = item.sender.id === userId;
 
@@ -307,6 +346,24 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardAvoidingView}
         >
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+              <Ionicons name="chevron-back" size={24} color="#333" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleUserPress} style={styles.userInfo}>
+              <Image
+                source={{ uri: route.params.userAvatar }}
+                style={styles.avatar}
+              />
+              <View style={styles.userTextInfo}>
+                <Text style={styles.userName}>{route.params.userName}</Text>
+                <Text style={styles.userStatus}>В сети</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuButton}>
+              <Ionicons name="ellipsis-vertical" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
           <FlatList
             ref={flatListRef}
             data={messages}
@@ -344,6 +401,48 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
           </View>
         </KeyboardAvoidingView>
       </View>
+      <Modal
+        visible={showAttachments}
+        animationType="slide"
+        onRequestClose={() => setShowAttachments(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setShowAttachments(false)}>
+              <Ionicons name="close" size={24} color="#333" />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Вложения</Text>
+            <View style={{ width: 24 }} />
+          </View>
+          <View style={styles.tabContainer}>
+            <TouchableOpacity
+              style={[styles.tab, attachmentType === 'media' && styles.activeTab]}
+              onPress={() => setAttachmentType('media')}
+            >
+              <Text style={[styles.tabText, attachmentType === 'media' && styles.activeTabText]}>
+                Медиа
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, attachmentType === 'documents' && styles.activeTab]}
+              onPress={() => setAttachmentType('documents')}
+            >
+              <Text style={[styles.tabText, attachmentType === 'documents' && styles.activeTabText]}>
+                Документы
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, attachmentType === 'links' && styles.activeTab]}
+              onPress={() => setAttachmentType('links')}
+            >
+              <Text style={[styles.tabText, attachmentType === 'links' && styles.activeTabText]}>
+                Ссылки
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {renderAttachments()}
+        </View>
+      </Modal>
     </ScreenWrapper>
   );
 };
@@ -353,13 +452,41 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
-  headerButton: {
-    marginRight: 16,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E3D3FF',
   },
-  headerAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  backButton: {
+    marginRight: 12,
+  },
+  userInfo: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+  },
+  userTextInfo: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  userStatus: {
+    fontSize: 12,
+    color: '#666',
+  },
+  menuButton: {
+    padding: 8,
   },
   messageList: {
     flex: 1,
@@ -462,6 +589,50 @@ const styles = StyleSheet.create({
   },
   keyboardAvoidingView: {
     flex: 1,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E3D3FF',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E3D3FF',
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#8A2BE2',
+  },
+  tabText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  activeTabText: {
+    color: '#8A2BE2',
+    fontWeight: '600',
+  },
+  attachmentsList: {
+    flex: 1,
+    padding: 16,
   },
 });
 
