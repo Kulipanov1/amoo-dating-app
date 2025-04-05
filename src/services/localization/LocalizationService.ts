@@ -5,9 +5,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Import translations
 import en from '../../locales/en.json';
 import ru from '../../locales/ru.json';
-import es from '../../locales/es.json';
-import de from '../../locales/de.json';
-import fr from '../../locales/fr.json';
 
 interface TranslationData {
   [key: string]: string | TranslationData;
@@ -19,14 +16,13 @@ export class LocalizationService {
   private readonly LOCALE_STORAGE_KEY = '@app_locale';
   private readonly DEFAULT_LOCALE = 'ru';
   private readonly SUPPORTED_LOCALES = ['en', 'ru'];
+  private translations = { en, ru };
 
   private constructor() {
-    this.i18n = new I18n({
-      en,
-      ru
-    });
-
+    this.i18n = new I18n();
+    this.i18n.translations = this.translations;
     this.i18n.defaultLocale = this.DEFAULT_LOCALE;
+    this.i18n.locale = this.DEFAULT_LOCALE;
     this.i18n.enableFallback = true;
     this.initializeLocale();
   }
@@ -71,7 +67,12 @@ export class LocalizationService {
   }
 
   public t(key: string, options?: object): string {
-    return this.i18n.t(key, options);
+    try {
+      return this.i18n.t(key, options) || key;
+    } catch (error) {
+      console.error('Translation error:', error);
+      return key;
+    }
   }
 
   public getCurrentLocale(): string {
@@ -91,18 +92,33 @@ export class LocalizationService {
   }
 
   public formatDate(date: Date, format?: string): string {
-    return this.i18n.strftime(date, format || '%d %b %Y');
+    try {
+      return this.i18n.strftime(date, format || '%d %b %Y');
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return date.toLocaleDateString();
+    }
   }
 
   public formatNumber(number: number, options?: Intl.NumberFormatOptions): string {
-    return new Intl.NumberFormat(this.i18n.locale, options).format(number);
+    try {
+      return new Intl.NumberFormat(this.i18n.locale, options).format(number);
+    } catch (error) {
+      console.error('Number formatting error:', error);
+      return number.toString();
+    }
   }
 
   public formatCurrency(amount: number, currency: string = 'USD'): string {
-    return new Intl.NumberFormat(this.i18n.locale, {
-      style: 'currency',
-      currency
-    }).format(amount);
+    try {
+      return new Intl.NumberFormat(this.i18n.locale, {
+        style: 'currency',
+        currency
+      }).format(amount);
+    } catch (error) {
+      console.error('Currency formatting error:', error);
+      return `${amount} ${currency}`;
+    }
   }
 
   public getTextDirection(): 'ltr' | 'rtl' {

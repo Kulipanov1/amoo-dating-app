@@ -4,7 +4,8 @@ import Swiper from 'react-native-deck-swiper';
 import { hapticFeedback } from '../utils/haptics';
 import { SuperLikeIcon, LikeIcon, DislikeIcon, BackArrowIcon } from '../components/Icons';
 import AnimatedBackground from '../components/AnimatedBackground';
-import { Animated as RNAnimated } from 'react';
+import { Animated as RNAnimated } from 'react-native';
+import type { HomeScreenProps } from '../types/navigation';
 
 interface User {
   id: string;
@@ -47,7 +48,7 @@ const dummyUsers: User[] = [
 const DESKTOP_CONTENT_WIDTH = 480;
 const DESKTOP_CONTENT_HEIGHT = 700;
 
-const HomeScreen: React.FC = () => {
+const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);

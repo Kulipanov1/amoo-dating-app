@@ -52,4 +52,12 @@ export type ChatRoomScreenRouteProp = RouteProp<ChatStackParamList, 'ChatRoom'>;
 export type ChatRoomScreenProps = {
   navigation: ChatRoomScreenNavigationProp;
   route: ChatRoomScreenRouteProp;
+};
+
+export type HomeScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'Home'>;
+export type HomeScreenRouteProp = RouteProp<HomeStackParamList, 'Home'>;
+
+export type HomeScreenProps = {
+  navigation: HomeScreenNavigationProp;
+  route: HomeScreenRouteProp;
 }; 

@@ -1,3 +1,6 @@
+import { RouteProp } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+
 export type TabParamList = {
   HomeTab: undefined;
   StreamsTab: undefined;
@@ -46,4 +49,12 @@ export type StreamsStackParamList = {
     streamId: string;
     userName: string;
   };
+};
+
+export type HomeScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'Home'>;
+export type HomeScreenRouteProp = RouteProp<HomeStackParamList, 'Home'>;
+
+export type HomeScreenProps = {
+  navigation: HomeScreenNavigationProp;
+  route: HomeScreenRouteProp;
 }; 

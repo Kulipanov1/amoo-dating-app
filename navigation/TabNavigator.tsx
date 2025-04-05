@@ -1,38 +1,20 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TextStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalization } from '../src/contexts/LocalizationContext';
-
-// Types
-type RootStackParamList = {
-  HomeTab: undefined;
-  ChatTab: undefined;
-  StreamsTab: undefined;
-  ProfileTab: undefined;
-};
-
-type ChatStackParamList = {
-  ChatList: undefined;
-  Chat: { userName: string };
-  SingleChat: undefined;
-  ChatRoom: undefined;
-};
-
-type ProfileStackParamList = {
-  Profile: undefined;
-};
-
-type HomeStackParamList = {
-  Home: undefined;
-  Map: undefined;
-};
-
-type StreamsStackParamList = {
-  Streams: undefined;
-  Live: undefined;
-};
+import { StackNavigationOptions } from '@react-navigation/stack';
+import {
+  RootStackParamList,
+  ChatStackParamList,
+  ProfileStackParamList,
+  HomeStackParamList,
+  StreamsStackParamList,
+  ChatScreenProps,
+  SingleChatScreenProps,
+  ChatRoomScreenProps,
+} from '../src/types/navigation';
 
 // Screens
 import HomeScreen from '../screens/HomeScreen';
@@ -54,144 +36,102 @@ const ProfileStack = createStackNavigator<ProfileStackParamList>();
 const HomeStack = createStackNavigator<HomeStackParamList>();
 const StreamsStack = createStackNavigator<StreamsStackParamList>();
 
-const ChatStackNavigator = () => (
-  <ChatStack.Navigator
-    screenOptions={{
-      headerStyle: {
-        backgroundColor: 'white',
-        elevation: 0,
-        shadowOpacity: 0,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E3D3FF',
-      },
-      headerTintColor: '#333',
-      headerTitleStyle: {
-        fontWeight: '600',
-      },
-      headerBackTitleVisible: false,
-      headerBackImage: () => (
-        <Ionicons name="chevron-back" size={24} color="#333" style={{ marginLeft: 10 }} />
-      ),
-    }}
-  >
-    <ChatStack.Screen
-      name="ChatList"
-      component={ChatListScreen}
-      options={{ headerShown: false }}
-    />
-    <ChatStack.Screen
-      name="Chat"
-      component={ChatScreen}
-      options={({ route }) => ({
-        title: route.params?.userName || 'Чат',
-      })}
-    />
-    <ChatStack.Screen
-      name="SingleChat"
-      component={SingleChatScreen}
-      options={{ title: 'Чат' }}
-    />
-    <ChatStack.Screen
-      name="ChatRoom"
-      component={ChatRoomScreen}
-      options={{ title: 'Комната' }}
-    />
-  </ChatStack.Navigator>
-);
+const screenOptions: StackNavigationOptions = {
+  headerStyle: {
+    backgroundColor: 'white',
+    elevation: 0,
+    shadowOpacity: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E3D3FF',
+  },
+  headerTintColor: '#333',
+  headerTitleStyle: {
+    fontWeight: '600' as TextStyle['fontWeight'],
+  },
+  headerBackTitleVisible: false,
+  headerBackImage: () => (
+    <Ionicons name="chevron-back" size={24} color="#333" style={{ marginLeft: 10 }} />
+  ),
+};
 
-const ProfileStackNavigator = () => (
-  <ProfileStack.Navigator
-    screenOptions={{
-      headerStyle: {
-        backgroundColor: 'white',
-        elevation: 0,
-        shadowOpacity: 0,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E3D3FF',
-      },
-      headerTintColor: '#333',
-      headerTitleStyle: {
-        fontWeight: '600',
-      },
-      headerBackTitleVisible: false,
-      headerBackImage: () => (
-        <Ionicons name="chevron-back" size={24} color="#333" style={{ marginLeft: 10 }} />
-      ),
-    }}
-  >
-    <ProfileStack.Screen
-      name="Profile"
-      component={ProfileScreen}
-      options={{ headerShown: false }}
-    />
-  </ProfileStack.Navigator>
-);
+const ChatStackNavigator = () => {
+  const { t } = useLocalization();
+  return (
+    <ChatStack.Navigator screenOptions={screenOptions}>
+      <ChatStack.Screen
+        name="ChatList"
+        component={ChatListScreen}
+        options={{ headerShown: false }}
+      />
+      <ChatStack.Screen
+        name="Chat"
+        component={ChatScreen as React.ComponentType<ChatScreenProps>}
+        options={({ route }) => ({
+          title: route.params?.userName || t('chat.title'),
+        })}
+      />
+      <ChatStack.Screen
+        name="SingleChat"
+        component={SingleChatScreen as React.ComponentType<SingleChatScreenProps>}
+        options={{ title: t('chat.title') }}
+      />
+      <ChatStack.Screen
+        name="ChatRoom"
+        component={ChatRoomScreen as React.ComponentType<ChatRoomScreenProps>}
+        options={{ title: t('chat.title') }}
+      />
+    </ChatStack.Navigator>
+  );
+};
 
-const HomeStackNavigator = () => (
-  <HomeStack.Navigator
-    screenOptions={{
-      headerStyle: {
-        backgroundColor: 'white',
-        elevation: 0,
-        shadowOpacity: 0,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E3D3FF',
-      },
-      headerTintColor: '#333',
-      headerTitleStyle: {
-        fontWeight: '600',
-      },
-      headerBackTitleVisible: false,
-      headerBackImage: () => (
-        <Ionicons name="chevron-back" size={24} color="#333" style={{ marginLeft: 10 }} />
-      ),
-    }}
-  >
-    <HomeStack.Screen
-      name="Home"
-      component={HomeScreen}
-      options={{ headerShown: false }}
-    />
-    <HomeStack.Screen
-      name="Map"
-      component={MapScreen}
-      options={{ title: 'Карта' }}
-    />
-  </HomeStack.Navigator>
-);
+const ProfileStackNavigator = () => {
+  const { t } = useLocalization();
+  return (
+    <ProfileStack.Navigator screenOptions={screenOptions}>
+      <ProfileStack.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ headerShown: false }}
+      />
+    </ProfileStack.Navigator>
+  );
+};
 
-const StreamsStackNavigator = () => (
-  <StreamsStack.Navigator
-    screenOptions={{
-      headerStyle: {
-        backgroundColor: 'white',
-        elevation: 0,
-        shadowOpacity: 0,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E3D3FF',
-      },
-      headerTintColor: '#333',
-      headerTitleStyle: {
-        fontWeight: '600',
-      },
-      headerBackTitleVisible: false,
-      headerBackImage: () => (
-        <Ionicons name="chevron-back" size={24} color="#333" style={{ marginLeft: 10 }} />
-      ),
-    }}
-  >
-    <StreamsStack.Screen
-      name="Streams"
-      component={StreamsScreen}
-      options={{ headerShown: false }}
-    />
-    <StreamsStack.Screen
-      name="Live"
-      component={LiveScreen}
-      options={{ title: 'Прямой эфир' }}
-    />
-  </StreamsStack.Navigator>
-);
+const HomeStackNavigator = () => {
+  const { t } = useLocalization();
+  return (
+    <HomeStack.Navigator screenOptions={screenOptions}>
+      <HomeStack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{ headerShown: false }}
+      />
+      <HomeStack.Screen
+        name="Map"
+        component={MapScreen}
+        options={{ title: t('common.map') }}
+      />
+    </HomeStack.Navigator>
+  );
+};
+
+const StreamsStackNavigator = () => {
+  const { t } = useLocalization();
+  return (
+    <StreamsStack.Navigator screenOptions={screenOptions}>
+      <StreamsStack.Screen
+        name="Streams"
+        component={StreamsScreen}
+        options={{ headerShown: false }}
+      />
+      <StreamsStack.Screen
+        name="Live"
+        component={LiveScreen}
+        options={{ title: t('streams.goLive') }}
+      />
+    </StreamsStack.Navigator>
+  );
+};
 
 const TabNavigator = () => {
   const { t } = useLocalization();
@@ -204,30 +144,24 @@ const TabNavigator = () => {
           tabBarIcon: ({ focused, color, size }) => {
             let iconName: keyof typeof Ionicons.glyphMap = 'home';
 
-            switch (route.name) {
-              case 'HomeTab':
-                iconName = focused ? 'home' : 'home-outline';
-                break;
-              case 'ChatTab':
-                iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
-                break;
-              case 'StreamsTab':
-                iconName = focused ? 'videocam' : 'videocam-outline';
-                break;
-              case 'ProfileTab':
-                iconName = focused ? 'person' : 'person-outline';
-                break;
+            if (route.name === 'HomeTab') {
+              iconName = focused ? 'home' : 'home-outline';
+            } else if (route.name === 'ChatTab') {
+              iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
+            } else if (route.name === 'StreamsTab') {
+              iconName = focused ? 'videocam' : 'videocam-outline';
+            } else if (route.name === 'ProfileTab') {
+              iconName = focused ? 'person' : 'person-outline';
             }
 
             return <Ionicons name={iconName} size={size} color={color} />;
           },
           tabBarActiveTintColor: '#8A2BE2',
-          tabBarInactiveTintColor: 'gray',
+          tabBarInactiveTintColor: '#666',
           tabBarStyle: {
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            borderTopWidth: 0,
-            elevation: 0,
-            shadowOpacity: 0,
+            backgroundColor: 'white',
+            borderTopWidth: 1,
+            borderTopColor: '#E3D3FF',
           },
           headerShown: false,
         })}
@@ -235,22 +169,22 @@ const TabNavigator = () => {
         <Tab.Screen
           name="HomeTab"
           component={HomeStackNavigator}
-          options={{ title: 'Главная' }}
-        />
-        <Tab.Screen
-          name="StreamsTab"
-          component={StreamsStackNavigator}
-          options={{ title: 'Стримы' }}
+          options={{ title: t('common.home') }}
         />
         <Tab.Screen
           name="ChatTab"
           component={ChatStackNavigator}
-          options={{ title: 'Чаты' }}
+          options={{ title: t('common.chats') }}
+        />
+        <Tab.Screen
+          name="StreamsTab"
+          component={StreamsStackNavigator}
+          options={{ title: t('common.streams') }}
         />
         <Tab.Screen
           name="ProfileTab"
           component={ProfileStackNavigator}
-          options={{ title: 'Профиль' }}
+          options={{ title: t('common.profile') }}
         />
       </Tab.Navigator>
     </View>
@@ -260,6 +194,7 @@ const TabNavigator = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
   },
 });
 
