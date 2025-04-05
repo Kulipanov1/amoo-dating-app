@@ -73,20 +73,78 @@ export default function HomeScreen() {
     return () => clearTimeout(timer);
   }, []);
 
+  const handleSwipe = useCallback((direction: string, cardIndex: number) => {
+    if (direction === 'top') {
+      setCurrentProfile(users[cardIndex]);
+      setShowProfile(true);
+    }
+  }, [users]);
+
   const renderCard = (user: User) => {
     if (!user) return null;
     
     return (
       <View style={[styles.card, { width: cardWidth, height: cardHeight }]}>
-        <Image
-          source={{ uri: user.images[0] }}
-          style={styles.cardImage}
-          resizeMode="cover"
-        />
-        <View style={[styles.imageTint, { backgroundColor: glowColor, opacity: glowIntensity }]} />
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: user.images[0] }}
+            style={styles.cardImage}
+            resizeMode="cover"
+          />
+          <View style={[styles.imageTint, { backgroundColor: glowColor, opacity: glowIntensity }]} />
+        </View>
         <View style={styles.cardContent}>
           <Text style={styles.cardTitle}>{user.name}, {user.age}</Text>
           <Text style={styles.cardDescription}>{user.bio}</Text>
+        </View>
+      </View>
+    );
+  };
+
+  const renderExpandedProfile = (user: User) => {
+    return (
+      <View style={styles.expandedProfile}>
+        <View style={styles.expandedHeader}>
+          <Text style={styles.expandedName}>{user.name}, {user.age}</Text>
+          <TouchableOpacity 
+            style={styles.closeButton}
+            onPress={() => setShowProfile(false)}
+          >
+            <Text style={styles.closeButtonText}>×</Text>
+          </TouchableOpacity>
+        </View>
+        
+        <Image
+          source={{ uri: user.images[0] }}
+          style={styles.expandedImage}
+          resizeMode="cover"
+        />
+        
+        <View style={styles.expandedContent}>
+          <Text style={styles.expandedBio}>{user.bio}</Text>
+          
+          {user.location && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>📍 Местоположение:</Text>
+              <Text style={styles.infoText}>{user.location}</Text>
+            </View>
+          )}
+          
+          {user.occupation && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>💼 Работа:</Text>
+              <Text style={styles.infoText}>{user.occupation}</Text>
+            </View>
+          )}
+          
+          <Text style={styles.interestsTitle}>Интересы:</Text>
+          <View style={styles.interestsContainer}>
+            {user.interests.map((interest, index) => (
+              <View key={index} style={styles.interestTag}>
+                <Text style={styles.interestText}>{interest}</Text>
+              </View>
+            ))}
+          </View>
         </View>
       </View>
     );
@@ -129,6 +187,7 @@ export default function HomeScreen() {
                 inputRotationRange={[-15, 0, 15]}
                 outputRotationRange={['-5deg', '0deg', '5deg']}
                 swipeAnimationDuration={350}
+                onSwipedTop={(cardIndex) => handleSwipe('top', cardIndex)}
               />
             </View>
 
@@ -149,6 +208,14 @@ export default function HomeScreen() {
           </View>
         </View>
       </SafeAreaView>
+
+      <Modal
+        visible={showProfile}
+        animationType="slide"
+        onRequestClose={() => setShowProfile(false)}
+      >
+        {currentProfile && renderExpandedProfile(currentProfile)}
+      </Modal>
     </View>
   );
 }
@@ -222,10 +289,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
+  imageContainer: {
+    flex: 1,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
   cardImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 20,
+    objectFit: 'cover',
   },
   imageTint: {
     position: 'absolute',
@@ -292,5 +364,83 @@ const styles = StyleSheet.create({
   largeButton: {
     width: 60,
     height: 60,
+  },
+  expandedProfile: {
+    flex: 1,
+    backgroundColor: '#F8F4FF',
+  },
+  expandedHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#8A2BE2',
+  },
+  expandedName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    fontSize: 24,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  expandedImage: {
+    width: '100%',
+    height: 300,
+    objectFit: 'cover',
+  },
+  expandedContent: {
+    padding: 20,
+  },
+  expandedBio: {
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 20,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  infoLabel: {
+    fontSize: 16,
+    color: '#666',
+    marginRight: 10,
+  },
+  infoText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  interestsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 20,
+    marginBottom: 15,
+  },
+  interestsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  interestTag: {
+    backgroundColor: '#8A2BE2',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  interestText: {
+    color: '#fff',
+    fontSize: 14,
   },
 });
