@@ -12,14 +12,10 @@ import {
   ProfileStackParamList,
   HomeStackParamList,
   StreamsStackParamList,
-  ChatScreenProps,
-  SingleChatScreenProps,
-  ChatRoomScreenProps
 } from '../src/types/navigation';
 
 // Screens
 import HomeScreen from '../screens/HomeScreen';
-import { SettingsScreen } from '../src/screens/SettingsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ChatListScreen from '../screens/ChatListScreen';
 import ChatScreen from '../screens/ChatScreen';
@@ -52,6 +48,10 @@ const ChatStackNavigator = () => (
       headerTitleStyle: {
         fontWeight: '600',
       },
+      headerBackTitleVisible: false,
+      headerBackImage: () => (
+        <Ionicons name="chevron-back" size={24} color="#333" style={{ marginLeft: 10 }} />
+      ),
     }}
   >
     <ChatStack.Screen
@@ -93,6 +93,10 @@ const ProfileStackNavigator = () => (
       headerTitleStyle: {
         fontWeight: '600',
       },
+      headerBackTitleVisible: false,
+      headerBackImage: () => (
+        <Ionicons name="chevron-back" size={24} color="#333" style={{ marginLeft: 10 }} />
+      ),
     }}
   >
     <ProfileStack.Screen
@@ -117,6 +121,10 @@ const HomeStackNavigator = () => (
       headerTitleStyle: {
         fontWeight: '600',
       },
+      headerBackTitleVisible: false,
+      headerBackImage: () => (
+        <Ionicons name="chevron-back" size={24} color="#333" style={{ marginLeft: 10 }} />
+      ),
     }}
   >
     <HomeStack.Screen
@@ -146,6 +154,10 @@ const StreamsStackNavigator = () => (
       headerTitleStyle: {
         fontWeight: '600',
       },
+      headerBackTitleVisible: false,
+      headerBackImage: () => (
+        <Ionicons name="chevron-back" size={24} color="#333" style={{ marginLeft: 10 }} />
+      ),
     }}
   >
     <StreamsStack.Screen
@@ -185,9 +197,6 @@ const TabNavigator = () => {
               case 'ProfileTab':
                 iconName = focused ? 'person' : 'person-outline';
                 break;
-              case 'SettingsTab':
-                iconName = focused ? 'settings' : 'settings-outline';
-                break;
             }
 
             return <Ionicons name={iconName} size={size} color={color} />;
@@ -205,28 +214,23 @@ const TabNavigator = () => {
       >
         <Tab.Screen
           name="HomeTab"
-          component={HomeScreen}
-          options={{ title: t('common.home') }}
+          component={HomeStackNavigator}
+          options={{ title: 'Главная' }}
         />
         <Tab.Screen
           name="StreamsTab"
           component={StreamsStackNavigator}
-          options={{ title: t('streams.title') }}
+          options={{ title: 'Стримы' }}
         />
         <Tab.Screen
           name="ChatTab"
           component={ChatStackNavigator}
-          options={{ title: t('chat.title') }}
+          options={{ title: 'Чаты' }}
         />
         <Tab.Screen
           name="ProfileTab"
           component={ProfileStackNavigator}
-          options={{ title: t('profile.title') }}
-        />
-        <Tab.Screen
-          name="SettingsTab"
-          component={SettingsScreen}
-          options={{ title: t('settings.title') }}
+          options={{ title: 'Профиль' }}
         />
       </Tab.Navigator>
     </View>

@@ -1,59 +1,33 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { LocalizationService } from '../services/localization/LocalizationService';
 
 interface LocalizationContextType {
   t: (key: string, options?: object) => string;
-  locale: string;
-  changeLocale: (newLocale: string, userId?: string) => Promise<void>;
+  getCurrentLocale: () => string;
+  changeLocale: (locale: string, userId?: string) => Promise<void>;
+  getSupportedLocales: () => string[];
+  getLocaleDisplayName: (locale: string) => string;
   formatDate: (date: Date, format?: string) => string;
   formatNumber: (number: number, options?: Intl.NumberFormatOptions) => string;
   formatCurrency: (amount: number, currency?: string) => string;
-  textDirection: 'ltr' | 'rtl';
+  getTextDirection: () => 'ltr' | 'rtl';
 }
 
-const LocalizationContext = createContext<LocalizationContextType | undefined>(undefined);
+const LocalizationContext = createContext<LocalizationContextType | null>(null);
 
-interface LocalizationProviderProps {
-  children: ReactNode;
-}
-
-export const LocalizationProvider: React.FC<LocalizationProviderProps> = ({ children }) => {
+export const LocalizationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const localizationService = LocalizationService.getInstance();
-  const [locale, setLocale] = useState(localizationService.getCurrentLocale());
 
-  useEffect(() => {
-    // Инициализация локали при монтировании компонента
-    const initLocale = async () => {
-      try {
-        setLocale(localizationService.getCurrentLocale());
-      } catch (error) {
-        console.error('Error initializing locale:', error);
-      }
-    };
-
-    initLocale();
-  }, []);
-
-  const changeLocale = async (newLocale: string, userId?: string) => {
-    try {
-      await localizationService.changeLocale(newLocale, userId);
-      setLocale(newLocale);
-    } catch (error) {
-      console.error('Error changing locale:', error);
-      throw error;
-    }
-  };
-
-  const value = {
-    t: (key: string, options?: object) => localizationService.t(key, options),
-    locale,
-    changeLocale,
-    formatDate: (date: Date, format?: string) => localizationService.formatDate(date, format),
-    formatNumber: (number: number, options?: Intl.NumberFormatOptions) => 
-      localizationService.formatNumber(number, options),
-    formatCurrency: (amount: number, currency?: string) => 
-      localizationService.formatCurrency(amount, currency),
-    textDirection: localizationService.getTextDirection(),
+  const value: LocalizationContextType = {
+    t: (key, options) => localizationService.t(key, options),
+    getCurrentLocale: () => localizationService.getCurrentLocale(),
+    changeLocale: (locale, userId) => localizationService.changeLocale(locale, userId),
+    getSupportedLocales: () => localizationService.getSupportedLocales(),
+    getLocaleDisplayName: (locale) => localizationService.getLocaleDisplayName(locale),
+    formatDate: (date, format) => localizationService.formatDate(date, format),
+    formatNumber: (number, options) => localizationService.formatNumber(number, options),
+    formatCurrency: (amount, currency) => localizationService.formatCurrency(amount, currency),
+    getTextDirection: () => localizationService.getTextDirection(),
   };
 
   return (
@@ -63,7 +37,7 @@ export const LocalizationProvider: React.FC<LocalizationProviderProps> = ({ chil
   );
 };
 
-export const useLocalization = (): LocalizationContextType => {
+export const useLocalization = () => {
   const context = useContext(LocalizationContext);
   if (!context) {
     throw new Error('useLocalization must be used within a LocalizationProvider');

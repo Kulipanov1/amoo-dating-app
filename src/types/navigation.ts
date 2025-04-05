@@ -6,7 +6,6 @@ export type RootStackParamList = {
   ChatTab: undefined;
   StreamsTab: undefined;
   ProfileTab: undefined;
-  SettingsTab: undefined;
 };
 
 export type ChatStackParamList = {
@@ -18,6 +17,7 @@ export type ChatStackParamList = {
 
 export type ProfileStackParamList = {
   Profile: undefined;
+  Settings: undefined;
 };
 
 export type HomeStackParamList = {

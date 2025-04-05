@@ -11,11 +11,13 @@ import {
   Platform,
   Dimensions,
   SafeAreaView,
+  Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { hapticFeedback } from '../utils/haptics';
 import AnimatedBackground from '../components/AnimatedBackground';
+import { useLocalization } from '../src/contexts/LocalizationContext';
 
 interface Achievement {
   id: string;
@@ -111,21 +113,13 @@ const dummyPhotos = [
 
 const defaultAvatar = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
 
-export default function ProfileScreen() {
+const ProfileScreen = () => {
+  const { t, getCurrentLocale, changeLocale, getSupportedLocales, getLocaleDisplayName } = useLocalization();
   const { width: windowWidth } = Dimensions.get('window');
   const [windowHeight, setWindowHeight] = useState(Dimensions.get('window').height);
   const [isExpanded, setIsExpanded] = useState(false);
   const isDesktop = Platform.OS === 'web' && windowWidth > 768;
   const contentWidth = isDesktop ? 480 : windowWidth;
-  
-  useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ window }) => {
-      setWindowHeight(window.height);
-    });
-
-    return () => subscription?.remove();
-  }, []);
-
   const [profile, setProfile] = useState<UserProfile>({
     id: '1',
     name: 'Александр Петров',
@@ -158,9 +152,19 @@ export default function ProfileScreen() {
     isVerified: true,
     isPremium: true,
   });
-
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [activeModal, setActiveModal] = useState<'followers' | 'following' | 'likes' | 'matches' | null>(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+  const [showOnline, setShowOnline] = useState(true);
+
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setWindowHeight(window.height);
+    });
+
+    return () => subscription?.remove();
+  }, []);
 
   const handleEditPhoto = async () => {
     hapticFeedback.light();
@@ -250,6 +254,42 @@ export default function ProfileScreen() {
     setIsExpanded(!isExpanded);
     hapticFeedback.light();
   };
+
+  const handleLanguageChange = (locale: string) => {
+    changeLocale(locale);
+  };
+
+  const renderSettingItem = (
+    icon: keyof typeof Ionicons.glyphMap,
+    title: string,
+    value?: string | boolean,
+    onPress?: () => void,
+    isSwitch?: boolean
+  ) => (
+    <TouchableOpacity
+      style={styles.settingItem}
+      onPress={onPress}
+      disabled={isSwitch}
+    >
+      <View style={styles.settingLeft}>
+        <Ionicons name={icon} size={24} color="#8A2BE2" />
+        <Text style={styles.settingTitle}>{title}</Text>
+      </View>
+      {isSwitch ? (
+        <Switch
+          value={value as boolean}
+          onValueChange={onPress}
+          trackColor={{ false: '#D1D1D1', true: '#E3D3FF' }}
+          thumbColor={value ? '#8A2BE2' : '#f4f3f4'}
+        />
+      ) : (
+        <View style={styles.settingRight}>
+          {value && <Text style={styles.settingValue}>{value}</Text>}
+          <Ionicons name="chevron-forward" size={20} color="#666" />
+        </View>
+      )}
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
@@ -399,35 +439,59 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.settingsItem}>
-              <Ionicons name="lock-closed-outline" size={24} color="#8A2BE2" />
-              <Text style={styles.settingsText}>Приватность</Text>
-              <Ionicons name="chevron-forward" size={24} color="#666" />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.settingsItem}>
-              <Ionicons name="notifications-outline" size={24} color="#8A2BE2" />
-              <Text style={styles.settingsText}>Уведомления</Text>
-              <Ionicons name="chevron-forward" size={24} color="#666" />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.settingsItem}>
-              <Ionicons name="shield-outline" size={24} color="#8A2BE2" />
-              <Text style={styles.settingsText}>Безопасность</Text>
-              <Ionicons name="chevron-forward" size={24} color="#666" />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.settingsItem}>
-              <Ionicons name="language-outline" size={24} color="#8A2BE2" />
-              <Text style={styles.settingsText}>Язык приложения</Text>
-              <Ionicons name="chevron-forward" size={24} color="#666" />
-            </TouchableOpacity>
+            {renderSettingItem(
+              'notifications',
+              'Уведомления',
+              notificationsEnabled,
+              () => setNotificationsEnabled(!notificationsEnabled),
+              true
+            )}
+            
+            {renderSettingItem(
+              'moon',
+              'Темная тема',
+              darkMode,
+              () => setDarkMode(!darkMode),
+              true
+            )}
+            
+            {renderSettingItem(
+              'eye',
+              'Показывать статус',
+              showOnline,
+              () => setShowOnline(!showOnline),
+              true
+            )}
+            
+            {renderSettingItem(
+              'language',
+              'Язык',
+              getLocaleDisplayName(getCurrentLocale()),
+              () => {
+                // Здесь можно добавить модальное окно для выбора языка
+              }
+            )}
+            
+            {renderSettingItem(
+              'shield-checkmark',
+              'Конфиденциальность'
+            )}
+            
+            {renderSettingItem(
+              'help-circle',
+              'Помощь'
+            )}
+            
+            {renderSettingItem(
+              'information-circle',
+              'О приложении'
+            )}
           </View>
         </View>
       </Modal>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -691,62 +755,31 @@ const styles = StyleSheet.create({
   closeButton: {
     padding: 4,
   },
-  settingsItem: {
+  settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  settingsText: {
-    flex: 1,
-    fontSize: 16,
-    color: '#333',
-    marginLeft: 12,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  userList: {
-    paddingBottom: 20,
-  },
-  userListItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
+    justifyContent: 'space-between',
+    paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#E3D3FF',
   },
-  userListAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 12,
+  settingLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  userListInfo: {
-    flex: 1,
-  },
-  userListName: {
+  settingTitle: {
     fontSize: 16,
-    fontWeight: '600',
     color: '#333',
-    marginBottom: 4,
+    marginLeft: 15,
   },
-  userListStatus: {
-    fontSize: 14,
+  settingRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  settingValue: {
+    fontSize: 16,
     color: '#666',
-  },
-  chatButton: {
-    padding: 8,
-    backgroundColor: 'rgba(138, 43, 226, 0.1)',
-    borderRadius: 20,
-  },
-  likeButton: {
-    padding: 8,
-    backgroundColor: 'rgba(138, 43, 226, 0.1)',
-    borderRadius: 20,
+    marginRight: 10,
   },
   expandedContent: {
     paddingBottom: 100,
@@ -778,4 +811,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-}); 
+});
+
+export default ProfileScreen; 
