@@ -4,6 +4,7 @@ import Swiper from 'react-native-deck-swiper';
 import { hapticFeedback } from '../utils/haptics';
 import { SuperLikeIcon, LikeIcon, DislikeIcon, BackArrowIcon } from '../components/Icons';
 import AnimatedBackground from '../components/AnimatedBackground';
+import { Animated as RNAnimated } from 'react';
 
 interface User {
   id: string;
@@ -56,6 +57,7 @@ const HomeScreen: React.FC = () => {
   const swiper = useRef<any>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [currentProfile, setCurrentProfile] = useState<User | null>(null);
+  const [pan] = useState(new RNAnimated.ValueXY());
 
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
@@ -73,39 +75,52 @@ const HomeScreen: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleSwipe = useCallback((direction: string, cardIndex: number) => {
-    if (direction === 'top') {
-      setCurrentProfile(users[cardIndex]);
-      setShowProfile(true);
-    }
-  }, [users]);
+  const handleSwipe = (direction: 'left' | 'right') => {
+    const xPosition = direction === 'left' ? -500 : 500;
+    
+    RNAnimated.sequence([
+      RNAnimated.spring(pan, {
+        toValue: { x: xPosition, y: 0 },
+        useNativeDriver: true,
+        bounciness: 0,
+        speed: 20,
+      }),
+      RNAnimated.timing(pan, {
+        toValue: { x: 0, y: 0 },
+        duration: 0,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      // Обновляем индекс текущего профиля
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % users.length);
+    });
+  };
 
-  const handleLike = useCallback(() => {
-    if (swiper.current) {
-      hapticFeedback.medium();
-      setGlowColor('#FF4B6E');
-      setGlowIntensity(0.3);
-      swiper.current.swipeRight();
-    }
-  }, []);
+  const handleLike = () => {
+    handleSwipe('right');
+  };
 
-  const handleDislike = useCallback(() => {
-    if (swiper.current) {
-      hapticFeedback.medium();
-      setGlowColor('#FF4B4B');
-      setGlowIntensity(0.3);
-      swiper.current.swipeLeft();
-    }
-  }, []);
+  const handleDislike = () => {
+    handleSwipe('left');
+  };
 
-  const handleSuperLike = useCallback(() => {
-    if (swiper.current) {
-      hapticFeedback.medium();
-      setGlowColor('#00E0FF');
-      setGlowIntensity(0.3);
-      swiper.current.swipeRight();
-    }
-  }, []);
+  const handleSuperLike = () => {
+    RNAnimated.sequence([
+      RNAnimated.spring(pan, {
+        toValue: { x: 0, y: -500 },
+        useNativeDriver: true,
+        bounciness: 0,
+        speed: 20,
+      }),
+      RNAnimated.timing(pan, {
+        toValue: { x: 0, y: 0 },
+        duration: 0,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % users.length);
+    });
+  };
 
   const handleRewind = useCallback(() => {
     if (currentIndex > 0 && swiper.current) {
@@ -114,6 +129,11 @@ const HomeScreen: React.FC = () => {
       setCurrentIndex(currentIndex - 1);
     }
   }, [currentIndex]);
+
+  const handleSwipeUp = (cardIndex: number) => {
+    setCurrentProfile(users[cardIndex]);
+    setShowProfile(true);
+  };
 
   const renderCard = (user: User) => {
     if (!user) return null;
@@ -208,26 +228,17 @@ const HomeScreen: React.FC = () => {
                 ref={swiper}
                 cards={users}
                 renderCard={renderCard}
-                cardIndex={currentIndex}
+                onSwipedAll={() => setUsers(dummyUsers)}
+                cardIndex={0}
                 backgroundColor="transparent"
                 stackSize={3}
-                cardStyle={styles.cardContainer}
-                animateCardOpacity
-                verticalSwipe={true}
-                horizontalSwipe={true}
                 stackSeparation={15}
-                cardVerticalMargin={10}
-                cardHorizontalMargin={0}
-                disableBottomSwipe={true}
-                inputRotationRange={[-8, 0, 8]}
-                outputRotationRange={['-3deg', '0deg', '3deg']}
-                swipeAnimationDuration={800}
+                animateCardOpacity
                 verticalThreshold={150}
                 horizontalThreshold={120}
-                onSwipedTop={(cardIndex) => handleSwipe('top', cardIndex)}
-                onSwipedLeft={() => setGlowIntensity(0)}
-                onSwipedRight={() => setGlowIntensity(0)}
-                onSwipedAll={() => setUsers(dummyUsers)}
+                onSwipedTop={handleSwipeUp}
+                onSwipedLeft={() => handleSwipe('left')}
+                onSwipedRight={() => handleSwipe('right')}
               />
             </View>
 
@@ -305,12 +316,9 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    backgroundColor: 'transparent',
-    maxWidth: DESKTOP_CONTENT_WIDTH + 40,
-    alignSelf: 'center',
-    width: '100%',
-    borderRadius: 20,
-    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
   },
   header: {
     height: 56,
@@ -335,7 +343,10 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   cardContainer: {
-    backgroundColor: 'transparent',
+    width: '100%',
+    maxWidth: 400,
+    aspectRatio: 0.7,
+    alignSelf: 'center',
   },
   card: {
     borderRadius: 20,

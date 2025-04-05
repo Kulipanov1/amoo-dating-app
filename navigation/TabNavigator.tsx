@@ -57,7 +57,7 @@ const ChatStackNavigator = () => (
     <ChatStack.Screen
       name="ChatList"
       component={ChatListScreen}
-      options={{ title: 'Чаты' }}
+      options={{ headerShown: false }}
     />
     <ChatStack.Screen
       name="Chat"
@@ -102,7 +102,7 @@ const ProfileStackNavigator = () => (
     <ProfileStack.Screen
       name="Profile"
       component={ProfileScreen}
-      options={{ title: 'Профиль' }}
+      options={{ headerShown: false }}
     />
   </ProfileStack.Navigator>
 );
@@ -163,7 +163,7 @@ const StreamsStackNavigator = () => (
     <StreamsStack.Screen
       name="Streams"
       component={StreamsScreen}
-      options={{ title: 'Стримы' }}
+      options={{ headerShown: false }}
     />
     <StreamsStack.Screen
       name="Live"

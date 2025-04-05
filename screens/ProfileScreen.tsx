@@ -291,125 +291,166 @@ const ProfileScreen = () => {
     </TouchableOpacity>
   );
 
+  const handleEditProfile = () => {
+    hapticFeedback.light();
+    // TODO: Добавить навигацию к редактированию профиля
+  };
+
+  const handleStatPress = (type: 'followers' | 'following' | 'likes' | 'matches') => {
+    hapticFeedback.light();
+    setActiveModal(type);
+  };
+
+  const handleSettingsPress = () => {
+    hapticFeedback.light();
+    setShowSettingsModal(true);
+  };
+
+  const handleLogout = () => {
+    hapticFeedback.medium();
+    // TODO: Добавить логику выхода
+  };
+
+  const handlePrivacyPress = () => {
+    hapticFeedback.light();
+    // TODO: Добавить навигацию к настройкам приватности
+  };
+
+  const handleHelpPress = () => {
+    hapticFeedback.light();
+    // TODO: Добавить навигацию к справке
+  };
+
+  const handleAboutPress = () => {
+    hapticFeedback.light();
+    // TODO: Добавить навигацию к информации о приложении
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, isDesktop && styles.desktopSafeArea]}>
       <AnimatedBackground />
-      <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
-        <View style={[
-          styles.mainContent,
-          isDesktop && { width: contentWidth, maxHeight: 700 }
-        ]}>
-          <View style={styles.header}>
-            <Text style={styles.logoText}>Amoo</Text>
-            <TouchableOpacity style={styles.settingsButton}>
-              <Ionicons name="settings-outline" size={24} color="#8A2BE2" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.profileInfo}>
-            <View style={styles.avatarContainer}>
-              <Image
-                source={{ uri: profile.avatar || defaultAvatar }}
-                style={styles.avatar}
-              />
-              <TouchableOpacity style={styles.editAvatarButton} onPress={handleEditPhoto}>
-                <Ionicons name="camera" size={20} color="white" />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        <View style={[styles.wrapper, isDesktop && styles.desktopWrapper]}>
+          <View style={[
+            styles.mainContent,
+            isDesktop && { width: contentWidth, maxHeight: windowHeight - 40 }
+          ]}>
+            <View style={styles.header}>
+              <Text style={styles.logoText}>Amoo</Text>
+              <TouchableOpacity style={styles.settingsButton} onPress={handleSettingsPress}>
+                <Ionicons name="settings-outline" size={24} color="#8A2BE2" />
               </TouchableOpacity>
             </View>
-            
-            <View style={styles.nameContainer}>
-              <Text style={styles.name}>{profile.name}</Text>
-              <View style={styles.verifiedContainer}>
-                <Ionicons name="checkmark-circle" size={20} color="#8A2BE2" />
-                <Text style={styles.premiumStar}>★</Text>
+
+            <View style={styles.profileInfo}>
+              <TouchableOpacity style={styles.avatarContainer} onPress={handleEditPhoto}>
+                <Image
+                  source={{ uri: profile.avatar || defaultAvatar }}
+                  style={styles.avatar}
+                />
+                <TouchableOpacity style={styles.editAvatarButton} onPress={handleEditPhoto}>
+                  <Ionicons name="camera" size={20} color="white" />
+                </TouchableOpacity>
+              </TouchableOpacity>
+              
+              <View style={styles.nameContainer}>
+                <Text style={styles.name}>{profile.name}</Text>
+                <View style={styles.verifiedContainer}>
+                  <Ionicons name="checkmark-circle" size={20} color="#8A2BE2" />
+                  <Text style={styles.premiumStar}>★</Text>
+                </View>
+              </View>
+              
+              <Text style={styles.bio}>{profile.status}</Text>
+              
+              <TouchableOpacity style={styles.editButton} onPress={handleEditProfile}>
+                <Text style={styles.editButtonText}>Редактировать профиль</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.statsContainer}>
+              <TouchableOpacity style={styles.statItem} onPress={() => handleStatPress('followers')}>
+                <Text style={styles.statValue}>{formatNumber(profile.stats.followers)}</Text>
+                <Text style={styles.statLabel}>Подписчики</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.statItem} onPress={() => handleStatPress('following')}>
+                <Text style={styles.statValue}>{formatNumber(profile.stats.following)}</Text>
+                <Text style={styles.statLabel}>Подписки</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.statItem} onPress={() => handleStatPress('likes')}>
+                <Text style={styles.statValue}>{formatNumber(profile.stats.likes)}</Text>
+                <Text style={styles.statLabel}>Лайки</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.statItem} onPress={() => handleStatPress('matches')}>
+                <Text style={styles.statValue}>{formatNumber(profile.stats.matches)}</Text>
+                <Text style={styles.statLabel}>Совпадения</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.interestsSection}>
+              <Text style={styles.sectionTitle}>Интересы</Text>
+              <View style={styles.interestsContainer}>
+                {profile.interests.map((interest, index) => (
+                  <View key={index} style={styles.interestTag}>
+                    <Text style={styles.interestText}>{interest}</Text>
+                  </View>
+                ))}
               </View>
             </View>
-            
-            <Text style={styles.bio}>{profile.status}</Text>
-          </View>
 
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{formatNumber(profile.stats.followers)}</Text>
-              <Text style={styles.statLabel}>Подписчики</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{formatNumber(profile.stats.following)}</Text>
-              <Text style={styles.statLabel}>Подписки</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{formatNumber(profile.stats.likes)}</Text>
-              <Text style={styles.statLabel}>Лайки</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{formatNumber(profile.stats.matches)}</Text>
-              <Text style={styles.statLabel}>Совпадения</Text>
-            </View>
-          </View>
-
-          <View style={styles.interestsSection}>
-            <Text style={styles.sectionTitle}>Интересы</Text>
-            <View style={styles.interestsContainer}>
-              {profile.interests.map((interest, index) => (
-                <View key={index} style={styles.interestTag}>
-                  <Text style={styles.interestText}>{interest}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.photosSection}>
-            <Text style={styles.sectionTitle}>Фотографии</Text>
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              style={styles.photosScrollView}
-            >
-              {dummyPhotos.map((photo, index) => (
-                <TouchableOpacity 
-                  key={index}
-                  style={styles.photoContainer}
-                  onPress={() => handleEditPhoto()}
-                >
-                  <Image source={{ uri: photo }} style={styles.photo} />
-                </TouchableOpacity>
-              ))}
-              <TouchableOpacity 
-                style={[styles.photoContainer, styles.addPhotoButton]}
-                onPress={handleEditPhoto}
+            <View style={styles.photosSection}>
+              <Text style={styles.sectionTitle}>Фотографии</Text>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                style={styles.photosScrollView}
               >
-                <Ionicons name="add" size={40} color="#8A2BE2" />
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-
-          <View style={styles.achievementsSection}>
-            <Text style={styles.sectionTitle}>Достижения</Text>
-            <View style={styles.achievementsGrid}>
-              {profile.achievements.map((achievement) => (
-                <View key={achievement.id} style={styles.achievementCard}>
-                  <View style={styles.achievementIcon}>
-                    <Ionicons name={achievement.icon as any} size={24} color="#8A2BE2" />
-                  </View>
-                  <Text style={styles.achievementTitle}>{achievement.title}</Text>
-                  <Text style={styles.achievementDescription}>{achievement.description}</Text>
-                </View>
-              ))}
+                {dummyPhotos.map((photo, index) => (
+                  <TouchableOpacity 
+                    key={index}
+                    style={styles.photoContainer}
+                    onPress={() => handleEditPhoto()}
+                  >
+                    <Image source={{ uri: photo }} style={styles.photo} />
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity 
+                  style={[styles.photoContainer, styles.addPhotoButton]}
+                  onPress={handleEditPhoto}
+                >
+                  <Ionicons name="add" size={40} color="#8A2BE2" />
+                </TouchableOpacity>
+              </ScrollView>
             </View>
-          </View>
 
-          <TouchableOpacity 
-            style={styles.expandButton}
-            onPress={handleExpandProfile}
-          >
-            <Ionicons 
-              name={isExpanded ? "chevron-down" : "chevron-up"} 
-              size={24} 
-              color="#8A2BE2" 
-            />
-          </TouchableOpacity>
+            <View style={styles.achievementsSection}>
+              <Text style={styles.sectionTitle}>Достижения</Text>
+              <View style={styles.achievementsGrid}>
+                {profile.achievements.map((achievement) => (
+                  <View key={achievement.id} style={styles.achievementCard}>
+                    <View style={styles.achievementIcon}>
+                      <Ionicons name={achievement.icon as any} size={24} color="#8A2BE2" />
+                    </View>
+                    <Text style={styles.achievementTitle}>{achievement.title}</Text>
+                    <Text style={styles.achievementDescription}>{achievement.description}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            <TouchableOpacity 
+              style={styles.expandButton}
+              onPress={handleExpandProfile}
+            >
+              <Ionicons 
+                name={isExpanded ? "chevron-down" : "chevron-up"} 
+                size={24} 
+                color="#8A2BE2" 
+              />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </ScrollView>
 
       {activeModal && (
         <StatModal
@@ -468,24 +509,34 @@ const ProfileScreen = () => {
               'Язык',
               getLocaleDisplayName(getCurrentLocale()),
               () => {
-                // Здесь можно добавить модальное окно для выбора языка
+                // TODO: Добавить модальное окно выбора языка
               }
             )}
             
             {renderSettingItem(
               'shield-checkmark',
-              'Конфиденциальность'
+              'Конфиденциальность',
+              undefined,
+              handlePrivacyPress
             )}
             
             {renderSettingItem(
               'help-circle',
-              'Помощь'
+              'Помощь',
+              undefined,
+              handleHelpPress
             )}
             
             {renderSettingItem(
               'information-circle',
-              'О приложении'
+              'О приложении',
+              undefined,
+              handleAboutPress
             )}
+
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <Text style={styles.logoutButtonText}>Выйти</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -496,7 +547,7 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8F4FF',
+    backgroundColor: '#8A2BE2',
   },
   desktopSafeArea: {
     backgroundColor: '#8A2BE2',
@@ -520,9 +571,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 20,
   },
   header: {
     height: 56,
@@ -810,6 +863,74 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+  },
+  editButton: {
+    backgroundColor: '#8A2BE2',
+    padding: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  editButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  logoutButton: {
+    backgroundColor: '#8A2BE2',
+    padding: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  logoutButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  userList: {
+    paddingBottom: 20,
+  },
+  userListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E3D3FF',
+  },
+  userListAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  userListInfo: {
+    flex: 1,
+  },
+  userListName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  userListStatus: {
+    fontSize: 14,
+    color: '#666',
+  },
+  chatButton: {
+    padding: 8,
+    backgroundColor: 'rgba(138, 43, 226, 0.1)',
+    borderRadius: 20,
+  },
+  likeButton: {
+    padding: 8,
+    backgroundColor: 'rgba(138, 43, 226, 0.1)',
+    borderRadius: 20,
   },
 });
 
