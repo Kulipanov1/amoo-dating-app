@@ -38,6 +38,25 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
   const [showDetails, setShowDetails] = useState(false);
   const position = useRef(new Animated.ValueXY()).current;
   const detailsOpacity = useRef(new Animated.Value(0)).current;
+  const [isSuperLiking, setIsSuperLiking] = useState(false);
+
+  const hideDetails = () => {
+    setShowDetails(false);
+    Animated.spring(detailsOpacity, {
+      toValue: 0,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const showDetailsIfAllowed = () => {
+    if (!isSuperLiking) {
+      setShowDetails(true);
+      Animated.spring(detailsOpacity, {
+        toValue: 1,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
 
   const panResponder = useRef(
     PanResponder.create({
@@ -46,18 +65,10 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
         position.setValue({ x: gesture.dx, y: gesture.dy });
         
         // Показываем детали только при свайпе вверх и не во время суперлайка
-        if (gesture.dy < -SWIPE_UP_THRESHOLD && !showDetails && Math.abs(gesture.dx) < SWIPE_THRESHOLD) {
-          setShowDetails(true);
-          Animated.spring(detailsOpacity, {
-            toValue: 1,
-            useNativeDriver: true,
-          }).start();
+        if (gesture.dy < -SWIPE_UP_THRESHOLD && !showDetails && Math.abs(gesture.dx) < SWIPE_THRESHOLD && !isSuperLiking) {
+          showDetailsIfAllowed();
         } else if ((gesture.dy >= -SWIPE_UP_THRESHOLD || Math.abs(gesture.dx) >= SWIPE_THRESHOLD) && showDetails) {
-          setShowDetails(false);
-          Animated.spring(detailsOpacity, {
-            toValue: 0,
-            useNativeDriver: true,
-          }).start();
+          hideDetails();
         }
       },
       onPanResponderRelease: (event, gesture) => {
@@ -74,6 +85,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
 
   const forceSwipe = (direction: 'right' | 'left') => {
     const x = direction === 'right' ? SCREEN_WIDTH : -SCREEN_WIDTH;
+    hideDetails(); // Всегда скрываем детали при свайпе
     Animated.timing(position, {
       toValue: { x, y: 0 },
       duration: SWIPE_OUT_DURATION,
@@ -84,17 +96,12 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
   const onSwipeComplete = (direction: 'right' | 'left') => {
     direction === 'right' ? onSwipeRight() : onSwipeLeft();
     position.setValue({ x: 0, y: 0 });
+    setIsSuperLiking(false); // Сбрасываем флаг суперлайка
   };
 
   const handleSuperLike = () => {
-    // Убеждаемся, что детали скрыты
-    if (showDetails) {
-      setShowDetails(false);
-      Animated.spring(detailsOpacity, {
-        toValue: 0,
-        useNativeDriver: true,
-      }).start();
-    }
+    setIsSuperLiking(true); // Устанавливаем флаг суперлайка
+    hideDetails(); // Принудительно скрываем детали
     onSuperLike();
     forceSwipe('right');
   };
