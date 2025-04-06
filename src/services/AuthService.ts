@@ -1,14 +1,13 @@
-import { firebase } from '@react-native-firebase/auth';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import auth from '@react-native-firebase/auth';
 
 export interface AuthUser {
   uid: string;
-  email: string | null;
+  email: string;
+  emailVerified: boolean;
   displayName: string | null;
   photoURL: string | null;
-  phoneNumber: string | null;
-  emailVerified: boolean;
 }
 
 class AuthService {
@@ -29,12 +28,27 @@ class AuthService {
   }
 
   // Регистрация по email
-  async registerWithEmail(email: string, password: string): Promise<AuthUser> {
+  async registerWithEmail(email: string, password: string, displayName: string): Promise<AuthUser> {
     try {
       const userCredential = await auth().createUserWithEmailAndPassword(email, password);
-      await this.sendEmailVerification();
-      return this.transformFirebaseUser(userCredential.user);
-    } catch (error: any) {
+      await userCredential.user.updateProfile({ displayName });
+      
+      // Создаем документ пользователя в Firestore
+      await firestore().collection('users').doc(userCredential.user.uid).set({
+        email,
+        displayName,
+        createdAt: new Date(),
+        emailVerified: false,
+        photoURL: null,
+        isOnline: true,
+        lastSeen: new Date(),
+      });
+
+      // Отправляем email для верификации
+      await userCredential.user.sendEmailVerification();
+
+      return this.transformUser(userCredential.user);
+    } catch (error) {
       throw this.handleAuthError(error);
     }
   }
@@ -43,8 +57,15 @@ class AuthService {
   async loginWithEmail(email: string, password: string): Promise<AuthUser> {
     try {
       const userCredential = await auth().signInWithEmailAndPassword(email, password);
-      return this.transformFirebaseUser(userCredential.user);
-    } catch (error: any) {
+      
+      // Обновляем статус онлайн
+      await firestore().collection('users').doc(userCredential.user.uid).update({
+        isOnline: true,
+        lastSeen: new Date(),
+      });
+
+      return this.transformUser(userCredential.user);
+    } catch (error) {
       throw this.handleAuthError(error);
     }
   }
@@ -55,24 +76,7 @@ class AuthService {
       const { idToken } = await GoogleSignin.signIn();
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
       const userCredential = await auth().signInWithCredential(googleCredential);
-      return this.transformFirebaseUser(userCredential.user);
-    } catch (error: any) {
-      throw this.handleAuthError(error);
-    }
-  }
-
-  // Отправка письма для подтверждения email
-  async sendEmailVerification(): Promise<void> {
-    const user = auth().currentUser;
-    if (user) {
-      await user.sendEmailVerification();
-    }
-  }
-
-  // Сброс пароля
-  async resetPassword(email: string): Promise<void> {
-    try {
-      await auth().sendPasswordResetEmail(email);
+      return this.transformUser(userCredential.user);
     } catch (error: any) {
       throw this.handleAuthError(error);
     }
@@ -81,11 +85,41 @@ class AuthService {
   // Выход
   async logout(): Promise<void> {
     try {
+      const user = auth().currentUser;
+      if (user) {
+        // Обновляем статус оффлайн
+        await firestore().collection('users').doc(user.uid).update({
+          isOnline: false,
+          lastSeen: new Date(),
+        });
+      }
       await auth().signOut();
       if (await GoogleSignin.isSignedIn()) {
         await GoogleSignin.signOut();
       }
-    } catch (error: any) {
+    } catch (error) {
+      throw this.handleAuthError(error);
+    }
+  }
+
+  // Сброс пароля
+  async resetPassword(email: string): Promise<void> {
+    try {
+      await auth().sendPasswordResetEmail(email);
+    } catch (error) {
+      throw this.handleAuthError(error);
+    }
+  }
+
+  // Обновление профиля
+  async updateProfile(data: { displayName?: string; photoURL?: string }): Promise<void> {
+    try {
+      const user = auth().currentUser;
+      if (!user) throw new Error('User not authenticated');
+
+      await user.updateProfile(data);
+      await firestore().collection('users').doc(user.uid).update(data);
+    } catch (error) {
       throw this.handleAuthError(error);
     }
   }
@@ -93,54 +127,41 @@ class AuthService {
   // Получение текущего пользователя
   getCurrentUser(): AuthUser | null {
     const user = auth().currentUser;
-    return user ? this.transformFirebaseUser(user) : null;
+    return user ? this.transformUser(user) : null;
   }
 
-  // Подписка на изменение состояния аутентификации
+  // Подписка на изменения состояния аутентификации
   onAuthStateChanged(callback: (user: AuthUser | null) => void): () => void {
     return auth().onAuthStateChanged((user) => {
-      callback(user ? this.transformFirebaseUser(user) : null);
+      callback(user ? this.transformUser(user) : null);
     });
   }
 
-  // Преобразование Firebase User в AuthUser
-  private transformFirebaseUser(firebaseUser: any): AuthUser {
+  // Трансформация пользователя Firebase в AuthUser
+  private transformUser(user: FirebaseAuthTypes.User): AuthUser {
     return {
-      uid: firebaseUser.uid,
-      email: firebaseUser.email,
-      displayName: firebaseUser.displayName,
-      photoURL: firebaseUser.photoURL,
-      phoneNumber: firebaseUser.phoneNumber,
-      emailVerified: firebaseUser.emailVerified,
+      uid: user.uid,
+      email: user.email!,
+      emailVerified: user.emailVerified,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
     };
   }
 
   // Обработка ошибок аутентификации
   private handleAuthError(error: any): Error {
-    let message = 'Произошла ошибка при аутентификации';
+    let message = 'Произошла ошибка аутентификации';
     
-    switch (error.code) {
-      case 'auth/email-already-in-use':
-        message = 'Этот email уже используется';
-        break;
-      case 'auth/invalid-email':
-        message = 'Неверный формат email';
-        break;
-      case 'auth/operation-not-allowed':
-        message = 'Операция не разрешена';
-        break;
-      case 'auth/weak-password':
-        message = 'Слишком слабый пароль';
-        break;
-      case 'auth/user-disabled':
-        message = 'Аккаунт отключен';
-        break;
-      case 'auth/user-not-found':
-        message = 'Пользователь не найден';
-        break;
-      case 'auth/wrong-password':
-        message = 'Неверный пароль';
-        break;
+    if (error.code === 'auth/email-already-in-use') {
+      message = 'Этот email уже используется';
+    } else if (error.code === 'auth/invalid-email') {
+      message = 'Неверный формат email';
+    } else if (error.code === 'auth/weak-password') {
+      message = 'Слишком слабый пароль';
+    } else if (error.code === 'auth/user-not-found') {
+      message = 'Пользователь не найден';
+    } else if (error.code === 'auth/wrong-password') {
+      message = 'Неверный пароль';
     }
 
     return new Error(message);

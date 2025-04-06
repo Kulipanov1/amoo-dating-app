@@ -1,28 +1,41 @@
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
-import { UserProfile } from './UserService';
+import { Match } from './MatchService';
+
+export type MessageType = 'text' | 'image' | 'video' | 'audio' | 'location';
 
 export interface Message {
   id: string;
   chatId: string;
   senderId: string;
-  text: string;
+  type: MessageType;
+  content: string;
   timestamp: Date;
   read: boolean;
-  type: 'text' | 'image' | 'video' | 'audio';
+  readAt?: Date;
   mediaUrl?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+  replyTo?: string; // ID сообщения, на которое отвечают
 }
 
 export interface Chat {
   id: string;
+  matchId: string;
   participants: string[];
   lastMessage?: {
-    text: string;
+    content: string;
+    type: MessageType;
     timestamp: Date;
     senderId: string;
   };
+  unreadCount: { [userId: string]: number };
   createdAt: Date;
   updatedAt: Date;
+  isActive: boolean;
 }
 
 class ChatService {
@@ -39,18 +52,152 @@ class ChatService {
     return ChatService.instance;
   }
 
-  // Создание нового чата
-  async createChat(user1Id: string, user2Id: string): Promise<Chat> {
+  // Создание чата для мэтча
+  async createChat(matchId: string, participants: string[]): Promise<Chat> {
     const chatRef = firestore().collection(this.chatsCollection).doc();
+    const now = new Date();
+
     const chat: Chat = {
       id: chatRef.id,
-      participants: [user1Id, user2Id],
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      matchId,
+      participants,
+      unreadCount: participants.reduce((acc, userId) => ({ ...acc, [userId]: 0 }), {}),
+      createdAt: now,
+      updatedAt: now,
+      isActive: true,
     };
 
     await chatRef.set(chat);
     return chat;
+  }
+
+  // Отправка текстового сообщения
+  async sendTextMessage(chatId: string, senderId: string, content: string, replyTo?: string): Promise<Message> {
+    const messageRef = firestore().collection(this.messagesCollection).doc();
+    const now = new Date();
+
+    const message: Message = {
+      id: messageRef.id,
+      chatId,
+      senderId,
+      type: 'text',
+      content,
+      timestamp: now,
+      read: false,
+      replyTo,
+    };
+
+    await messageRef.set(message);
+    await this.updateChatLastMessage(chatId, message, senderId);
+
+    return message;
+  }
+
+  // Отправка медиа-сообщения (изображение, видео, аудио)
+  async sendMediaMessage(
+    chatId: string,
+    senderId: string,
+    type: 'image' | 'video' | 'audio',
+    uri: string,
+    caption?: string
+  ): Promise<Message> {
+    // Загружаем медиафайл
+    const filename = `chats/${chatId}/${Date.now()}_${type}`;
+    const reference = storage().ref(filename);
+    await reference.putFile(uri);
+    const mediaUrl = await reference.getDownloadURL();
+
+    const messageRef = firestore().collection(this.messagesCollection).doc();
+    const now = new Date();
+
+    const message: Message = {
+      id: messageRef.id,
+      chatId,
+      senderId,
+      type,
+      content: caption || '',
+      mediaUrl,
+      timestamp: now,
+      read: false,
+    };
+
+    await messageRef.set(message);
+    await this.updateChatLastMessage(chatId, message, senderId);
+
+    return message;
+  }
+
+  // Отправка локации
+  async sendLocation(
+    chatId: string,
+    senderId: string,
+    latitude: number,
+    longitude: number,
+    address?: string
+  ): Promise<Message> {
+    const messageRef = firestore().collection(this.messagesCollection).doc();
+    const now = new Date();
+
+    const message: Message = {
+      id: messageRef.id,
+      chatId,
+      senderId,
+      type: 'location',
+      content: address || 'Поделился местоположением',
+      location: { latitude, longitude, address },
+      timestamp: now,
+      read: false,
+    };
+
+    await messageRef.set(message);
+    await this.updateChatLastMessage(chatId, message, senderId);
+
+    return message;
+  }
+
+  // Получение сообщений чата
+  async getMessages(chatId: string, limit: number = 50, startAfter?: Date): Promise<Message[]> {
+    let query = firestore()
+      .collection(this.messagesCollection)
+      .where('chatId', '==', chatId)
+      .orderBy('timestamp', 'desc')
+      .limit(limit);
+
+    if (startAfter) {
+      query = query.startAfter(startAfter);
+    }
+
+    const snapshot = await query.get();
+    return snapshot.docs.map(doc => doc.data() as Message);
+  }
+
+  // Отметить сообщения как прочитанные
+  async markMessagesAsRead(chatId: string, userId: string): Promise<void> {
+    const batch = firestore().batch();
+    
+    // Получаем непрочитанные сообщения
+    const messages = await firestore()
+      .collection(this.messagesCollection)
+      .where('chatId', '==', chatId)
+      .where('read', '==', false)
+      .where('senderId', '!=', userId)
+      .get();
+
+    // Отмечаем каждое сообщение как прочитанное
+    messages.docs.forEach(doc => {
+      batch.update(doc.ref, {
+        read: true,
+        readAt: new Date(),
+      });
+    });
+
+    // Обновляем счетчик непрочитанных в чате
+    const chatRef = firestore().collection(this.chatsCollection).doc(chatId);
+    batch.update(chatRef, {
+      [`unreadCount.${userId}`]: 0,
+    });
+
+    await batch.commit();
   }
 
   // Получение чата по ID
@@ -63,139 +210,35 @@ class ChatService {
     return doc.exists ? (doc.data() as Chat) : null;
   }
 
+  // Получение чата по ID мэтча
+  async getChatByMatchId(matchId: string): Promise<Chat | null> {
+    const chats = await firestore()
+      .collection(this.chatsCollection)
+      .where('matchId', '==', matchId)
+      .limit(1)
+      .get();
+
+    return !chats.empty ? (chats.docs[0].data() as Chat) : null;
+  }
+
   // Получение всех чатов пользователя
   async getUserChats(userId: string): Promise<Chat[]> {
-    const snapshot = await firestore()
+    const chats = await firestore()
       .collection(this.chatsCollection)
       .where('participants', 'array-contains', userId)
+      .where('isActive', '==', true)
       .orderBy('updatedAt', 'desc')
       .get();
 
-    return snapshot.docs.map(doc => doc.data() as Chat);
+    return chats.docs.map(doc => doc.data() as Chat);
   }
 
-  // Отправка текстового сообщения
-  async sendMessage(chatId: string, senderId: string, text: string): Promise<Message> {
-    const messageRef = firestore()
-      .collection(this.chatsCollection)
-      .doc(chatId)
-      .collection(this.messagesCollection)
-      .doc();
-
-    const message: Message = {
-      id: messageRef.id,
-      chatId,
-      senderId,
-      text,
-      timestamp: new Date(),
-      read: false,
-      type: 'text',
-    };
-
-    const batch = firestore().batch();
-    
-    // Сохраняем сообщение
-    batch.set(messageRef, message);
-    
-    // Обновляем последнее сообщение в чате
-    batch.update(firestore().collection(this.chatsCollection).doc(chatId), {
-      lastMessage: {
-        text,
-        timestamp: message.timestamp,
-        senderId,
-      },
-      updatedAt: message.timestamp,
-    });
-
-    await batch.commit();
-    return message;
-  }
-
-  // Отправка медиа-сообщения
-  async sendMediaMessage(
-    chatId: string,
-    senderId: string,
-    uri: string,
-    type: 'image' | 'video' | 'audio'
-  ): Promise<Message> {
-    // Загружаем медиафайл
-    const filename = `chats/${chatId}/${Date.now()}_${type}`;
-    const reference = storage().ref(filename);
-    await reference.putFile(uri);
-    const mediaUrl = await reference.getDownloadURL();
-
-    const messageRef = firestore()
-      .collection(this.chatsCollection)
-      .doc(chatId)
-      .collection(this.messagesCollection)
-      .doc();
-
-    const message: Message = {
-      id: messageRef.id,
-      chatId,
-      senderId,
-      text: `${type} message`,
-      timestamp: new Date(),
-      read: false,
-      type,
-      mediaUrl,
-    };
-
-    const batch = firestore().batch();
-    
-    batch.set(messageRef, message);
-    batch.update(firestore().collection(this.chatsCollection).doc(chatId), {
-      lastMessage: {
-        text: message.text,
-        timestamp: message.timestamp,
-        senderId,
-      },
-      updatedAt: message.timestamp,
-    });
-
-    await batch.commit();
-    return message;
-  }
-
-  // Получение сообщений чата
-  async getMessages(chatId: string, limit: number = 50): Promise<Message[]> {
-    const snapshot = await firestore()
-      .collection(this.chatsCollection)
-      .doc(chatId)
-      .collection(this.messagesCollection)
-      .orderBy('timestamp', 'desc')
-      .limit(limit)
-      .get();
-
-    return snapshot.docs.map(doc => doc.data() as Message);
-  }
-
-  // Отметка сообщений как прочитанных
-  async markMessagesAsRead(chatId: string, userId: string): Promise<void> {
-    const batch = firestore().batch();
-    const messages = await firestore()
-      .collection(this.chatsCollection)
-      .doc(chatId)
-      .collection(this.messagesCollection)
-      .where('read', '==', false)
-      .where('senderId', '!=', userId)
-      .get();
-
-    messages.docs.forEach(doc => {
-      batch.update(doc.ref, { read: true });
-    });
-
-    await batch.commit();
-  }
-
-  // Подписка на новые сообщения
-  onNewMessage(chatId: string, callback: (message: Message) => void): () => void {
+  // Подписка на новые сообщения в чате
+  onNewMessages(chatId: string, callback: (message: Message) => void): () => void {
     return firestore()
-      .collection(this.chatsCollection)
-      .doc(chatId)
       .collection(this.messagesCollection)
+      .where('chatId', '==', chatId)
       .orderBy('timestamp', 'desc')
-      .limit(1)
       .onSnapshot(snapshot => {
         snapshot.docChanges().forEach(change => {
           if (change.type === 'added') {
@@ -210,11 +253,39 @@ class ChatService {
     return firestore()
       .collection(this.chatsCollection)
       .doc(chatId)
-      .onSnapshot(snapshot => {
-        if (snapshot.exists) {
-          callback(snapshot.data() as Chat);
+      .onSnapshot(doc => {
+        if (doc.exists) {
+          callback(doc.data() as Chat);
         }
       });
+  }
+
+  // Обновление последнего сообщения в чате
+  private async updateChatLastMessage(chatId: string, message: Message, senderId: string): Promise<void> {
+    const chatRef = firestore().collection(this.chatsCollection).doc(chatId);
+    const chat = await chatRef.get();
+    
+    if (!chat.exists) return;
+
+    const chatData = chat.data() as Chat;
+    const updates: any = {
+      lastMessage: {
+        content: message.content,
+        type: message.type,
+        timestamp: message.timestamp,
+        senderId: message.senderId,
+      },
+      updatedAt: message.timestamp,
+    };
+
+    // Увеличиваем счетчик непрочитанных сообщений для всех участников, кроме отправителя
+    chatData.participants.forEach(participantId => {
+      if (participantId !== senderId) {
+        updates[`unreadCount.${participantId}`] = firestore.FieldValue.increment(1);
+      }
+    });
+
+    await chatRef.update(updates);
   }
 }
 
