@@ -45,14 +45,14 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
       onPanResponderMove: (event, gesture) => {
         position.setValue({ x: gesture.dx, y: gesture.dy });
         
-        // Показываем детали при свайпе вверх
-        if (gesture.dy < -SWIPE_UP_THRESHOLD && !showDetails) {
+        // Показываем детали только при свайпе вверх и не во время суперлайка
+        if (gesture.dy < -SWIPE_UP_THRESHOLD && !showDetails && Math.abs(gesture.dx) < SWIPE_THRESHOLD) {
           setShowDetails(true);
           Animated.spring(detailsOpacity, {
             toValue: 1,
             useNativeDriver: true,
           }).start();
-        } else if (gesture.dy >= -SWIPE_UP_THRESHOLD && showDetails) {
+        } else if ((gesture.dy >= -SWIPE_UP_THRESHOLD || Math.abs(gesture.dx) >= SWIPE_THRESHOLD) && showDetails) {
           setShowDetails(false);
           Animated.spring(detailsOpacity, {
             toValue: 0,
@@ -87,6 +87,14 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
   };
 
   const handleSuperLike = () => {
+    // Убеждаемся, что детали скрыты
+    if (showDetails) {
+      setShowDetails(false);
+      Animated.spring(detailsOpacity, {
+        toValue: 0,
+        useNativeDriver: true,
+      }).start();
+    }
     onSuperLike();
     forceSwipe('right');
   };
