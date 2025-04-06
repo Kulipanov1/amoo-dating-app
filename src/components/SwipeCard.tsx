@@ -10,7 +10,7 @@ import {
   PanResponder,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign, Entypo, FontAwesome, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { UserProfile } from '../services/UserProfileService';
 
@@ -119,21 +119,21 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
           style={[styles.button, styles.dislikeButton]}
           onPress={() => forceSwipe('left')}
         >
-          <MaterialCommunityIcons name="close-circle" size={30} color="#FF4B4B" />
+          <Entypo name="cross" size={40} color="#FF4B4B" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, styles.superLikeButton]}
           onPress={handleSuperLike}
         >
-          <FontAwesome5 name="star" size={30} color="#4CAF50" solid />
+          <FontAwesome name="star" size={35} color="#4CAF50" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, styles.likeButton]}
           onPress={() => forceSwipe('right')}
         >
-          <MaterialCommunityIcons name="heart" size={30} color="#FF4081" />
+          <AntDesign name="heart" size={35} color="#FF4081" />
         </TouchableOpacity>
       </View>
     );
@@ -185,7 +185,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
       
       {isFirst && (
         <View style={styles.swipeHint}>
-          <MaterialCommunityIcons name="gesture-swipe-up" size={24} color="#fff" />
+          <Entypo name="chevron-up" size={30} color="#fff" />
           <Text style={styles.swipeHintText}>Свайп вверх для подробностей</Text>
         </View>
       )}
@@ -290,9 +290,9 @@ const styles = StyleSheet.create({
     right: 0,
   },
   button: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 65,
+    height: 65,
+    borderRadius: 32.5,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white',
@@ -321,14 +321,18 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    alignSelf: 'center',
   },
   swipeHintText: {
     color: '#fff',
-    fontSize: 14,
-    marginTop: 5,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
+    fontSize: 16,
+    marginLeft: 8,
+    fontWeight: '500',
   },
 });
 
