@@ -1,48 +1,55 @@
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
-// allows you to do things like:
-// expect(element).toHaveTextContent(/react/i)
-// learn more: https://github.com/testing-library/jest-dom
+/// <reference types="@testing-library/jest-dom" />
 import '@testing-library/jest-dom';
 
 // Мок для window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: (query: string) => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: jest.fn(), // устаревший
-    removeListener: jest.fn(), // устаревший
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
+    addListener: () => {}, // устаревший
+    removeListener: () => {}, // устаревший
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => true,
+  }),
 });
 
 // Мок для IntersectionObserver
-const mockIntersectionObserver = jest.fn();
-mockIntersectionObserver.mockReturnValue({
-  observe: () => null,
-  unobserve: () => null,
-  disconnect: () => null
+class MockIntersectionObserver {
+  observe = () => null;
+  unobserve = () => null;
+  disconnect = () => null;
+}
+
+Object.defineProperty(window, 'IntersectionObserver', {
+  writable: true,
+  value: MockIntersectionObserver,
 });
-window.IntersectionObserver = mockIntersectionObserver;
 
 // Мок для fetch
-global.fetch = jest.fn(() =>
+const mockFetch = () =>
   Promise.resolve({
     json: () => Promise.resolve({}),
     ok: true,
     status: 200,
     statusText: 'OK',
-  })
-) as jest.Mock;
+  });
+
+Object.defineProperty(window, 'fetch', {
+  writable: true,
+  value: mockFetch,
+});
 
 // Мок для localStorage
 const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
+  clear: () => {},
 };
-Object.defineProperty(window, 'localStorage', { value: localStorageMock }); 
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+}); 

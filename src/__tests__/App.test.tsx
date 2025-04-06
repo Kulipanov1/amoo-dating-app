@@ -1,12 +1,22 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
-import App from '../../App';
-
-jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import App from '../App';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from '../hooks/useAuth';
+import { NotificationProvider } from '../components/NotificationProvider';
 
 describe('App', () => {
   it('renders correctly', () => {
-    const { getByText } = render(<App />);
-    expect(getByText('amoo')).toBeTruthy();
+    render(
+      <BrowserRouter>
+        <AuthProvider>
+          <NotificationProvider>
+            <App />
+          </NotificationProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    );
+    expect(screen.getByTestId('app')).toBeInTheDocument();
   });
-}); 
+});
