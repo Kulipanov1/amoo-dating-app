@@ -1,6 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Dimensions, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { StreamsStackParamList } from '../types/navigation';
+
+type LiveScreenNavigationProp = StackNavigationProp<StreamsStackParamList, 'Live'>;
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const ITEM_WIDTH = (SCREEN_WIDTH - 30) / 2;
@@ -50,6 +55,8 @@ const DUMMY_STREAMS: LiveStream[] = [
 ];
 
 const LiveScreen = () => {
+  const navigation = useNavigation<LiveScreenNavigationProp>();
+
   const renderStreamItem = ({ item }: { item: LiveStream }) => (
     <TouchableOpacity style={styles.streamItem}>
       <View style={styles.thumbnailContainer}>
@@ -72,7 +79,22 @@ const LiveScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Прямые эфиры</Text>
+        <TouchableOpacity 
+          style={styles.startStreamButton}
+          onPress={() => {/* Здесь будет логика начала стрима */}}
+        >
+          <Ionicons name="videocam" size={24} color="#8A2BE2" />
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={DUMMY_STREAMS}
         renderItem={renderStreamItem}
@@ -81,7 +103,7 @@ const LiveScreen = () => {
         columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.listContainer}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -89,6 +111,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  startStreamButton: {
+    padding: 8,
   },
   listContainer: {
     padding: 10,

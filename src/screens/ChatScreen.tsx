@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -20,13 +20,14 @@ interface ChatScreenProps {
     params: {
       chatId: string;
       otherUserId: string;
+      userName: string;
     };
   };
 }
 
 const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
   const navigation = useNavigation();
-  const { chatId, otherUserId } = route.params;
+  const { chatId, otherUserId, userName } = route.params;
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -97,8 +98,13 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
         >
           <MaterialIcons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Чат</Text>
-        <View style={styles.backButton} />
+        <Text style={styles.headerTitle}>{userName}</Text>
+        <TouchableOpacity
+          style={styles.menuButton}
+          onPress={() => {}}
+        >
+          <MaterialIcons name="more-vert" size={24} color="#000" />
+        </TouchableOpacity>
       </View>
       <KeyboardAvoidingView
         style={styles.container}
@@ -130,7 +136,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
             <MaterialIcons
               name="send"
               size={24}
-              color={newMessage.trim() ? '#007AFF' : '#999'}
+              color={newMessage.trim() ? '#8A2BE2' : '#999'}
             />
           </TouchableOpacity>
         </View>
@@ -158,9 +164,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  menuButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
   },
   messagesList: {
     padding: 16,
@@ -173,11 +187,11 @@ const styles = StyleSheet.create({
   },
   myMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: '#007AFF',
+    backgroundColor: '#8A2BE2',
   },
   otherMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: '#E9E9EB',
+    backgroundColor: '#F0F0F0',
   },
   messageText: {
     fontSize: 16,

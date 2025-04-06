@@ -36,21 +36,29 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
   const navigation = useNavigation();
   const [showDetails, setShowDetails] = useState(false);
   const position = useRef(new Animated.ValueXY()).current;
+  const detailsOpacity = useRef(new Animated.Value(0)).current;
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderMove: (event, gesture) => {
         position.setValue({ x: gesture.dx, y: gesture.dy });
+        if (gesture.dy < -50) {
+          Animated.spring(detailsOpacity, {
+            toValue: 1,
+            useNativeDriver: true,
+          }).start();
+          setShowDetails(true);
+        } else {
+          Animated.spring(detailsOpacity, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+          setShowDetails(false);
+        }
       },
       onPanResponderRelease: (event, gesture) => {
-        if (gesture.dy < -50) {
-          // Свайп вверх для показа деталей
-          setShowDetails(true);
-          Animated.spring(position, {
-            toValue: { x: 0, y: 0 },
-            useNativeDriver: false,
-          }).start();
-        } else if (gesture.dx > SWIPE_THRESHOLD) {
+        if (gesture.dx > SWIPE_THRESHOLD) {
           forceSwipe('right');
         } else if (gesture.dx < -SWIPE_THRESHOLD) {
           forceSwipe('left');
@@ -140,14 +148,18 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{profile.displayName}</Text>
         <Text style={styles.age}>{profile.age} лет</Text>
-        {showDetails && (
-          <View style={styles.detailsContainer}>
-            <Text style={styles.bio}>{profile.bio}</Text>
-            <Text style={styles.interests}>
-              Интересы: {profile.interests.join(', ')}
-            </Text>
-          </View>
-        )}
+        <Animated.View style={[styles.detailsContainer, { opacity: detailsOpacity }]}>
+          <Text style={styles.bio}>{profile.bio}</Text>
+          <Text style={styles.interests}>
+            Интересы: {profile.interests.join(', ')}
+          </Text>
+          {profile.occupation && (
+            <Text style={styles.occupation}>Работа: {profile.occupation}</Text>
+          )}
+          {profile.education && (
+            <Text style={styles.education}>Образование: {profile.education}</Text>
+          )}
+        </Animated.View>
       </View>
       {renderButtons()}
     </Animated.View>
@@ -215,6 +227,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'white',
     fontStyle: 'italic',
+    marginBottom: 5,
+  },
+  occupation: {
+    fontSize: 14,
+    color: 'white',
+    marginBottom: 5,
+  },
+  education: {
+    fontSize: 14,
+    color: 'white',
+    marginBottom: 5,
   },
   buttonContainer: {
     flexDirection: 'row',

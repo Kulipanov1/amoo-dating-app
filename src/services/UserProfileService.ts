@@ -5,7 +5,7 @@ import { app } from '../config/firebase';
 const firestore = getFirestore(app);
 const storage = getStorage(app);
 
-interface UserProfile {
+export interface UserProfile {
   uid: string;
   displayName: string;
   email: string;

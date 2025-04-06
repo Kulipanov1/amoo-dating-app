@@ -7,9 +7,15 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { StreamsStackParamList } from '../types/navigation';
+
+type StreamScreenNavigationProp = StackNavigationProp<StreamsStackParamList, 'Streams'>;
 
 const StreamScreen = () => {
   const [isStreaming, setIsStreaming] = useState(false);
+  const navigation = useNavigation<StreamScreenNavigationProp>();
 
   const handleStartStream = () => {
     setIsStreaming(true);
@@ -21,10 +27,20 @@ const StreamScreen = () => {
     // Здесь будет логика остановки стрима
   };
 
+  const handleViewStreams = () => {
+    navigation.navigate('Live');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Стримы</Text>
+        <TouchableOpacity 
+          style={styles.viewStreamsButton}
+          onPress={handleViewStreams}
+        >
+          <MaterialIcons name="live-tv" size={24} color="#8A2BE2" />
+        </TouchableOpacity>
       </View>
       <View style={styles.content}>
         {isStreaming ? (
@@ -58,6 +74,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
@@ -65,6 +84,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  viewStreamsButton: {
+    padding: 8,
   },
   content: {
     flex: 1,
