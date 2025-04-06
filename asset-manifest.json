@@ -1,0 +1,32 @@
+{
+  "files": {
+    "main.js": "/static/js/main.bf6ab54c.js",
+    "static/js/873.d7335473.js": "/static/js/873.d7335473.js",
+    "fonts/MaterialCommunityIcons.ttf": "/fonts/MaterialCommunityIcons.ttf",
+    "fonts/Fontisto.ttf": "/fonts/Fontisto.ttf",
+    "fonts/Ionicons.ttf": "/fonts/Ionicons.ttf",
+    "fonts/MaterialIcons.ttf": "/fonts/MaterialIcons.ttf",
+    "fonts/FontAwesome5_Solid.ttf": "/fonts/FontAwesome5_Solid.ttf",
+    "fonts/FontAwesome.ttf": "/fonts/FontAwesome.ttf",
+    "fonts/FontAwesome5_Brands.ttf": "/fonts/FontAwesome5_Brands.ttf",
+    "fonts/AntDesign.ttf": "/fonts/AntDesign.ttf",
+    "fonts/Entypo.ttf": "/fonts/Entypo.ttf",
+    "fonts/Foundation.ttf": "/fonts/Foundation.ttf",
+    "fonts/Feather.ttf": "/fonts/Feather.ttf",
+    "fonts/SimpleLineIcons.ttf": "/fonts/SimpleLineIcons.ttf",
+    "fonts/Octicons.ttf": "/fonts/Octicons.ttf",
+    "fonts/FontAwesome5_Regular.ttf": "/fonts/FontAwesome5_Regular.ttf",
+    "fonts/Zocial.ttf": "/fonts/Zocial.ttf",
+    "fonts/EvilIcons.ttf": "/fonts/EvilIcons.ttf",
+    "index.html": "/index.html",
+    "manifest.json": "/manifest.json",
+    "serve.json": "/serve.json",
+    "static/media/Ionicons.ttf": "/static/media/Ionicons.a56026c271301489e7fd.ttf",
+    "main.bf6ab54c.js.map": "/static/js/main.bf6ab54c.js.map",
+    "873.d7335473.js.map": "/static/js/873.d7335473.js.map"
+  },
+  "entrypoints": [
+    "static/js/873.d7335473.js",
+    "static/js/main.bf6ab54c.js"
+  ]
+}

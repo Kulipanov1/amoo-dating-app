@@ -1,0 +1,21 @@
+{
+  "description": "",
+  "display": "standalone",
+  "lang": "en",
+  "name": "Amoo one",
+  "short_name": "Amoo one",
+  "start_url": "/?utm_source=web_app_manifest",
+  "orientation": "portrait",
+  "related_applications": [
+    {
+      "platform": "itunes",
+      "id": "com.amoo.datingapp"
+    },
+    {
+      "platform": "play",
+      "url": "http://play.google.com/store/apps/details?id=com.amoo.datingapp",
+      "id": "com.amoo.datingapp"
+    }
+  ],
+  "prefer_related_applications": true
+}
