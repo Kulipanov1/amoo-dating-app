@@ -1,19 +1,23 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
-  FlatList,
+  StyleSheet,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
+  FlatList,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { NavigationProp } from '@react-navigation/native';
+import { ChatStackParamList } from '../types/navigation';
+import type { Message } from '../services/ChatService';
 import ChatService from '../services/ChatService';
 import { auth } from '../config/firebase';
+
+type ChatScreenNavigationProp = NavigationProp<ChatStackParamList, 'Chat'>;
 
 interface ChatScreenProps {
   route: {
@@ -23,114 +27,101 @@ interface ChatScreenProps {
       userName: string;
     };
   };
+  navigation: ChatScreenNavigationProp;
 }
 
-const ChatScreen: React.FC<ChatScreenProps> = ({ route }) => {
-  const navigation = useNavigation();
+const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
   const { chatId, otherUserId, userName } = route.params;
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(true);
   const flatListRef = useRef<FlatList>(null);
+  const chatService = useMemo(() => {
+    return ChatService.getInstance();
+  }, []);
 
   useEffect(() => {
+    const loadMessages = async () => {
+      try {
+        const chatMessages = await chatService.getMessages(chatId);
+        setMessages(chatMessages);
+      } catch (error) {
+        console.error('Error loading messages:', error);
+      }
+    };
+
     loadMessages();
-    const unsubscribe = ChatService.onNewMessage(chatId, handleNewMessage);
+
+    const unsubscribe = chatService.onNewMessage(chatId, (newMessage: Message) => {
+      setMessages((prevMessages) => [newMessage, ...prevMessages]);
+    });
+
     return () => unsubscribe();
-  }, [chatId]);
+  }, [chatId, chatService]);
 
-  const loadMessages = async () => {
-    try {
-      const chatMessages = await ChatService.getMessages(chatId);
-      setMessages(chatMessages);
-    } catch (error) {
-      console.error('Error loading messages:', error);
-    } finally {
-      setLoading(false);
+  const handleSend = async () => {
+    if (newMessage.trim() && auth.currentUser) {
+      try {
+        await chatService.sendMessage(chatId, auth.currentUser.uid, otherUserId, newMessage);
+        setNewMessage('');
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
     }
-  };
-
-  const handleNewMessage = (message: any) => {
-    setMessages(prevMessages => [...prevMessages, message]);
-    if (flatListRef.current) {
-      flatListRef.current.scrollToEnd({ animated: true });
-    }
-  };
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
-
-    try {
-      await ChatService.sendMessage(chatId, newMessage);
-      setNewMessage('');
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
-  };
-
-  const renderMessage = ({ item }: { item: any }) => {
-    const isMyMessage = item.senderId === auth.currentUser?.uid;
-
-    return (
-      <View
-        style={[
-          styles.messageContainer,
-          isMyMessage ? styles.myMessage : styles.otherMessage,
-        ]}
-      >
-        <Text style={styles.messageText}>{item.content}</Text>
-        <Text style={styles.messageTime}>
-          {new Date(item.timestamp).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </Text>
-      </View>
-    );
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
+        <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <MaterialIcons name="arrow-back" size={24} color="#000" />
+          <MaterialIcons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{userName}</Text>
-        <TouchableOpacity
-          style={styles.menuButton}
-          onPress={() => {}}
+        <TouchableOpacity 
+          style={styles.closeButton}
+          onPress={() => navigation.navigate('ChatList')}
         >
-          <MaterialIcons name="more-vert" size={24} color="#000" />
+          <MaterialIcons name="close" size={24} color="#333" />
         </TouchableOpacity>
       </View>
+
       <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.content}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
       >
         <FlatList
           ref={flatListRef}
           data={messages}
-          renderItem={renderMessage}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.messagesList}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
-          onLayout={() => flatListRef.current?.scrollToEnd()}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={[
+              styles.messageContainer,
+              item.senderId === auth.currentUser?.uid ? styles.sentMessage : styles.receivedMessage
+            ]}>
+              <Text style={[
+                styles.messageText,
+                item.senderId === auth.currentUser?.uid ? styles.sentMessageText : styles.receivedMessageText
+              ]}>{item.content}</Text>
+            </View>
+          )}
+          contentContainerStyle={styles.messageList}
+          inverted
         />
+
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
             value={newMessage}
             onChangeText={setNewMessage}
-            placeholder="Введите сообщение..."
+            placeholder="Написать сообщение..."
             multiline
           />
           <TouchableOpacity
             style={styles.sendButton}
-            onPress={handleSendMessage}
+            onPress={handleSend}
             disabled={!newMessage.trim()}
           >
             <MaterialIcons
@@ -159,16 +150,10 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eee',
   },
   backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 8,
   },
-  menuButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+  closeButton: {
+    padding: 8,
   },
   headerTitle: {
     fontSize: 18,
@@ -176,43 +161,45 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
   },
-  messagesList: {
+  content: {
+    flex: 1,
+  },
+  messageList: {
     padding: 16,
   },
   messageContainer: {
     maxWidth: '80%',
-    marginBottom: 8,
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 16,
+    marginBottom: 8,
   },
-  myMessage: {
+  sentMessage: {
     alignSelf: 'flex-end',
     backgroundColor: '#8A2BE2',
   },
-  otherMessage: {
+  receivedMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: '#F0F0F0',
+    backgroundColor: '#f0f0f0',
   },
   messageText: {
     fontSize: 16,
-    color: '#000',
   },
-  messageTime: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-    alignSelf: 'flex-end',
+  sentMessageText: {
+    color: '#fff',
+  },
+  receivedMessageText: {
+    color: '#333',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: 8,
     borderTopWidth: 1,
     borderTopColor: '#eee',
   },
   input: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#f5f5f5',
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -220,10 +207,7 @@ const styles = StyleSheet.create({
     maxHeight: 100,
   },
   sendButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 8,
   },
 });
 

@@ -9,7 +9,8 @@ import {
   TouchableOpacity,
   Platform,
   FlatList,
-  SafeAreaView
+  SafeAreaView,
+  Modal
 } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { UserProfile } from '../services/UserProfileService';
@@ -102,6 +103,35 @@ const ProfileScreen = () => {
       <Text style={styles.statLabel}>{label}</Text>
     </TouchableOpacity>
   );
+
+  const StatModal = ({ visible, onClose, title, data, type }: StatModalProps) => {
+    return (
+      <Modal
+        visible={visible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={onClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                <MaterialIcons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>{title}</Text>
+            </View>
+            <FlatList
+              data={data}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.userList}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   if (loading) {
     return (
@@ -234,6 +264,38 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    width: '80%',
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  closeButton: {
+    padding: 8,
+    marginRight: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
+  },
+  userList: {
+    padding: 16,
   },
 });
 

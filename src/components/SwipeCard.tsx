@@ -83,6 +83,11 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
     position.setValue({ x: 0, y: 0 });
   };
 
+  const handleSuperLike = () => {
+    onSuperLike();
+    forceSwipe('right');
+  };
+
   const resetPosition = () => {
     Animated.spring(position, {
       toValue: { x: 0, y: 0 },
@@ -116,7 +121,7 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
 
         <TouchableOpacity
           style={[styles.button, styles.superLikeButton]}
-          onPress={onSuperLike}
+          onPress={handleSuperLike}
         >
           <MaterialIcons name="star" size={30} color="#4CAF50" />
         </TouchableOpacity>
@@ -147,23 +152,34 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
       />
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{profile.displayName}</Text>
-        <Text style={styles.age}>{profile.age} лет</Text>
+        <Text style={styles.age}>{profile.birthDate ? calculateAge(profile.birthDate) : ''} лет</Text>
         <Animated.View style={[styles.detailsContainer, { opacity: detailsOpacity }]}>
           <Text style={styles.bio}>{profile.bio}</Text>
           <Text style={styles.interests}>
             Интересы: {profile.interests.join(', ')}
           </Text>
-          {profile.occupation && (
-            <Text style={styles.occupation}>Работа: {profile.occupation}</Text>
+          {profile.location && (
+            <Text style={styles.location}>Местоположение: {profile.location}</Text>
           )}
-          {profile.education && (
-            <Text style={styles.education}>Образование: {profile.education}</Text>
+          {profile.gender && (
+            <Text style={styles.gender}>Пол: {profile.gender}</Text>
           )}
         </Animated.View>
       </View>
       {renderButtons()}
     </Animated.View>
   );
+};
+
+const calculateAge = (birthDate: string) => {
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
 };
 
 const styles = StyleSheet.create({
@@ -229,12 +245,12 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginBottom: 5,
   },
-  occupation: {
+  location: {
     fontSize: 14,
     color: 'white',
     marginBottom: 5,
   },
-  education: {
+  gender: {
     fontSize: 14,
     color: 'white',
     marginBottom: 5,

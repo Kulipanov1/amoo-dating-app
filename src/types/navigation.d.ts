@@ -1,18 +1,20 @@
-import { RouteProp } from '@react-navigation/native';
+import { RouteProp, NavigatorScreenParams } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 export type RootStackParamList = {
-  HomeTab: undefined;
-  ChatTab: undefined;
-  StreamsTab: undefined;
-  ProfileTab: undefined;
+  Home: NavigatorScreenParams<HomeStackParamList>;
+  Chat: NavigatorScreenParams<ChatStackParamList>;
+  Profile: NavigatorScreenParams<ProfileStackParamList>;
+  Streams: NavigatorScreenParams<StreamsStackParamList>;
 };
 
 export type ChatStackParamList = {
   ChatList: undefined;
-  Chat: { userName: string };
-  SingleChat: undefined;
-  ChatRoom: undefined;
+  Chat: {
+    chatId: string;
+    otherUserId: string;
+    userName: string;
+  };
 };
 
 export type ProfileStackParamList = {
@@ -23,17 +25,23 @@ export type ProfileStackParamList = {
 
 export type HomeStackParamList = {
   Home: undefined;
-  Map: undefined;
+  SwipeCard: undefined;
 };
 
 export type StreamsStackParamList = {
   Streams: undefined;
-  Live: undefined;
+  Stream: { streamId: string };
 };
 
 export type ChatScreenProps = {
-  navigation: StackNavigationProp<ChatStackParamList, 'Chat'>;
-  route: RouteProp<ChatStackParamList, 'Chat'>;
+  route: {
+    params: {
+      chatId: string;
+      otherUserId: string;
+      userName: string;
+    };
+  };
+  navigation: any;
 };
 
 export type SingleChatScreenProps = {
