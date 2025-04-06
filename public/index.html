@@ -4,21 +4,49 @@
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#1976d2" />
     <meta
       name="description"
-      content="Amoo One - приложение для знакомств"
+      content="Amoo - современная социальная сеть для общения, обмена фотографиями и новостями"
     />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>Amoo One</title>
+    <link rel="canonical" href="https://amoo.com/" />
+    
+    <!-- Open Graph мета-теги -->
+    <meta property="og:title" content="Amoo - Социальная сеть" />
+    <meta property="og:description" content="Amoo - современная социальная сеть для общения, обмена фотографиями и новостями" />
+    <meta property="og:image" content="%PUBLIC_URL%/logo512.png" />
+    <meta property="og:url" content="https://amoo.com/" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Twitter Card мета-теги -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Amoo - Социальная сеть" />
+    <meta name="twitter:description" content="Amoo - современная социальная сеть для общения, обмена фотографиями и новостями" />
+    <meta name="twitter:image" content="%PUBLIC_URL%/logo512.png" />
+    
+    <title>Amoo - Социальная сеть</title>
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
     />
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>Для работы приложения необходимо включить JavaScript.</noscript>
     <div id="root"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+              console.log('ServiceWorker registration successful');
+            })
+            .catch(err => {
+              console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+      }
+    </script>
   </body>
 </html> 

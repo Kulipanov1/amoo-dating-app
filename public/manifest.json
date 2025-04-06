@@ -1,6 +1,6 @@
 {
-  "short_name": "Amoo One",
-  "name": "Amoo One - приложение для знакомств",
+  "short_name": "Amoo",
+  "name": "Amoo - Социальная сеть",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +20,12 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#1976d2",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "scope": "/",
+  "description": "Современная социальная сеть для общения",
+  "lang": "ru-RU",
+  "dir": "ltr",
+  "categories": ["social", "communication", "networking"]
 } 

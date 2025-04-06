@@ -1,0 +1,12 @@
+# Разрешаем индексацию всего сайта
+User-agent: *
+Allow: /
+
+# Запрещаем индексацию служебных страниц
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+Disallow: /auth/
+
+# Sitemap
+Sitemap: https://amoo.com/sitemap.xml 

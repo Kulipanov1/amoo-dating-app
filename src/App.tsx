@@ -1,54 +1,55 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material';
+import React, { Suspense, useEffect } from 'react';
+import { BrowserRouter, useLocation } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import ErrorBoundary from './components/ErrorBoundary';
+import { NotificationProvider } from './components/NotificationProvider';
+import { AuthProvider } from './hooks/useAuth';
+import LoadingOverlay from './components/LoadingOverlay';
+import PerformanceTracker from './components/PerformanceTracker';
+import NotificationManager from './components/NotificationManager';
+import theme from './theme';
+import AppRoutes from './routes';
+import AnalyticsService from './services/AnalyticsService';
 
-// Компоненты
-import AuthGuard from './components/AuthGuard';
-import Layout from './components/Layout';
-import Login from './screens/Login';
-import Register from './screens/Register';
-import Home from './screens/Home';
-import Profile from './screens/Profile';
-import Chat from './screens/Chat';
-import ChatList from './screens/ChatList';
-import Settings from './screens/Settings';
+// Компонент для отслеживания навигации
+const NavigationTracker: React.FC = () => {
+  const location = useLocation();
+  const analytics = AnalyticsService.getInstance();
 
-// Создаем тему
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
+  useEffect(() => {
+    analytics.trackPageView(location.pathname);
+  }, [location.pathname]);
 
-function App() {
+  return null;
+};
+
+const App: React.FC = () => {
+  useEffect(() => {
+    // Инициализация аналитики
+    const analytics = AnalyticsService.getInstance();
+    analytics.initialize();
+  }, []);
+
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <Routes>
-          {/* Публичные маршруты */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-
-          {/* Защищенные маршруты */}
-          <Route element={<AuthGuard><Layout /></AuthGuard>}>
-            <Route path="/" element={<Home />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/chats" element={<ChatList />} />
-            <Route path="/chat/:id" element={<Chat />} />
-            <Route path="/settings" element={<Settings />} />
-          </Route>
-        </Routes>
-      </Router>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <NotificationProvider>
+          <AuthProvider>
+            <BrowserRouter>
+              <NavigationTracker />
+              <PerformanceTracker />
+              <NotificationManager />
+              <Suspense fallback={<LoadingOverlay open={true} message="Загрузка приложения..." />}>
+                <AppRoutes />
+              </Suspense>
+            </BrowserRouter>
+          </AuthProvider>
+        </NotificationProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
-}
+};
 
 export default App; 

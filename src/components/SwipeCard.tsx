@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,11 +8,13 @@ import {
   TouchableOpacity,
   Animated,
   PanResponder,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AntDesign, Entypo, FontAwesome, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { UserProfile } from '../services/UserProfileService';
+import ImageCacheService from '../services/ImageCacheService';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
@@ -36,9 +38,30 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
 }) => {
   const navigation = useNavigation();
   const [showDetails, setShowDetails] = useState(false);
+  const [isSuperLiking, setIsSuperLiking] = useState(false);
+  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const position = useRef(new Animated.ValueXY()).current;
   const detailsOpacity = useRef(new Animated.Value(0)).current;
-  const [isSuperLiking, setIsSuperLiking] = useState(false);
+
+  useEffect(() => {
+    loadCachedImage();
+  }, [profile.photos[0]]);
+
+  const loadCachedImage = async () => {
+    if (profile.photos[0]) {
+      setIsLoading(true);
+      try {
+        const uri = await ImageCacheService.getInstance().getCachedImageUri(profile.photos[0]);
+        setImageUri(uri);
+      } catch (error) {
+        console.error('Error loading cached image:', error);
+        setImageUri(profile.photos[0]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
   const hideDetails = () => {
     setShowDetails(false);
@@ -159,11 +182,18 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
       style={[styles.card, getCardStyle()]}
       {...panResponder.panHandlers}
     >
-      <Image
-        source={{ uri: profile.photos[0] }}
-        style={styles.image}
-        resizeMode="cover"
-      />
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#8A2BE2" />
+        </View>
+      ) : (
+        <Image
+          source={{ uri: imageUri || profile.photos[0] }}
+          style={styles.image}
+          resizeMode="cover"
+          onError={() => setImageUri(profile.photos[0])}
+        />
+      )}
       <LinearGradient
         colors={['transparent', 'rgba(0,0,0,0.8)']}
         style={styles.gradient}
@@ -348,6 +378,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 8,
     fontWeight: '500',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
   },
 });
 
