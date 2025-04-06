@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -6,9 +7,12 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
-  Platform
+  Platform,
+  FlatList,
+  SafeAreaView
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { UserProfile } from '../services/UserProfileService';
 
 interface ProfileSection {
   id: string;
@@ -51,205 +55,185 @@ const PROFILE_SECTIONS: ProfileSection[] = [
 ];
 
 const ProfileScreen = () => {
-  const userProfile = {
-    name: 'Анна',
-    age: 25,
-    location: 'Москва',
-    bio: 'Люблю путешествия, фотографию и хорошую музыку. В поисках интересных знакомств и новых впечатлений.',
-    photos: [
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9',
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1'
-    ],
-    interests: ['Путешествия', 'Фотография', 'Музыка', 'Спорт', 'Искусство']
+  const navigation = useNavigation();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      const userProfile = await UserProfile.getProfile(
+        auth.currentUser?.uid || ''
+      );
+      setProfile(userProfile);
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <View style={styles.profileImageContainer}>
-        <Image
-          source={{ uri: userProfile.photos[0] }}
-          style={styles.profileImage}
-        />
-        <TouchableOpacity style={styles.editImageButton}>
-          <Ionicons name="camera-outline" size={20} color="#fff" />
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.name}>{userProfile.name}, {userProfile.age}</Text>
-      <Text style={styles.bio}>{userProfile.bio}</Text>
-      <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>248</Text>
-          <Text style={styles.statLabel}>Подписчики</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>186</Text>
-          <Text style={styles.statLabel}>Подписки</Text>
-        </View>
-      </View>
-    </View>
-  );
+  const handleFollowersPress = () => {
+    navigation.navigate('UserList', {
+      title: 'Подписчики',
+      userIds: profile?.followers || [],
+    });
+  };
 
-  const renderSections = () => (
-    <View style={styles.sections}>
-      {PROFILE_SECTIONS.map((section) => (
-        <TouchableOpacity
-          key={section.id}
-          style={styles.sectionItem}
-          onPress={section.action}
-        >
-          <View style={styles.sectionIcon}>
-            <Ionicons name={section.icon} size={24} color="#8A2BE2" />
-          </View>
-          <Text style={styles.sectionTitle}>{section.title}</Text>
-          <Ionicons name="chevron-forward" size={24} color="#666" />
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
+  const handleFollowingPress = () => {
+    navigation.navigate('UserList', {
+      title: 'Подписки',
+      userIds: profile?.following || [],
+    });
+  };
 
-  const renderLogoutButton = () => (
-    <TouchableOpacity style={styles.logoutButton}>
-      <Text style={styles.logoutText}>Выйти</Text>
+  const renderStatItem = (
+    count: number,
+    label: string,
+    onPress: () => void,
+    icon: string
+  ) => (
+    <TouchableOpacity style={styles.statItem} onPress={onPress}>
+      <MaterialIcons name={icon} size={24} color="#666" />
+      <Text style={styles.statCount}>{count}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
     </TouchableOpacity>
   );
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Загрузка...</Text>
+      </View>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <View style={styles.container}>
+        <Text>Профиль не найден</Text>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={styles.container}>
-      {renderHeader()}
-      {renderSections()}
-      {renderLogoutButton()}
-    </ScrollView>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <MaterialIcons name="arrow-back" size={24} color="#000" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Профиль</Text>
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => navigation.navigate('EditProfile')}
+        >
+          <MaterialIcons name="edit" size={24} color="#000" />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.profileContainer}>
+        <Image
+          source={{ uri: profile.photos[0] }}
+          style={styles.avatar}
+          resizeMode="cover"
+        />
+        <Text style={styles.name}>{profile.displayName}</Text>
+        <Text style={styles.bio}>{profile.bio}</Text>
+        <View style={styles.statsContainer}>
+          {renderStatItem(
+            profile.followers.length,
+            'Подписчики',
+            handleFollowersPress,
+            'people'
+          )}
+          {renderStatItem(
+            profile.following.length,
+            'Подписки',
+            handleFollowingPress,
+            'person-add'
+          )}
+          {renderStatItem(profile.likes, 'Лайки', () => {}, 'favorite')}
+        </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#fff',
   },
   header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
-  profileImageContainer: {
-    position: 'relative',
-    marginBottom: 15,
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  profileImage: {
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  editButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileContainer: {
+    alignItems: 'center',
+    padding: 16,
+  },
+  avatar: {
     width: 120,
     height: 120,
     borderRadius: 60,
-  },
-  editImageButton: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#8A2BE2',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#fff',
+    marginBottom: 16,
   },
   name: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
+    marginBottom: 8,
   },
   bio: {
     fontSize: 16,
     color: '#666',
-    marginBottom: 15,
+    textAlign: 'center',
+    marginBottom: 16,
   },
   statsContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-around',
     width: '100%',
-    paddingHorizontal: 30,
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
   },
   statItem: {
-    flex: 1,
     alignItems: 'center',
   },
-  statDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: '#ddd',
-    marginHorizontal: 20,
-  },
-  statNumber: {
-    fontSize: 20,
+  statCount: {
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    marginTop: 4,
   },
   statLabel: {
     fontSize: 14,
     color: '#666',
-    marginTop: 5,
-  },
-  sections: {
-    backgroundColor: '#fff',
-    marginTop: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  sectionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  sectionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F0E6FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  sectionTitle: {
-    flex: 1,
-    fontSize: 16,
-    color: '#333',
-  },
-  logoutButton: {
-    margin: 20,
-    padding: 15,
-    backgroundColor: '#FF4B4B',
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  logoutText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    marginTop: 4,
   },
 });
 
