@@ -4,7 +4,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import ErrorBoundary from './components/ErrorBoundary';
 import { NotificationProvider } from './components/NotificationProvider';
-import { AuthProvider } from './hooks/useAuth';
+import { AuthProvider } from './contexts/AuthContext';
 import LoadingOverlay from './components/LoadingOverlay';
 import PerformanceTracker from './components/PerformanceTracker';
 import NotificationManager from './components/NotificationManager';
@@ -32,23 +32,25 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <ErrorBoundary>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <NotificationProvider>
-          <AuthProvider>
-            <BrowserRouter>
-              <NavigationTracker />
-              <PerformanceTracker />
-              <NotificationManager />
-              <Suspense fallback={<LoadingOverlay open={true} message="Загрузка приложения..." />}>
-                <AppRoutes />
-              </Suspense>
-            </BrowserRouter>
-          </AuthProvider>
-        </NotificationProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+    <BrowserRouter>
+      <ErrorBoundary>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <NotificationProvider>
+            <AuthProvider>
+              <div data-testid="app">
+                <NavigationTracker />
+                <PerformanceTracker />
+                <NotificationManager />
+                <Suspense fallback={<LoadingOverlay open={true} message="Загрузка приложения..." />}>
+                  <AppRoutes />
+                </Suspense>
+              </div>
+            </AuthProvider>
+          </NotificationProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </BrowserRouter>
   );
 };
 

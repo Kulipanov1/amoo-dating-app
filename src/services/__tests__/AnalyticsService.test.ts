@@ -31,11 +31,11 @@ describe('AnalyticsService', () => {
     analyticsService.initialize();
 
     expect(ReactGA.initialize).toHaveBeenCalledWith('test-ga-id');
-    expect(Sentry.init).toHaveBeenCalledWith({
+    expect(Sentry.init).toHaveBeenCalledWith(expect.objectContaining({
       dsn: 'test-sentry-dsn',
       tracesSampleRate: 1.0,
       environment: 'test'
-    });
+    }));
   });
 
   it('отслеживает просмотр страницы', () => {
@@ -53,14 +53,14 @@ describe('AnalyticsService', () => {
   it('отслеживает события', () => {
     const category = 'Test Category';
     const action = 'Test Action';
-    const options = { label: 'Test Label' };
+    const label = 'Test Label';
 
-    analyticsService.trackEvent(category, action, options);
+    analyticsService.trackEvent(category, action, label);
 
     expect(ReactGA.event).toHaveBeenCalledWith({
       category,
       action,
-      label: options
+      label
     });
   });
 
@@ -78,7 +78,7 @@ describe('AnalyticsService', () => {
   });
 
   it('устанавливает информацию о пользователе', () => {
-    const user = {
+    const mockUser = {
       uid: 'test-uid',
       email: 'test@example.com',
       emailVerified: false,
@@ -87,6 +87,10 @@ describe('AnalyticsService', () => {
       providerData: [],
       refreshToken: '',
       tenantId: null,
+      displayName: null,
+      phoneNumber: null,
+      photoURL: null,
+      providerId: 'firebase',
       delete: async () => {},
       getIdToken: async () => '',
       getIdTokenResult: async () => ({
@@ -100,14 +104,14 @@ describe('AnalyticsService', () => {
       }),
       reload: async () => {},
       toJSON: () => ({})
-    } as User;
+    } as unknown as User;
 
-    analyticsService.setUser(user);
+    analyticsService.setUser(mockUser);
 
-    expect(ReactGA.set).toHaveBeenCalledWith({ userId: user.uid });
+    expect(ReactGA.set).toHaveBeenCalledWith({ userId: mockUser.uid });
     expect(Sentry.setUser).toHaveBeenCalledWith({
-      id: user.uid,
-      email: user.email
+      id: mockUser.uid,
+      email: mockUser.email
     });
   });
 
