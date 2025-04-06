@@ -1,5 +1,5 @@
 [build]
-  command = "npm install --legacy-peer-deps && NODE_OPTIONS=--max_old_space_size=4096 expo export:web"
+  command = "npm install --legacy-peer-deps && NODE_OPTIONS=--max_old_space_size=4096 npm run build:web"
   publish = "web-build"
 
 [[redirects]]
