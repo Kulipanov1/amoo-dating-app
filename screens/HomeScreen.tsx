@@ -231,7 +231,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
                 onSwipedTop={() => {
                   if (swiper.current) {
                     swiper.current.swipeBack();
-                    handleSwipeUp();
+                    if (!showProfile) {
+                      handleSwipeUp();
+                    }
                   }
                 }}
                 onSwiped={(cardIndex) => {
