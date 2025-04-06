@@ -36,26 +36,12 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
   const navigation = useNavigation();
   const [showDetails, setShowDetails] = useState(false);
   const position = useRef(new Animated.ValueXY()).current;
-  const detailsOpacity = useRef(new Animated.Value(0)).current;
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderMove: (event, gesture) => {
         position.setValue({ x: gesture.dx, y: gesture.dy });
-        if (gesture.dy < -50) {
-          Animated.spring(detailsOpacity, {
-            toValue: 1,
-            useNativeDriver: true,
-          }).start();
-          setShowDetails(true);
-        } else {
-          Animated.spring(detailsOpacity, {
-            toValue: 0,
-            useNativeDriver: true,
-          }).start();
-          setShowDetails(false);
-        }
       },
       onPanResponderRelease: (event, gesture) => {
         if (gesture.dx > SWIPE_THRESHOLD) {
@@ -153,27 +139,16 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{profile.displayName}</Text>
         <Text style={styles.age}>{profile.birthDate ? calculateAge(profile.birthDate) : ''} лет</Text>
-        <Animated.View style={[styles.detailsContainer, { opacity: detailsOpacity }]}>
-          <Text style={styles.bio}>{profile.bio}</Text>
-          <Text style={styles.interests}>
-            Интересы: {profile.interests.join(', ')}
-          </Text>
-          {profile.location && (
-            <Text style={styles.location}>Местоположение: {profile.location}</Text>
-          )}
-          {profile.gender && (
-            <Text style={styles.gender}>Пол: {profile.gender}</Text>
-          )}
-        </Animated.View>
+        <Text style={styles.bio}>{profile.bio}</Text>
       </View>
       {renderButtons()}
     </Animated.View>
   );
 };
 
-const calculateAge = (birthDate: string) => {
+const calculateAge = (birthDate: string | Date): number => {
   const today = new Date();
-  const birth = new Date(birthDate);
+  const birth = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
   let age = today.getFullYear() - birth.getFullYear();
   const m = today.getMonth() - birth.getMonth();
   if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
@@ -228,32 +203,10 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: 10,
   },
-  detailsContainer: {
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    padding: 10,
-    borderRadius: 10,
-    marginTop: 10,
-  },
   bio: {
     fontSize: 16,
     color: 'white',
     marginBottom: 10,
-  },
-  interests: {
-    fontSize: 14,
-    color: 'white',
-    fontStyle: 'italic',
-    marginBottom: 5,
-  },
-  location: {
-    fontSize: 14,
-    color: 'white',
-    marginBottom: 5,
-  },
-  gender: {
-    fontSize: 14,
-    color: 'white',
-    marginBottom: 5,
   },
   buttonContainer: {
     flexDirection: 'row',
