@@ -10,13 +10,14 @@ import {
   PanResponder,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { UserProfile } from '../services/UserProfileService';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
 const SWIPE_OUT_DURATION = 250;
+const SWIPE_UP_THRESHOLD = 50;
 
 interface SwipeCardProps {
   profile: UserProfile;
@@ -36,12 +37,28 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
   const navigation = useNavigation();
   const [showDetails, setShowDetails] = useState(false);
   const position = useRef(new Animated.ValueXY()).current;
+  const detailsOpacity = useRef(new Animated.Value(0)).current;
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderMove: (event, gesture) => {
         position.setValue({ x: gesture.dx, y: gesture.dy });
+        
+        // Показываем детали при свайпе вверх
+        if (gesture.dy < -SWIPE_UP_THRESHOLD && !showDetails) {
+          setShowDetails(true);
+          Animated.spring(detailsOpacity, {
+            toValue: 1,
+            useNativeDriver: true,
+          }).start();
+        } else if (gesture.dy >= -SWIPE_UP_THRESHOLD && showDetails) {
+          setShowDetails(false);
+          Animated.spring(detailsOpacity, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+        }
       },
       onPanResponderRelease: (event, gesture) => {
         if (gesture.dx > SWIPE_THRESHOLD) {
@@ -102,21 +119,21 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
           style={[styles.button, styles.dislikeButton]}
           onPress={() => forceSwipe('left')}
         >
-          <MaterialIcons name="close" size={30} color="#FF4B4B" />
+          <MaterialCommunityIcons name="close-circle" size={30} color="#FF4B4B" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, styles.superLikeButton]}
           onPress={handleSuperLike}
         >
-          <MaterialIcons name="star" size={30} color="#4CAF50" />
+          <FontAwesome5 name="star" size={30} color="#4CAF50" solid />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, styles.likeButton]}
           onPress={() => forceSwipe('right')}
         >
-          <MaterialIcons name="favorite" size={30} color="#FF4081" />
+          <MaterialCommunityIcons name="heart" size={30} color="#FF4081" />
         </TouchableOpacity>
       </View>
     );
@@ -140,8 +157,38 @@ const SwipeCard: React.FC<SwipeCardProps> = ({
         <Text style={styles.name}>{profile.displayName}</Text>
         <Text style={styles.age}>{profile.birthDate ? calculateAge(profile.birthDate) : ''} лет</Text>
         <Text style={styles.bio}>{profile.bio}</Text>
+        
+        <Animated.View style={[styles.detailsContainer, { opacity: detailsOpacity }]}>
+          {profile.interests && profile.interests.length > 0 && (
+            <Text style={styles.interests}>
+              <MaterialCommunityIcons name="heart-multiple" size={16} color="#fff" /> Интересы: {profile.interests.join(', ')}
+            </Text>
+          )}
+          {profile.location && (
+            <Text style={styles.location}>
+              <Ionicons name="location-sharp" size={16} color="#fff" /> {profile.location}
+            </Text>
+          )}
+          {profile.education && (
+            <Text style={styles.education}>
+              <Ionicons name="school" size={16} color="#fff" /> {profile.education}
+            </Text>
+          )}
+          {profile.work && (
+            <Text style={styles.work}>
+              <MaterialCommunityIcons name="briefcase" size={16} color="#fff" /> {profile.work}
+            </Text>
+          )}
+        </Animated.View>
       </View>
       {renderButtons()}
+      
+      {isFirst && (
+        <View style={styles.swipeHint}>
+          <MaterialCommunityIcons name="gesture-swipe-up" size={24} color="#fff" />
+          <Text style={styles.swipeHintText}>Свайп вверх для подробностей</Text>
+        </View>
+      )}
     </Animated.View>
   );
 };
@@ -208,6 +255,32 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: 10,
   },
+  detailsContainer: {
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  interests: {
+    fontSize: 14,
+    color: 'white',
+    marginBottom: 8,
+  },
+  location: {
+    fontSize: 14,
+    color: 'white',
+    marginBottom: 8,
+  },
+  education: {
+    fontSize: 14,
+    color: 'white',
+    marginBottom: 8,
+  },
+  work: {
+    fontSize: 14,
+    color: 'white',
+    marginBottom: 8,
+  },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -240,6 +313,22 @@ const styles = StyleSheet.create({
   },
   likeButton: {
     backgroundColor: 'white',
+  },
+  swipeHint: {
+    position: 'absolute',
+    top: 20,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  swipeHintText: {
+    color: '#fff',
+    fontSize: 14,
+    marginTop: 5,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
 });
 

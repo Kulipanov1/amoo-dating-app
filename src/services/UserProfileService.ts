@@ -9,27 +9,22 @@ export interface UserProfile {
   uid: string;
   displayName: string;
   email: string;
-  birthDate: Date;
-  gender: 'male' | 'female' | 'other';
-  bio?: string;
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-  interests: string[];
+  birthDate: string;
+  gender: string;
+  bio: string;
   photos: string[];
-  preferences: {
-    ageRange: {
-      min: number;
-      max: number;
-    };
-    distance: number;
-    gender: ('male' | 'female' | 'other')[];
-    showMe: boolean;
-  };
-  isOnline: boolean;
-  lastSeen: Date;
-  isVerified: boolean;
+  interests: string[];
+  location?: string;
+  education?: string;
+  work?: string;
+  matches: string[];
+  likes: string[];
+  dislikes: string[];
+  superLikes: string[];
+  followers: string[];
+  following: string[];
+  lastSeen?: string;
+  isOnline?: boolean;
 }
 
 interface FindUsersOptions {
