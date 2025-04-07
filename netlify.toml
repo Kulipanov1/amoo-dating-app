@@ -1,5 +1,5 @@
 [build]
-  command = "npm install --legacy-peer-deps && npm run build"
+  command = "CI=false npm install --force && npm run build"
   publish = "build"
 
 [[redirects]]
@@ -12,4 +12,4 @@
   NPM_VERSION = "10.8.2"
   CI = "false"
   NODE_ENV = "production"
-  NODE_OPTIONS = "--max_old_space_size=4096" 
+  DISABLE_ESLINT_PLUGIN = "true" 
