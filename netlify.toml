@@ -1,5 +1,5 @@
 [build]
-  command = "npm install --legacy-peer-deps --prefer-offline && NODE_ENV=production CI=false DISABLE_ESLINT_PLUGIN=true npm run build"
+  command = "CI=false npm install && npm run build"
   publish = "build"
 
 [[redirects]]
@@ -10,4 +10,4 @@
 [build.environment]
   NODE_VERSION = "18.20.8"
   NPM_VERSION = "10.8.2"
-  NODE_OPTIONS = "--max-old-space-size=4096" 
+  NODE_ENV = "production" 
