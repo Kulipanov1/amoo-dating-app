@@ -1,5 +1,5 @@
 [build]
-  command = "CI=false npm ci && npm run build"
+  command = "npm install && CI=false npm run build"
   publish = "build"
 
 [[redirects]]
@@ -11,5 +11,6 @@
   NODE_VERSION = "18.20.8"
   NPM_VERSION = "10.8.2"
   CI = "false"
+  NPM_FLAGS = "--legacy-peer-deps=true"
   NETLIFY_USE_YARN = "false"
   EXPO_NO_DOTENV = "1" 
