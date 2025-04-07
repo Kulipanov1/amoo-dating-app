@@ -1,15 +1,10 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { AuthProvider } from '../contexts/AuthContext';
+import { NotificationProvider } from '../components/NotificationProvider';
+import { AnalyticsProvider } from '../contexts/AnalyticsContext';
 import App from '../App';
-import { ThemeProvider } from '@mui/material/styles';
-import theme from '../theme';
 
-// Мок переменных окружения
-process.env.REACT_APP_GA_MEASUREMENT_ID = 'test-ga-id';
-process.env.REACT_APP_SENTRY_DSN = 'test-sentry-dsn';
-process.env.REACT_APP_VERSION = '1.0.0';
-
+// Мок для Firebase
 jest.mock('../config/firebase', () => ({
   auth: {
     onAuthStateChanged: jest.fn((callback) => {
@@ -40,12 +35,35 @@ jest.mock('../config/firebase', () => ({
   }
 }));
 
+// Мок для Google Analytics
+jest.mock('react-ga4', () => ({
+  initialize: jest.fn(),
+  send: jest.fn(),
+  pageview: jest.fn()
+}));
+
+// Мок для переменных окружения
+jest.mock('../config/env', () => ({
+  REACT_APP_GA_MEASUREMENT_ID: 'test-ga-id',
+  REACT_APP_SENTRY_DSN: 'test-sentry-dsn',
+  REACT_APP_FIREBASE_API_KEY: 'test-api-key',
+  REACT_APP_FIREBASE_AUTH_DOMAIN: 'test-auth-domain',
+  REACT_APP_FIREBASE_PROJECT_ID: 'test-project-id',
+  REACT_APP_FIREBASE_STORAGE_BUCKET: 'test-storage-bucket',
+  REACT_APP_FIREBASE_MESSAGING_SENDER_ID: 'test-messaging-sender-id',
+  REACT_APP_FIREBASE_APP_ID: 'test-app-id'
+}));
+
 describe('App', () => {
-  it('renders without crashing', () => {
+  it('renders without crashing', async () => {
     render(
-      <ThemeProvider theme={theme}>
-        <App />
-      </ThemeProvider>
+      <AnalyticsProvider>
+        <NotificationProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </NotificationProvider>
+      </AnalyticsProvider>
     );
 
     expect(screen.getByTestId('app')).toBeInTheDocument();

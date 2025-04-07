@@ -6,11 +6,12 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { NotificationProvider } from './components/NotificationProvider';
 import { AuthProvider } from './contexts/AuthContext';
 import LoadingOverlay from './components/LoadingOverlay';
-import PerformanceTracker from './components/PerformanceTracker';
+import { PerformanceTracker } from './components/PerformanceTracker';
 import NotificationManager from './components/NotificationManager';
 import theme from './theme';
 import AppRoutes from './routes';
 import AnalyticsService from './services/AnalyticsService';
+import { AnalyticsProvider } from './contexts/AnalyticsContext';
 
 // Компонент для отслеживания навигации
 const NavigationTracker: React.FC = () => {
@@ -32,25 +33,27 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <BrowserRouter>
-      <ErrorBoundary>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <NotificationProvider>
-            <AuthProvider>
-              <div data-testid="app">
-                <NavigationTracker />
-                <PerformanceTracker />
-                <NotificationManager />
-                <Suspense fallback={<LoadingOverlay open={true} message="Загрузка приложения..." />}>
-                  <AppRoutes />
-                </Suspense>
-              </div>
-            </AuthProvider>
-          </NotificationProvider>
-        </ThemeProvider>
-      </ErrorBoundary>
-    </BrowserRouter>
+    <div data-testid="app">
+      <BrowserRouter>
+        <ErrorBoundary>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <AnalyticsProvider>
+              <NotificationProvider>
+                <AuthProvider>
+                  <NavigationTracker />
+                  <PerformanceTracker />
+                  <NotificationManager />
+                  <Suspense fallback={<LoadingOverlay open={true} message="Загрузка приложения..." />}>
+                    <AppRoutes />
+                  </Suspense>
+                </AuthProvider>
+              </NotificationProvider>
+            </AnalyticsProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
+      </BrowserRouter>
+    </div>
   );
 };
 
