@@ -39,7 +39,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "CI=false GENERATE_SOURCEMAP=false react-scripts build",
+    "postinstall": "npm rebuild",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
