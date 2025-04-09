@@ -1,5 +1,5 @@
 [build]
-  command = "yarn install && yarn build"
+  command = "npm install --no-audit --no-fund && npm run build"
   publish = "build"
 
 [[redirects]]
@@ -9,6 +9,7 @@
 
 [build.environment]
   NODE_VERSION = "18.20.8"
-  YARN_VERSION = "1.22.19"
+  NPM_VERSION = "10.8.2"
   NODE_ENV = "production"
-  CI = "false" 
+  CI = "false"
+  GENERATE_SOURCEMAP = "false" 
