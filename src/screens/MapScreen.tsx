@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-web-maps';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
