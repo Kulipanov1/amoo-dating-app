@@ -3,14 +3,17 @@ import { Routes, Route } from 'react-router-dom';
 import LoadingOverlay from './components/LoadingOverlay';
 
 // Ленивая загрузка компонентов
-const Home = lazy(() => import('./screens/Home'));
-const Profile = lazy(() => import('./screens/Profile'));
+const HomeScreen = lazy(() => import('./screens/HomeScreen'));
 const Login = lazy(() => import('./screens/Login'));
 const Register = lazy(() => import('./screens/Register'));
-const Chat = lazy(() => import('./screens/Chat'));
-const ChatList = lazy(() => import('./screens/ChatList'));
-const Settings = lazy(() => import('./screens/Settings'));
+const ChatScreen = lazy(() => import('./screens/ChatScreen'));
+const ChatList = lazy(() => import('./screens/ChatListScreen'));
+const SettingsScreen = lazy(() => import('./screens/SettingsScreen'));
 const NotFound = lazy(() => import('./screens/NotFound'));
+const Profile = lazy(() => import('./screens/Profile'));
+const UserList = lazy(() => import('./screens/UserList'));
+const MapScreen = lazy(() => import('./screens/MapScreen'));
+const SwipeScreen = lazy(() => import('./screens/SwipeScreen'));
 
 // Компоненты
 const Layout = lazy(() => import('./components/Layout'));
@@ -21,16 +24,19 @@ const AppRoutes: React.FC = () => {
     <Suspense fallback={<LoadingOverlay open={true} message="Загрузка страницы..." />}>
       <Routes>
         {/* Публичные маршруты */}
+        <Route path="/" element={<HomeScreen />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
         {/* Защищенные маршруты */}
         <Route element={<AuthGuard><Layout /></AuthGuard>}>
-          <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/chats" element={<ChatList />} />
-          <Route path="/chat/:id" element={<Chat />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/chat/:id" element={<ChatScreen />} />
+          <Route path="/settings" element={<SettingsScreen />} />
+          <Route path="/users" element={<UserList />} />
+          <Route path="/map" element={<MapScreen />} />
+          <Route path="/swipe" element={<SwipeScreen />} />
         </Route>
 
         {/* 404 */}
