@@ -1,5 +1,19 @@
-import firestore from '@react-native-firebase/firestore';
-import storage from '@react-native-firebase/storage';
+import { 
+  getFirestore, 
+  collection, 
+  doc, 
+  getDoc, 
+  setDoc, 
+  updateDoc, 
+  query, 
+  where, 
+  getDocs,
+  arrayUnion,
+  arrayRemove,
+  Timestamp
+} from 'firebase/firestore';
+import { getStorage, ref, uploadString, getDownloadURL, deleteObject } from 'firebase/storage';
+import { db, storage } from '../config/firebase';
 import { AuthUser } from './AuthService';
 
 export interface UserProfile {
@@ -35,7 +49,7 @@ export interface UserProfile {
 
 class UserService {
   private static instance: UserService;
-  private readonly usersCollection = 'users';
+  private readonly usersCollection = collection(db, 'users');
 
   private constructor() {}
 
@@ -71,46 +85,40 @@ class UserService {
       updatedAt: new Date(),
     };
 
-    await firestore()
-      .collection(this.usersCollection)
-      .doc(authUser.uid)
-      .set(userProfile);
+    const userRef = doc(this.usersCollection, authUser.uid);
+    await setDoc(userRef, userProfile);
 
     return userProfile;
   }
 
   // Получение профиля пользователя
   async getProfile(uid: string): Promise<UserProfile | null> {
-    const doc = await firestore()
-      .collection(this.usersCollection)
-      .doc(uid)
-      .get();
+    const userRef = doc(this.usersCollection, uid);
+    const docSnap = await getDoc(userRef);
 
-    return doc.exists ? (doc.data() as UserProfile) : null;
+    return docSnap.exists() ? (docSnap.data() as UserProfile) : null;
   }
 
   // Обновление профиля
   async updateProfile(uid: string, updates: Partial<UserProfile>): Promise<void> {
-    await firestore()
-      .collection(this.usersCollection)
-      .doc(uid)
-      .update({
-        ...updates,
-        updatedAt: new Date(),
-      });
+    const userRef = doc(this.usersCollection, uid);
+    await updateDoc(userRef, {
+      ...updates,
+      updatedAt: new Date(),
+    });
   }
 
   // Загрузка фотографии
   async uploadPhoto(uid: string, uri: string): Promise<string> {
     const filename = `${uid}/${Date.now()}.jpg`;
-    const reference = storage().ref(filename);
+    const storageRef = ref(storage, filename);
     
-    await reference.putFile(uri);
-    const url = await reference.getDownloadURL();
+    await uploadString(storageRef, uri, 'data_url');
+    const url = await getDownloadURL(storageRef);
 
-    const userDoc = firestore().collection(this.usersCollection).doc(uid);
-    await userDoc.update({
-      photos: firestore.FieldValue.arrayUnion(url),
+    const userRef = doc(this.usersCollection, uid);
+    await updateDoc(userRef, {
+      photos: arrayUnion(url),
       updatedAt: new Date(),
     });
 
@@ -119,37 +127,36 @@ class UserService {
 
   // Удаление фотографии
   async deletePhoto(uid: string, url: string): Promise<void> {
-    const filename = storage().refFromURL(url).fullPath;
-    await storage().ref(filename).delete();
+    const storageRef = ref(storage, url);
+    await deleteObject(storageRef);
 
-    await firestore()
-      .collection(this.usersCollection)
-      .doc(uid)
-      .update({
-        photos: firestore.FieldValue.arrayRemove(url),
-        updatedAt: new Date(),
-      });
+    const userRef = doc(this.usersCollection, uid);
+    await updateDoc(userRef, {
+      photos: arrayRemove(url),
+      updatedAt: new Date(),
+    });
   }
 
   // Поиск пользователей по критериям
   async findUsers(currentUser: UserProfile, limit: number = 20): Promise<UserProfile[]> {
     const { preferences } = currentUser;
     
-    let query = firestore()
-      .collection(this.usersCollection)
-      .where('age', '>=', preferences.ageRange.min)
-      .where('age', '<=', preferences.ageRange.max)
-      .where('gender', 'in', preferences.gender)
-      .limit(limit);
+    const q = query(
+      this.usersCollection,
+      where('age', '>=', preferences.ageRange.min),
+      where('age', '<=', preferences.ageRange.max),
+      where('gender', 'in', preferences.gender)
+    );
 
-    const snapshot = await query.get();
+    const snapshot = await getDocs(q);
     const users = snapshot.docs
       .map(doc => doc.data() as UserProfile)
       .filter(user => 
         user.uid !== currentUser.uid &&
         !currentUser.likes.includes(user.uid) &&
         !currentUser.dislikes.includes(user.uid)
-      );
+      )
+      .slice(0, limit);
 
     // Фильтрация по расстоянию, если есть геолокация
     if (currentUser.location) {
@@ -169,44 +176,40 @@ class UserService {
 
   // Обработка лайка
   async handleLike(userId: string, likedUserId: string): Promise<boolean> {
-    const batch = firestore().batch();
-    const userRef = firestore().collection(this.usersCollection).doc(userId);
-    const likedUserRef = firestore().collection(this.usersCollection).doc(likedUserId);
+    const userRef = doc(this.usersCollection, userId);
+    const likedUserRef = doc(this.usersCollection, likedUserId);
 
     // Добавляем лайк текущему пользователю
-    batch.update(userRef, {
-      likes: firestore.FieldValue.arrayUnion(likedUserId),
+    await updateDoc(userRef, {
+      likes: arrayUnion(likedUserId),
       updatedAt: new Date(),
     });
 
     // Проверяем взаимный лайк
-    const likedUser = await likedUserRef.get();
-    const isMatch = likedUser.exists && 
-      (likedUser.data() as UserProfile).likes.includes(userId);
+    const likedUserDoc = await getDoc(likedUserRef);
+    const isMatch = likedUserDoc.exists() && 
+      (likedUserDoc.data() as UserProfile).likes.includes(userId);
 
     if (isMatch) {
       // Создаем матч для обоих пользователей
-      batch.update(userRef, {
-        matches: firestore.FieldValue.arrayUnion(likedUserId),
+      await updateDoc(userRef, {
+        matches: arrayUnion(likedUserId),
       });
-      batch.update(likedUserRef, {
-        matches: firestore.FieldValue.arrayUnion(userId),
+      await updateDoc(likedUserRef, {
+        matches: arrayUnion(userId),
       });
     }
 
-    await batch.commit();
     return isMatch;
   }
 
   // Обработка дизлайка
   async handleDislike(userId: string, dislikedUserId: string): Promise<void> {
-    await firestore()
-      .collection(this.usersCollection)
-      .doc(userId)
-      .update({
-        dislikes: firestore.FieldValue.arrayUnion(dislikedUserId),
-        updatedAt: new Date(),
-      });
+    const userRef = doc(this.usersCollection, userId);
+    await updateDoc(userRef, {
+      dislikes: arrayUnion(dislikedUserId),
+      updatedAt: new Date(),
+    });
   }
 
   // Расчет расстояния между двумя точками (в километрах)

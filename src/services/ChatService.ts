@@ -20,11 +20,9 @@ import {
   addDoc,
   onSnapshot
 } from 'firebase/firestore';
-import { app } from '../config/firebase';
-import storage from '@react-native-firebase/storage';
+import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../config/firebase';
 import { Match } from './MatchService';
-
-const firestore = getFirestore(app);
 
 export interface Message {
   id: string;
@@ -52,8 +50,8 @@ export interface Chat {
 
 class ChatService {
   private static instance: ChatService;
-  private chatsCollection = collection(firestore, 'chats');
-  private messagesCollection = collection(firestore, 'messages');
+  private chatsCollection = collection(db, 'chats');
+  private messagesCollection = collection(db, 'messages');
 
   private constructor() {}
 
@@ -74,20 +72,18 @@ class ChatService {
   }
 
   async getChat(chatId: string): Promise<Chat | null> {
-    const chatQuery = query(this.chatsCollection, where('id', '==', chatId));
-    const snapshot = await getDocs(chatQuery);
-    if (snapshot.empty) return null;
-    const chatDoc = snapshot.docs[0];
-    return { id: chatDoc.id, ...chatDoc.data() } as Chat;
+    const chatRef = doc(this.chatsCollection, chatId);
+    const chatDoc = await getDoc(chatRef);
+    return chatDoc.exists() ? { id: chatDoc.id, ...chatDoc.data() } as Chat : null;
   }
 
   async getUserChats(userId: string): Promise<Chat[]> {
-    const chatsQuery = query(
+    const q = query(
       this.chatsCollection,
       where('participants', 'array-contains', userId),
       orderBy('lastMessageTimestamp', 'desc')
     );
-    const snapshot = await getDocs(chatsQuery);
+    const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Chat);
   }
 
@@ -113,24 +109,30 @@ class ChatService {
     });
   }
 
-  async getMessages(chatId: string): Promise<Message[]> {
-    const messagesQuery = query(
+  async getMessages(chatId: string, messageLimit: number = 50, startAfterTimestamp?: Date): Promise<Message[]> {
+    let q = query(
       this.messagesCollection,
       where('chatId', '==', chatId),
-      orderBy('timestamp', 'desc')
+      orderBy('timestamp', 'desc'),
+      limit(messageLimit)
     );
-    const snapshot = await getDocs(messagesQuery);
+
+    if (startAfterTimestamp) {
+      q = query(q, startAfter(Timestamp.fromDate(startAfterTimestamp)));
+    }
+
+    const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Message);
   }
 
   onNewMessage(chatId: string, callback: (message: Message) => void) {
-    const messagesQuery = query(
+    const q = query(
       this.messagesCollection,
       where('chatId', '==', chatId),
       orderBy('timestamp', 'desc')
     );
 
-    return onSnapshot(messagesQuery, (snapshot) => {
+    return onSnapshot(q, (snapshot) => {
       snapshot.docChanges().forEach((change) => {
         if (change.type === 'added') {
           const message = { id: change.doc.id, ...change.doc.data() } as Message;
@@ -147,116 +149,92 @@ class ChatService {
     });
   }
 
-  // Получение чата по ID мэтча
   async getChatByMatchId(matchId: string): Promise<Chat | null> {
-    const chats = await getDocs(
-      query(
-        this.chatsCollection,
-        where('matchId', '==', matchId)
-      )
+    const q = query(
+      this.chatsCollection,
+      where('matchId', '==', matchId)
     );
-
-    return !chats.empty ? (chats.docs[0].data() as Chat) : null;
+    const snapshot = await getDocs(q);
+    return !snapshot.empty ? { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Chat : null;
   }
 
-  // Отправка медиа-сообщения (изображение, видео, аудио)
   async sendMediaMessage(
     chatId: string,
     senderId: string,
+    receiverId: string,
     type: 'image' | 'video' | 'audio',
     uri: string,
     caption?: string
   ): Promise<Message> {
-    // Загружаем медиафайл
     const filename = `chats/${chatId}/${Date.now()}_${type}`;
-    const reference = storage().ref(filename);
-    await reference.putFile(uri);
-    const mediaUrl = await reference.getDownloadURL();
+    const storageRef = ref(storage, filename);
+    await uploadString(storageRef, uri, 'data_url');
+    const mediaUrl = await getDownloadURL(storageRef);
 
-    const messageRef = firestore().collection(this.messagesCollection).doc();
-    const now = new Date();
-
-    const message: Message = {
-      id: messageRef.id,
+    const messageData: Omit<Message, 'id'> = {
       chatId,
       senderId,
+      receiverId,
       type,
       content: caption || '',
       mediaUrl,
-      timestamp: Timestamp.fromDate(now),
+      timestamp: Timestamp.now(),
     };
 
-    await messageRef.set(message);
+    const messageRef = await addDoc(this.messagesCollection, messageData);
+    const message = { id: messageRef.id, ...messageData };
+
     await this.updateChatLastMessage(chatId, message, senderId);
 
     return message;
   }
 
-  // Отправка локации
   async sendLocation(
     chatId: string,
     senderId: string,
+    receiverId: string,
     latitude: number,
     longitude: number,
     address?: string
   ): Promise<Message> {
-    const messageRef = firestore().collection(this.messagesCollection).doc();
-    const now = new Date();
-
-    const message: Message = {
-      id: messageRef.id,
+    const messageData: Omit<Message, 'id'> = {
       chatId,
       senderId,
+      receiverId,
       type: 'location',
       content: address || 'Поделился местоположением',
       location: { latitude, longitude, address },
-      timestamp: Timestamp.fromDate(now),
+      timestamp: Timestamp.now(),
     };
 
-    await messageRef.set(message);
+    const messageRef = await addDoc(this.messagesCollection, messageData);
+    const message = { id: messageRef.id, ...messageData };
+
     await this.updateChatLastMessage(chatId, message, senderId);
 
     return message;
   }
 
-  // Получение сообщений чата
-  async getMessages(chatId: string, limit: number = 50, startAfter?: Date): Promise<Message[]> {
-    let query = firestore()
-      .collection(this.messagesCollection)
-      .where('chatId', '==', chatId)
-      .orderBy('timestamp', 'desc')
-      .limit(limit);
-
-    if (startAfter) {
-      query = query.startAfter(startAfter);
-    }
-
-    const snapshot = await query.get();
-    return snapshot.docs.map(doc => doc.data() as Message);
-  }
-
-  // Обновление последнего сообщения в чате
   private async updateChatLastMessage(chatId: string, message: Message, senderId: string): Promise<void> {
-    const chatRef = firestore().collection(this.chatsCollection).doc(chatId);
-    const chat = await chatRef.get();
+    const chatRef = doc(this.chatsCollection, chatId);
+    const chatDoc = await getDoc(chatRef);
     
-    if (!chat.exists) return;
+    if (!chatDoc.exists()) return;
 
-    const chatData = chat.data() as Chat;
+    const chatData = chatDoc.data() as Chat;
     const updates: any = {
       lastMessage: message.content,
       lastMessageTimestamp: message.timestamp,
-      updatedAt: message.timestamp.toDate(),
+      updatedAt: message.timestamp,
     };
 
-    // Увеличиваем счетчик непрочитанных сообщений для всех участников, кроме отправителя
     chatData.participants.forEach(participantId => {
       if (participantId !== senderId) {
-        updates[`unreadCount.${participantId}`] = firestore.FieldValue.increment(1);
+        updates[`unreadCount.${participantId}`] = increment(1);
       }
     });
 
-    await chatRef.update(updates);
+    await updateDoc(chatRef, updates);
   }
 }
 
