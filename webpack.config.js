@@ -37,5 +37,7 @@ module.exports = async function (env, argv) {
     'react-native/Libraries/EventEmitter/NativeEventEmitter$': 'react-native-web/dist/vendor/react-native/NativeEventEmitter',
   };
 
+  config.resolve.extensions = ['.web.js', '.js', '.json', '.web.jsx', '.jsx', '.ts', '.tsx'];
+
   return config;
 }; 
