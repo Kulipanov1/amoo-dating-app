@@ -1,60 +1,46 @@
-import React, { Suspense, useEffect } from 'react';
-import { BrowserRouter, useLocation } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import ErrorBoundary from './components/ErrorBoundary';
-import { NotificationProvider } from './components/NotificationProvider';
-import { AuthProvider } from './contexts/AuthContext';
-import LoadingOverlay from './components/LoadingOverlay';
-import { PerformanceTracker } from './components/PerformanceTracker';
-import NotificationManager from './components/NotificationManager';
-import theme from './theme';
-import AppRoutes from './routes';
-import AnalyticsService from './services/AnalyticsService';
-import { AnalyticsProvider } from './contexts/AnalyticsContext';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material';
+import { HelmetProvider } from 'react-helmet-async';
+import { theme } from './theme';
+import { AuthProvider } from './providers/AuthProvider';
+import { NotificationProvider } from './providers/NotificationProvider';
+import { AnalyticsProvider } from './providers/AnalyticsProvider';
+import HomeScreen from './screens/HomeScreen';
+import ProfileScreen from './screens/ProfileScreen';
+import ChatScreen from './screens/ChatScreen';
+import ChatListScreen from './screens/ChatListScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import StreamScreen from './screens/StreamScreen';
+import MapScreen from './screens/MapScreen';
+import Layout from './components/Layout';
 
-// Компонент для отслеживания навигации
-const NavigationTracker: React.FC = () => {
-  const location = useLocation();
-  const analytics = AnalyticsService.getInstance();
-
-  useEffect(() => {
-    analytics.trackPageView(location.pathname);
-  }, [location.pathname]);
-
-  return null;
-};
-
-const App: React.FC = () => {
-  useEffect(() => {
-    // Инициализация аналитики
-    const analytics = AnalyticsService.getInstance();
-    analytics.initialize();
-  }, []);
-
+function App() {
   return (
-    <div data-testid="app">
-      <BrowserRouter>
-        <ErrorBoundary>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <AnalyticsProvider>
-              <NotificationProvider>
-                <AuthProvider>
-                  <NavigationTracker />
-                  <PerformanceTracker />
-                  <NotificationManager />
-                  <Suspense fallback={<LoadingOverlay open={true} message="Загрузка приложения..." />}>
-                    <AppRoutes />
-                  </Suspense>
-                </AuthProvider>
-              </NotificationProvider>
-            </AnalyticsProvider>
-          </ThemeProvider>
-        </ErrorBoundary>
-      </BrowserRouter>
-    </div>
+    <HelmetProvider>
+      <ThemeProvider theme={theme}>
+        <AnalyticsProvider>
+          <NotificationProvider>
+            <AuthProvider>
+              <Router>
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<HomeScreen />} />
+                    <Route path="/profile/:userId?" element={<ProfileScreen />} />
+                    <Route path="/chat/:chatId" element={<ChatScreen />} />
+                    <Route path="/chats" element={<ChatListScreen />} />
+                    <Route path="/settings" element={<SettingsScreen />} />
+                    <Route path="/stream/:streamId" element={<StreamScreen />} />
+                    <Route path="/map" element={<MapScreen />} />
+                  </Routes>
+                </Layout>
+              </Router>
+            </AuthProvider>
+          </NotificationProvider>
+        </AnalyticsProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   );
-};
+}
 
 export default App; 
